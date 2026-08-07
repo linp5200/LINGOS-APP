@@ -3,8 +3,6 @@ package com.lingos.app.ui.dashboard.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PowerSettingsNew
@@ -24,8 +22,9 @@ import com.lingos.app.ui.theme.LINGOSTypography
 
 @Composable
 fun DeviceList(devices: List<DeviceItem>, onDeviceToggle: (String) -> Unit, modifier: Modifier = Modifier) {
-    LazyColumn(modifier=modifier.fillMaxWidth(), verticalArrangement=Arrangement.spacedBy(4.dp)) {
-        items(devices) { device -> DeviceItemRow(device=device, onToggle={ onDeviceToggle(device.id) }) }
+    // 【修复-闪退】LazyColumn → Column（被外层 LazyColumn 嵌套时无限高度约束崩溃）
+    Column(modifier=modifier.fillMaxWidth(), verticalArrangement=Arrangement.spacedBy(4.dp)) {
+        devices.forEach { device -> DeviceItemRow(device=device, onToggle={ onDeviceToggle(device.id) }) }
     }
 }
 

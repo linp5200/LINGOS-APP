@@ -27,6 +27,8 @@ class SplashViewModel @Inject constructor(@ApplicationContext private val contex
     val state: StateFlow<SplashState> = _state.asStateFlow()
     private val _isConnecting = MutableStateFlow(false)
     val isConnecting: StateFlow<Boolean> = _isConnecting.asStateFlow()
+    private val _foundHost = MutableStateFlow<com.lingos.app.network.DiscoveredHost?>(null)
+    val foundHost: StateFlow<com.lingos.app.network.DiscoveredHost?> = _foundHost.asStateFlow()
     private val _connectionStatus = MutableStateFlow<ConnectionStatus?>(null)
     val connectionStatus: StateFlow<ConnectionStatus?> = _connectionStatus.asStateFlow()
     private fun getString(id: Int): String = context.getString(id)
@@ -37,7 +39,7 @@ class SplashViewModel @Inject constructor(@ApplicationContext private val contex
     private fun getLog2(): String = getString(R.string.splash_log_2)
     private fun getLog3(): String = getString(R.string.splash_log_3)
 
-    fun startAnimation() { viewModelScope.launch { runWelcomePhase(); runGlitchAndLingPhase(); runLoadingPhase(); runLogsPhase(); _state.value = SplashState.Complete; Logger.d(TAG, "Splash animation complete") } }
+    fun startAnimation() { viewModelScope.launch { runWelcomePhase(); runLoadingPhase(); runLogsPhase(); _state.value = SplashState.Complete; Logger.d(TAG, "Splash complete") } }
     fun attemptAutoConnect() {
         if (_isConnecting.value) return
         _isConnecting.value = true
@@ -48,6 +50,7 @@ class SplashViewModel @Inject constructor(@ApplicationContext private val contex
                 val hosts = DiscoveryManager.scan(2000L)
                 if (hosts.isNotEmpty()) {
                     val target = hosts.first()
+                    _foundHost.value = target
                     Logger.d(TAG, "Auto-connect to ${target.ip}:${target.port} v${target.version}")
                     val result = connectionManager.connect(target.ip, target.port, 3000L)
                     if (result.isSuccess) {

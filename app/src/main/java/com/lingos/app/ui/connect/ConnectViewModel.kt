@@ -1,6 +1,7 @@
 package com.lingos.app.ui.connect
 
 import android.content.Context
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.lingos.app.R
@@ -18,7 +19,24 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class ConnectViewModel @Inject constructor(@ApplicationContext private val context: Context, private val connectionManager: ConnectionManager) : ViewModel() {
+class ConnectViewModel @Inject constructor(
+    @ApplicationContext private val context: Context,
+    private val connectionManager: ConnectionManager,
+    private val savedStateHandle: SavedStateHandle
+) : ViewModel() {
+    init {
+        // 【B1】Splash 自动连接传递的主机信息 → 自动填入并触发连接（停在认证步）
+        val hostIp = savedStateHandle.get<String>("host_ip")
+        val hostPort = savedStateHandle.get<Int>("host_port")
+        if (!hostIp.isNullOrBlank()) {
+            _address.value = hostIp
+            if (hostPort != null) _port.value = hostPort.toString()
+            autoConnectFromSplash()
+        }
+    }
+    private fun autoConnectFromSplash() {
+        viewModelScope.launch { delay(300); startConnect() }
+    }
     companion object { private const val TAG = "ConnectVM"; private const val SCAN_TIMEOUT = 5000L; private const val CONNECT_TIMEOUT = 10000L }
     private val _state = MutableStateFlow<ConnectState>(ConnectState.Idle); val state: StateFlow<ConnectState> = _state.asStateFlow()
     private val _selectedMethod = MutableStateFlow(ConnectionMethod.LAN); val selectedMethod: StateFlow<ConnectionMethod> = _selectedMethod.asStateFlow()
