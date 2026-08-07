@@ -3,25 +3,28 @@ package com.lingos.app.network
 import android.content.Context
 import com.lingos.app.utils.Logger
 import dagger.hilt.android.qualifiers.ApplicationContext
-import javax.inject.Inject
-import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
-import okhttp3.*
-import okhttp3.logging.HttpLoggingInterceptor
-import okio.ByteString.Companion.toByteString
-import okio.ByteString
-import java.security.SecureRandom
-import java.security.cert.X509Certificate
-import java.util.concurrent.TimeUnit
-import javax.net.ssl.SSLContext
-import javax.net.ssl.TrustManager
-import javax.net.ssl.X509TrustManager
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
+import java.io.InputStream
+import java.net.InetSocketAddress
+import java.net.Socket
+import java.net.SocketTimeoutException
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
+import java.util.concurrent.atomic.AtomicBoolean
+import javax.inject.Inject
 
+/**
+ * LING OS 连接管理器 - TCP + 二进制 TLV 帧协议
+ * 与服务端 connection_handler.c (2937) 对应：
+ *   MAGIC(4B) | VERSION(2B) | TYPE(2B) | LENGTH(4B) | PAYLOAD
+ * 认证流程：AUTH_CODE → CONNECTION_CODE → ESTABLISHED
+ */
 class ConnectionManager @Inject constructor(@ApplicationContext private val context: Context) {
 
     companion object {
@@ -29,230 +32,227 @@ class ConnectionManager @Inject constructor(@ApplicationContext private val cont
         private const val DEFAULT_HOST = "127.0.0.1"
         private const val DEFAULT_PORT = 2937
         private const val BACKUP_PORT = 2938
-        private const val HEARTBEAT_INTERVAL = 30000L
-        private const val RECONNECT_DELAY = 5000L
-        private const val MAX_RECONNECT_ATTEMPTS = 5
+        private const val AUTH_TIMEOUT_MS = 10000L
+        private const val COMMAND_TIMEOUT_MS = 5000L
+        private const val SOCKET_READ_TIMEOUT_MS = 30000
+        private const val HEADER_SIZE = 12
+        private const val MAX_PAYLOAD = 65536
     }
+
+    private var socket: Socket? = null
+    private var receiveThread: Thread? = null
+    private val running = AtomicBoolean(false)
+    private var sessionId: String? = null
+    private var authCode = ""
+    private var connectionCode = ""
+
+    // 响应等待（同步化异步接收）
+    private var pendingAuth = CompletableDeferred<Result<Boolean>>()
+    private var pendingConnCode = CompletableDeferred<Result<Boolean>>()
+    private var pendingCommand = CompletableDeferred<Result<String>>()
 
     private val _connectionState = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected)
     val connectionState: StateFlow<ConnectionState> = _connectionState.asStateFlow()
 
-    private var webSocket: WebSocket? = null
-    private var isReconnecting = false
-    private var reconnectAttempts = 0
-    private var sessionId: String? = null
-    private var authCode: String? = null
-    private var connectionCode: String? = null
+    private val writeLock = Any()
 
-    private val okHttpClient: OkHttpClient by lazy {
-        val builder = OkHttpClient.Builder()
-            .connectTimeout(30, TimeUnit.SECONDS)
-            .readTimeout(30, TimeUnit.SECONDS)
-            .writeTimeout(30, TimeUnit.SECONDS)
-            .pingInterval(HEARTBEAT_INTERVAL, TimeUnit.MILLISECONDS)
-            .addInterceptor(HttpLoggingInterceptor().apply {
-                level = HttpLoggingInterceptor.Level.BODY
-            })
+    /** TCP 连接（非 WebSocket！服务端 2937 是 raw TCP） */
+    suspend fun connect(host: String = DEFAULT_HOST, port: Int = DEFAULT_PORT, timeout: Long = 10000L): Result<Unit> = withContext(Dispatchers.IO) {
         try {
-            val trustAllCerts = arrayOf<TrustManager>(object : X509TrustManager {
-                override fun checkClientTrusted(chain: Array<out X509Certificate>?, authType: String?) {}
-                override fun checkServerTrusted(chain: Array<out X509Certificate>?, authType: String?) {}
-                override fun getAcceptedIssuers(): Array<X509Certificate> = arrayOf()
-            })
-            val sslContext = SSLContext.getInstance("SSL")
-            sslContext.init(null, trustAllCerts, SecureRandom())
-            builder.sslSocketFactory(sslContext.socketFactory, trustAllCerts[0] as X509TrustManager)
-            builder.hostnameVerifier { _, _ -> true }
-        } catch (e: Exception) {
-            Logger.e(TAG, "SSL setup failed", e)
-        }
-        builder.build()
-    }
-
-    private val webSocketListener = object : WebSocketListener() {
-        override fun onOpen(webSocket: WebSocket, response: Response) {
-            Logger.d(TAG, "WebSocket opened")
-            _connectionState.value = ConnectionState.Connected
-            isReconnecting = false
-            reconnectAttempts = 0
-            authCode?.let { sendAuthCode(it) }
-        }
-
-        override fun onMessage(webSocket: WebSocket, text: String) {
-            Logger.d(TAG, "Message received: $text")
-            handleMessage(text)
-        }
-
-        override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
-            Logger.d(TAG, "Binary message received: ${bytes.size} bytes")
-            handleBinaryMessage(bytes)
-        }
-
-        override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
-            Logger.d(TAG, "WebSocket closing: $code $reason")
-            webSocket.close(1000, null)
-            _connectionState.value = ConnectionState.Disconnected
-        }
-
-        override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
-            Logger.d(TAG, "WebSocket closed: $code $reason")
-            _connectionState.value = ConnectionState.Disconnected
-            attemptReconnect()
-        }
-
-        override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
-            Logger.e(TAG, "WebSocket failure", t)
-            _connectionState.value = ConnectionState.Error(t.message ?: "连接失败")
-            attemptReconnect()
-        }
-    }
-
-    suspend fun connect(host: String = DEFAULT_HOST, port: Int = DEFAULT_PORT, timeout: Long = 10000L): Result<Unit> {
-        return try {
-            val url = "ws://$host:$port"
-            Logger.d(TAG, "Connecting to $url")
             _connectionState.value = ConnectionState.Connecting
+            Logger.d(TAG, "TCP connecting to $host:$port")
+            val sock = Socket()
+            sock.connect(InetSocketAddress(host, port), timeout.toInt())
+            sock.soTimeout = SOCKET_READ_TIMEOUT_MS
+            socket = sock
+            running.set(true)
+            startReceiveLoop()
+            _connectionState.value = ConnectionState.Connected
+            Logger.d(TAG, "TCP connected to $host:$port")
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Logger.e(TAG, "TCP connect failed", e)
+            _connectionState.value = ConnectionState.Error(e.message ?: "连接异常")
+            Result.failure(e.message ?: "连接失败")
+        }
+    }
 
-            val request = Request.Builder()
-                .url(url)
-                .addHeader("Origin", "android://com.lingos.app")
-                .build()
+    private fun startReceiveLoop() {
+        receiveThread = Thread({ receiveLoop() }, "LingosTcpReceiver").apply {
+            isDaemon = true
+            start()
+        }
+    }
 
-            webSocket = okHttpClient.newWebSocket(request, webSocketListener)
+    private fun receiveLoop() {
+        val sock = socket ?: return
+        val input: InputStream = try { sock.getInputStream() } catch (e: Exception) { return }
+        val headerBuf = ByteArray(HEADER_SIZE)
+        while (running.get()) {
+            try {
+                // 读 12 字节帧头
+                if (!readFully(input, headerBuf)) break
+                val header = ByteBuffer.wrap(headerBuf).order(ByteOrder.BIG_ENDIAN)
+                val magic = header.int
+                val version = header.short.toInt() and 0xFFFF
+                val type = header.short.toInt() and 0xFFFF
+                val length = header.int
+                if (magic != Protocol.MAGIC) {
+                    Logger.w(TAG, "Magic mismatch: 0x%08X (ver=%d)", magic, version)
+                    continue
+                }
+                if (length < 0 || length > MAX_PAYLOAD) {
+                    Logger.w(TAG, "Bad length: $length")
+                    continue
+                }
+                val payload = ByteArray(length)
+                if (!readFully(input, payload)) break
+                handleFrame(type, payload)
+            } catch (e: SocketTimeoutException) {
+                // 读超时：保活心跳
+                sendHeartbeat()
+            } catch (e: Exception) {
+                if (running.get()) Logger.e(TAG, "Receive error", e)
+                break
+            }
+        }
+        if (running.getAndSet(false)) {
+            _connectionState.value = ConnectionState.Disconnected
+        }
+    }
 
-            var attempts = 0
-            while (attempts < timeout / 100) {
-                delay(100)
-                attempts++
-                when (_connectionState.value) {
-                    ConnectionState.Connected -> return Result.success(Unit)
-                    is ConnectionState.Error -> return Result.failure("连接失败")
-                    else -> {}
+    private fun readFully(input: InputStream, buf: ByteArray): Boolean {
+        var read = 0
+        while (read < buf.size) {
+            val n = input.read(buf, read, buf.size - read)
+            if (n < 0) return false
+            read += n
+        }
+        return true
+    }
+
+    /** 帧分发（与服务端消息类型对齐） */
+    private fun handleFrame(type: Int, payload: ByteArray) {
+        val text = String(payload, Charsets.UTF_8)
+        Logger.d(TAG, "Frame type=0x%04X len=%d payload=%s", type, payload.size, text.take(150))
+        when (type) {
+            MessageType.AUTH_RESPONSE.value.toInt() -> {
+                if (text.contains("\"ok\"")) {
+                    _connectionState.value = ConnectionState.Authenticated
+                    pendingAuth.complete(Result.success(true))
+                } else {
+                    pendingAuth.complete(Result.failure(text))
                 }
             }
-            Result.failure("连接超时")
-        } catch (e: Exception) {
-            Logger.e(TAG, "Connect failed", e)
-            _connectionState.value = ConnectionState.Error(e.message ?: "连接异常")
-            Result.failure(e.message ?: "未知错误")
+            MessageType.CONNECTION_RESPONSE.value.toInt() -> {
+                if (text.contains("\"ok\"")) {
+                    sessionId = extractSessionId(text)
+                    _connectionState.value = ConnectionState.Connected
+                    pendingConnCode.complete(Result.success(true))
+                } else {
+                    pendingConnCode.complete(Result.failure(text))
+                }
+            }
+            MessageType.COMMAND_RESPONSE.value.toInt() -> {
+                pendingCommand.complete(Result.success(text))
+            }
+            MessageType.HEARTBEAT_ACK.value.toInt() -> {
+                // 心跳保活确认
+            }
+            MessageType.ERROR.value.toInt() -> {
+                pendingAuth.complete(Result.failure(text))
+                pendingConnCode.complete(Result.failure(text))
+                pendingCommand.complete(Result.failure(text))
+                _connectionState.value = ConnectionState.Error(text)
+            }
+            else -> Logger.w(TAG, "Unknown frame type 0x%04X", type)
         }
     }
 
+    private fun extractSessionId(text: String): String? {
+        return try {
+            val obj = org.json.JSONObject(text)
+            obj.optString("session_id").takeIf { it.isNotBlank() }
+        } catch (e: Exception) { null }
+    }
+
+    // ============ 发送 ============
+
     fun sendAuthCode(code: String): Boolean {
-        val ws = webSocket ?: return false
         authCode = code
-        val packet = Protocol.encodeAuthCode(code)
-        return ws.send(packet.toByteString())
+        return sendFrame(Protocol.encodeAuthCode(code))
     }
 
     fun sendConnectionCode(code: String): Boolean {
-        val ws = webSocket ?: return false
         connectionCode = code
-        val packet = Protocol.encodeConnectionCode(code)
-        return ws.send(packet.toByteString())
+        return sendFrame(Protocol.encodeConnectionCode(code))
     }
 
     fun sendHeartbeat(): Boolean {
-        val ws = webSocket ?: return false
-        val packet = Protocol.encodeHeartbeat()
-        return ws.send(packet.toByteString())
+        return sendFrame(Protocol.encodeHeartbeat())
     }
 
     fun sendCommand(command: String, params: Map<String, Any> = emptyMap()): Boolean {
-        val ws = webSocket ?: return false
-        val packet = Protocol.encodeCommand(command, params)
-        return ws.send(packet.toByteString())
+        return sendFrame(Protocol.encodeCommand(command, params))
+    }
+
+    private fun sendFrame(packet: ByteArray): Boolean {
+        val sock = socket ?: return false
+        return try {
+            synchronized(writeLock) {
+                val out = sock.getOutputStream()
+                out.write(packet)
+                out.flush()
+            }
+            true
+        } catch (e: Exception) {
+            Logger.e(TAG, "Send failed", e)
+            false
+        }
+    }
+
+    // ============ 同步等待响应 ============
+
+    /** 验证码校验（等待服务端 AUTH_RESPONSE） */
+    suspend fun verifyAuthCode(code: String): Result<Boolean> {
+        if (code.isBlank()) return Result.failure("验证码为空")
+        pendingAuth = CompletableDeferred()
+        if (!sendAuthCode(code)) return Result.failure("发送失败，请确认已连接")
+        return withTimeoutOrNull(AUTH_TIMEOUT_MS) { pendingAuth.await() }
+            ?: Result.failure("验证码验证超时")
+    }
+
+    /** 连接码校验（等待服务端 CONNECTION_RESPONSE） */
+    suspend fun verifyConnectionCode(code: String): Result<Boolean> {
+        if (code.isBlank()) return Result.failure("连接码为空")
+        pendingConnCode = CompletableDeferred()
+        if (!sendConnectionCode(code)) return Result.failure("发送失败，请确认已连接")
+        return withTimeoutOrNull(AUTH_TIMEOUT_MS) { pendingConnCode.await() }
+            ?: Result.failure("连接码验证超时")
+    }
+
+    /** 发送命令并等待响应 */
+    suspend fun sendCommandAndAwait(command: String, params: Map<String, Any> = emptyMap(), timeoutMs: Long = COMMAND_TIMEOUT_MS): Result<String> {
+        pendingCommand = CompletableDeferred()
+        if (!sendCommand(command, params)) return Result.failure("命令发送失败")
+        return withTimeoutOrNull(timeoutMs) { pendingCommand.await() }
+            ?: Result.failure("命令响应超时")
+    }
+
+    suspend fun connectViaUSB(device: String?): Result<Unit> {
+        return Result.failure("USB 连接暂不支持，请使用局域网连接")
     }
 
     fun disconnect() {
-        webSocket?.close(1000, "正常断开")
-        webSocket = null
+        running.set(false)
+        try { socket?.close() } catch (_: Exception) {}
+        socket = null
         _connectionState.value = ConnectionState.Disconnected
-        isReconnecting = false
-        reconnectAttempts = 0
     }
 
     fun getSessionId(): String? = sessionId
-
-    private fun handleMessage(text: String) {
-        try {
-            val json = org.json.JSONObject(text)
-            val type = json.optString("type")
-            when (type) {
-                "auth_response" -> {
-                    val status = json.optString("status")
-                    if (status == "ok") {
-                        _connectionState.value = ConnectionState.Authenticated
-                        Logger.d(TAG, "Auth verified")
-                    } else {
-                        _connectionState.value = ConnectionState.Error("验证码错误")
-                    }
-                }
-                "connection_response" -> {
-                    val status = json.optString("status")
-                    if (status == "ok") {
-                        sessionId = json.optString("session_id")
-                        _connectionState.value = ConnectionState.Connected
-                        Logger.d(TAG, "Connection established, session: $sessionId")
-                    } else {
-                        _connectionState.value = ConnectionState.Error("连接码错误")
-                    }
-                }
-                "heartbeat" -> sendHeartbeat()
-            }
-        } catch (e: Exception) {
-            Logger.w(TAG, "Failed to parse JSON message: $text")
-        }
-    }
-
-    private fun handleBinaryMessage(bytes: ByteString) {
-        try {
-            val (type, payload) = Protocol.decode(bytes.toByteArray()) ?: return
-            when (type) {
-                MessageType.AUTH_RESPONSE -> {
-                    val result = payload.decodeToString()
-                    if (result.contains("ok")) {
-                        _connectionState.value = ConnectionState.Authenticated
-                        Logger.d(TAG, "Auth verified (binary)")
-                    } else {
-                        _connectionState.value = ConnectionState.Error("验证码错误")
-                    }
-                }
-                MessageType.CONNECTION_RESPONSE -> {
-                    val result = payload.decodeToString()
-                    try {
-                        val json = org.json.JSONObject(result)
-                        sessionId = json.optString("session_id")
-                        _connectionState.value = ConnectionState.Connected
-                        Logger.d(TAG, "Connection established (binary), session: $sessionId")
-                    } catch (e: Exception) {
-                        _connectionState.value = ConnectionState.Error("连接码错误")
-                    }
-                }
-                MessageType.STATUS -> Logger.d(TAG, "Status message received")
-                MessageType.COMMAND -> Logger.d(TAG, "Command response received")
-                else -> Logger.d(TAG, "Unknown message type: $type")
-            }
-        } catch (e: Exception) {
-            Logger.e(TAG, "Failed to decode binary message", e)
-        }
-    }
-
-    private fun attemptReconnect() {
-        if (isReconnecting) return
-        if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
-            Logger.w(TAG, "Max reconnect attempts reached")
-            return
-        }
-        isReconnecting = true
-        reconnectAttempts++
-        CoroutineScope(Dispatchers.IO).launch {
-            delay(RECONNECT_DELAY)
-            Logger.d(TAG, "Attempting reconnect #$reconnectAttempts")
-            connect()
-            isReconnecting = false
-        }
-    }
+    fun getAuthCode(): String = authCode
+    fun getConnectionCode(): String = connectionCode
 
     sealed class ConnectionState {
         object Disconnected : ConnectionState()
@@ -270,38 +270,6 @@ class ConnectionManager @Inject constructor(@ApplicationContext private val cont
         companion object {
             fun <T> success(data: T): Result<T> = Result(true, data)
             fun <T> failure(message: String): Result<T> = Result(false, null, message)
-        }
-    }
-
-    fun verifyAuthCode(code: String): Result<Boolean> {
-        return try {
-            if (code.length >= 6) Result.success(true)
-            else Result.failure("验证码长度不足")
-        } catch (e: Exception) {
-            Result.failure(e.message ?: "验证失败")
-        }
-    }
-
-    fun verifyConnectionCode(code: String): Result<Boolean> {
-        return try {
-            if (code.length >= 10) Result.success(true)
-            else Result.failure("连接码长度不足")
-        } catch (e: Exception) {
-            Result.failure(e.message ?: "验证失败")
-        }
-    }
-
-    suspend fun connectViaUSB(device: String?): Result<Unit> {
-        return if (device != null) {
-            delay(1000)
-            if (device.startsWith("/dev/tty")) {
-                _connectionState.value = ConnectionState.Connected
-                Result.success(Unit)
-            } else {
-                Result.failure("无效的 USB 设备")
-            }
-        } else {
-            Result.failure("未检测到 USB 设备")
         }
     }
 }

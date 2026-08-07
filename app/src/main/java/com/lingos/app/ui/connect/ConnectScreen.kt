@@ -40,7 +40,7 @@ fun ConnectScreen(viewModel: ConnectViewModel = hiltViewModel(), onConnected: ()
         Column(modifier = Modifier.fillMaxSize().padding(paddingValues).background(LINGOSColors.Background).padding(horizontal=20.dp, vertical=16.dp)) {
             ConnectionMethodTabs(selectedMethod=selectedMethod, onMethodSelected=viewModel::selectMethod); Spacer(modifier=Modifier.height(20.dp))
             when (selectedMethod) {
-                ConnectionMethod.LAN -> LANConnectionContent(address=address, port=port, state=state, onAddressChange=viewModel::updateAddress, onPortChange=viewModel::updatePort, onScan=viewModel::startScan, onConnect=viewModel::startConnect, onRetry=viewModel::retry)
+                ConnectionMethod.LAN -> LANConnectionContent(address=address, port=port, state=state, authCode=authCode, connectionCode=connectionCode, onAddressChange=viewModel::updateAddress, onPortChange=viewModel::updatePort, onAuthCodeChange=viewModel::updateAuthCode, onConnectionCodeChange=viewModel::updateConnectionCode, onScan=viewModel::startScan, onConnect=viewModel::startConnect, onSubmitAuthCode=viewModel::submitAuthCode, onSubmitConnectionCode=viewModel::submitConnectionCode, onRetry=viewModel::retry)
                 ConnectionMethod.PUBLIC -> PublicConnectionContent(authCode=authCode, connectionCode=connectionCode, state=state, onAuthCodeChange=viewModel::updateAuthCode, onConnectionCodeChange=viewModel::updateConnectionCode, onConnect=viewModel::startConnect, onSubmitCode=viewModel::submitConnectionCode, onRetry=viewModel::retry)
                 ConnectionMethod.USB -> USBConnectionContent(isConnected=isUsbConnected, device=usbDevice, state=state, onCheck=viewModel::checkUsbStatus, onConnect=viewModel::startConnect, onRetry=viewModel::retry)
             }; Spacer(modifier=Modifier.height(16.dp)); ConnectionStatusDisplay(state=state)
@@ -64,7 +64,7 @@ private fun ConnectionMethodTabs(selectedMethod: ConnectionMethod, onMethodSelec
 }
 
 @Composable
-private fun LANConnectionContent(address: String, port: String, state: ConnectState, onAddressChange: (String) -> Unit, onPortChange: (String) -> Unit, onScan: () -> Unit, onConnect: () -> Unit, onRetry: () -> Unit) {
+private fun LANConnectionContent(address: String, port: String, state: ConnectState, authCode: String, connectionCode: String, onAddressChange: (String) -> Unit, onPortChange: (String) -> Unit, onAuthCodeChange: (String) -> Unit, onConnectionCodeChange: (String) -> Unit, onScan: () -> Unit, onConnect: () -> Unit, onSubmitAuthCode: (String) -> Unit, onSubmitConnectionCode: (String) -> Unit, onRetry: () -> Unit) {
     Column(modifier = Modifier.fillMaxWidth()) {
         OutlinedTextField(value=address, onValueChange=onAddressChange, label={ Text(stringResource(R.string.connect_address)) }, modifier=Modifier.fillMaxWidth(), colors=textFieldColors(), textStyle=LINGOSTypography.bodyMedium); Spacer(modifier=Modifier.height(12.dp))
         OutlinedTextField(value=port, onValueChange=onPortChange, label={ Text(stringResource(R.string.connect_port)) }, modifier=Modifier.fillMaxWidth(), colors=textFieldColors(), textStyle=LINGOSTypography.bodyMedium); Spacer(modifier=Modifier.height(16.dp))
@@ -73,6 +73,24 @@ private fun LANConnectionContent(address: String, port: String, state: ConnectSt
             Button(onClick={ if (state is ConnectState.Failed) onRetry() else onConnect() }, modifier=Modifier.weight(1f), colors=buttonColors(), enabled=state !is ConnectState.Connecting) { Text(if (state is ConnectState.Failed) stringResource(R.string.connect_retry) else stringResource(R.string.confirm)) }
         }
         if (state is ConnectState.Scanning) { Spacer(modifier=Modifier.height(16.dp)); ScanResultList(devices=state.foundDevices, progress=state.progress) }
+        if (state is ConnectState.WaitingAuth) {
+            Spacer(modifier=Modifier.height(16.dp))
+            Surface(shape=RoundedCornerShape(8.dp), color=LINGOSColors.Surface, modifier=Modifier.fillMaxWidth()) {
+                Column(modifier=Modifier.padding(12.dp)) {
+                    Text(text=if (state.step == AuthStep.AUTH_CODE) "⏳ TCP 已连接，请输入主机终端显示的验证码" else "✅ 验证码通过！请输入主机终端显示的连接码", style=LINGOSTypography.bodySmall, color=if (state.step == AuthStep.AUTH_CODE) LINGOSColors.TextSecondary else LINGOSColors.Success)
+                    Spacer(modifier=Modifier.height(8.dp))
+                    if (state.step == AuthStep.AUTH_CODE) {
+                        OutlinedTextField(value=authCode, onValueChange=onAuthCodeChange, label={ Text("验证码") }, modifier=Modifier.fillMaxWidth(), colors=textFieldColors(), textStyle=LINGOSTypography.bodyMedium, placeholder={ Text("主机终端 Auth Code", color=LINGOSColors.TextHint) })
+                        Spacer(modifier=Modifier.height(8.dp))
+                        Button(onClick={ onSubmitAuthCode(authCode) }, modifier=Modifier.fillMaxWidth(), colors=buttonColors(), enabled=authCode.isNotBlank()) { Text("提交验证码") }
+                    } else {
+                        OutlinedTextField(value=connectionCode, onValueChange=onConnectionCodeChange, label={ Text("连接码") }, modifier=Modifier.fillMaxWidth(), colors=textFieldColors(), textStyle=LINGOSTypography.bodyMedium, placeholder={ Text("主机终端 Connection Code", color=LINGOSColors.TextHint) })
+                        Spacer(modifier=Modifier.height(8.dp))
+                        Button(onClick={ onSubmitConnectionCode(connectionCode) }, modifier=Modifier.fillMaxWidth(), colors=buttonColors(), enabled=connectionCode.isNotBlank()) { Text("提交连接码") }
+                    }
+                }
+            }
+        }
     }
 }
 
