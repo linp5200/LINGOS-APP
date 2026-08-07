@@ -52,9 +52,9 @@ interface ChatDao {
 
 @Singleton
 class DatabaseProvider @Inject constructor(@ApplicationContext private val context: Context) {
-    private val database: LINGOSDatabase by lazy {
+    private val db: LINGOSDatabase by lazy {
         Room.databaseBuilder(context, LINGOSDatabase::class.java, "lingos_database")
             .fallbackToDestructiveMigration().build()
     }
-    fun getDatabase(): LINGOSDatabase = database
+    fun getDatabase(): LINGOSDatabase = db
 }
