@@ -2,44 +2,136 @@
 package com.lingos.app.ui.main
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.Dashboard
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.SwapHoriz
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.lingos.app.R
+import com.lingos.app.network.ConnectionManager
 import com.lingos.app.ui.chat.ChatScreen
 import com.lingos.app.ui.dashboard.DashboardScreen
 import com.lingos.app.ui.theme.LINGOSColors
 import com.lingos.app.ui.theme.LINGOSTypography
+import kotlinx.coroutines.launch
 
+/** 【B6】UI 定稿：单聊天流（主界面）+ 侧滑抽屉（控制台/HA/预警/设置） */
 @Composable
 fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val connState by viewModel.connectionState.collectAsStateWithLifecycle()
-    Scaffold(topBar = { MainTopBar(mode=uiState.currentMode, onModeToggle=viewModel::toggleMode, onMenuClick={}) }, bottomBar = { MainBottomBar(currentTab=uiState.currentTab, onTabSelected=viewModel::selectTab) }, containerColor = LINGOSColors.Background) { paddingValues ->
-        Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) { when (uiState.currentTab) { MainTab.CHAT -> ChatScreen(); MainTab.DASHBOARD -> DashboardScreen() } }
+    val drawerState = rememberDrawerState(DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
+    var currentPage by rememberSaveable { mutableStateOf("chat") }
+
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        drawerContent = {
+            ModalDrawerSheet(containerColor = LINGOSColors.Background) {
+                Column(modifier = Modifier.fillMaxSize()) {
+                    // 抽屉头部：品牌 + 连接状态
+                    Column(modifier = Modifier.fillMaxWidth().padding(20.dp, 24.dp)) {
+                        Text(text = "LING OS", style = LINGOSTypography.titleLarge, color = Color.White)
+                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 8.dp)) {
+                            Box(modifier = Modifier.size(8.dp).clip(CircleShape)
+                                .background(if (connState == ConnectionManager.ConnectionState.Connected) LINGOSColors.Success else LINGOSColors.Disconnected))
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                text = when (connState) {
+                                    ConnectionManager.ConnectionState.Connected -> "已连接"
+                                    ConnectionManager.ConnectionState.Connecting -> "连接中..."
+                                    is ConnectionManager.ConnectionState.Error -> "连接异常"
+                                    else -> "离线"
+                                },
+                                style = LINGOSTypography.labelMedium,
+                                color = LINGOSColors.TextSecondary
+                            )
+                        }
+                    }
+                    HorizontalDivider(color = LINGOSColors.TextHint.copy(alpha = 0.2f))
+                    DrawerItem("Chat", Icons.Default.Chat, currentPage == "chat") {
+                        currentPage = "chat"; scope.launch { drawerState.close() }
+                    }
+                    DrawerItem("控制台", Icons.Default.Dashboard, currentPage == "dash") {
+                        currentPage = "dash"; scope.launch { drawerState.close() }
+                    }
+                    DrawerItem("HA 智能联动", Icons.Default.Home, currentPage == "ha") {
+                        currentPage = "ha"; scope.launch { drawerState.close() }
+                    }
+                    DrawerItem("预警中心", Icons.Default.Warning, currentPage == "alert") {
+                        currentPage = "alert"; scope.launch { drawerState.close() }
+                    }
+                    DrawerItem("设置", Icons.Default.Settings, currentPage == "settings") {
+                        currentPage = "settings"; scope.launch { drawerState.close() }
+                    }
+                }
+            }
+        }
+    ) {
+        Scaffold(
+            topBar = {
+                MainTopBar(
+                    connState = connState,
+                    onMenuClick = { scope.launch { drawerState.open() } }
+                )
+            },
+            containerColor = LINGOSColors.Background
+        ) { paddingValues ->
+            Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
+                when (currentPage) {
+                    "chat" -> ChatScreen()
+                    "dash" -> DashboardScreen()
+                    "ha" -> PlaceholderPage("HA 智能联动\n（B13 批次开发中）")
+                    "alert" -> PlaceholderPage("预警中心\n（B7 批次开发中）")
+                    else -> PlaceholderPage("设置\n（后续批次开发中）")
+                }
+            }
+        }
     }
 }
 
 @Composable
-private fun MainTopBar(mode: MainMode, onModeToggle: () -> Unit, onMenuClick: () -> Unit) {
+private fun DrawerItem(label: String, icon: ImageVector, selected: Boolean, onClick: () -> Unit) {
+    NavigationDrawerItem(
+        label = { Text(text = label, style = LINGOSTypography.bodyMedium) },
+        icon = { Icon(imageVector = icon, contentDescription = label) },
+        selected = selected,
+        onClick = onClick,
+        colors = NavigationDrawerItemDefaults.colors(
+            selectedContainerColor = LINGOSColors.AccentRed.copy(alpha = 0.15f),
+            selectedIconColor = LINGOSColors.AccentRed,
+            selectedTextColor = LINGOSColors.AccentRed,
+            unselectedIconColor = LINGOSColors.TextSecondary,
+            unselectedTextColor = LINGOSColors.TextSecondary
+        ),
+        modifier = Modifier.padding(horizontal = 12.dp, vertical = 2.dp)
+    )
+}
+
+@Composable
+private fun PlaceholderPage(text: String) {
+    Box(modifier = Modifier.fillMaxSize().background(LINGOSColors.Background), contentAlignment = Alignment.Center) {
+        Text(text = text, style = LINGOSTypography.bodyLarge, color = LINGOSColors.TextSecondary)
+    }
+}
+
+@Composable
+private fun MainTopBar(connState: ConnectionManager.ConnectionState, onMenuClick: () -> Unit) {
     TopAppBar(
         title = {
-            Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
-                // 【B3】连接状态指示（绿=已连接 / 红=离线）
-                Box(modifier = Modifier.size(8.dp).clip(androidx.compose.foundation.shape.CircleShape)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(modifier = Modifier.size(8.dp).clip(CircleShape)
                     .background(if (connState == ConnectionManager.ConnectionState.Connected) LINGOSColors.Success else LINGOSColors.Disconnected))
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(text = "LING OS", style = LINGOSTypography.titleMedium, color = Color.White)
@@ -47,33 +139,7 @@ private fun MainTopBar(mode: MainMode, onModeToggle: () -> Unit, onMenuClick: ()
         },
         navigationIcon = {
             IconButton(onClick = onMenuClick) {
-                Icon(Icons.Default.Menu, contentDescription = stringResource(R.string.settings_title), tint = Color.White)
-            }
-        },
-        actions = {
-            IconButton(onClick = onModeToggle) {
-                Icon(
-                    Icons.Default.SwapHoriz,
-                    contentDescription = "Toggle mode",
-                    tint = if (mode == MainMode.AI) LINGOSColors.AccentRed else Color.White
-                )
-            }
-            Surface(
-                modifier = Modifier.padding(end = 8.dp).size(28.dp),
-                shape = MaterialTheme.shapes.small,
-                color = if (mode == MainMode.AI) LINGOSColors.AccentRed.copy(alpha = 0.2f)
-                        else LINGOSColors.Success.copy(alpha = 0.2f)
-            ) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = androidx.compose.ui.Alignment.Center
-                ) {
-                    Text(
-                        text = if (mode == MainMode.AI) "AI" else "SYS",
-                        style = LINGOSTypography.labelSmall,
-                        color = if (mode == MainMode.AI) LINGOSColors.AccentRed else LINGOSColors.Success
-                    )
-                }
+                Icon(Icons.Default.Menu, contentDescription = "Menu", tint = Color.White)
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(
@@ -81,13 +147,4 @@ private fun MainTopBar(mode: MainMode, onModeToggle: () -> Unit, onMenuClick: ()
             scrolledContainerColor = LINGOSColors.Background
         )
     )
-}
-
-@Composable
-private fun MainBottomBar(currentTab: MainTab, onTabSelected: (MainTab) -> Unit) {
-    NavigationBar(containerColor=LINGOSColors.Background, tonalElevation=0.dp) {
-        MainTab.entries.forEach { tab ->
-            NavigationBarItem(icon = { Icon(imageVector=tab.icon, contentDescription=tab.label, modifier=Modifier.size(24.dp)) }, label={ Text(text=tab.label, style=LINGOSTypography.labelSmall) }, selected=currentTab == tab, onClick={ onTabSelected(tab) }, colors = NavigationBarItemDefaults.colors(selectedIconColor=LINGOSColors.AccentRed, selectedTextColor=LINGOSColors.AccentRed, unselectedIconColor=LINGOSColors.TextHint, unselectedTextColor=LINGOSColors.TextHint, indicatorColor=LINGOSColors.AccentRed.copy(alpha=0.15f)))
-        }
-    }
 }
