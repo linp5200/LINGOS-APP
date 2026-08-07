@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App -->
+    <string name="app_name">LING OS</string>
+
+    <!-- Splash Screen -->
+    <string name="splash_welcome">Welcome</string>
+    <string name="splash_loading">LING OS is loading...</string>
+    <string name="splash_log_1">[00:01] Locating local host...</string>
+    <string name="splash_log_2">[00:02] Connecting to host...</string>
+    <string name="splash_log_3">[00:03] Handshake successful! Connected to LING OS</string>
+
+    <!-- Connection -->
+    <string name="connect_title">Connect to LING OS</string>
+    <string name="connect_lan">Local LAN</string>
+    <string name="connect_public">Public Network</string>
+    <string name="connect_usb">USB Debug</string>
+    <string name="connect_address">Address</string>
+    <string name="connect_port">Port</string>
+    <string name="connect_auth_code">Auth Code</string>
+    <string name="connect_connection_code">Connection Code</string>
+    <string name="connect_scan">Scan</string>
+    <string name="connect_retry">Retry</string>
+    <string name="connect_manual">Manual Setup</string>
+    <string name="connect_status_connected">Connected</string>
+    <string name="connect_status_connecting">Connecting...</string>
+    <string name="connect_status_disconnected">Disconnected</string>
+    <string name="connect_status_error">Connection Failed</string>
+
+    <!-- Dashboard -->
+    <string name="dashboard_title">System Hub</string>
+    <string name="dashboard_cpu">CPU</string>
+    <string name="dashboard_memory">Memory</string>
+    <string name="dashboard_network">Network</string>
+    <string name="dashboard_devices">Devices</string>
+    <string name="dashboard_scan">Scan New Device</string>
+    <string name="dashboard_mqtt">MQTT Service</string>
+    <string name="dashboard_logs">View Logs</string>
+
+    <!-- Chat -->
+    <string name="chat_title">AI Chat</string>
+    <string name="chat_placeholder">Type a message...</string>
+    <string name="chat_send">Send</string>
+    <string name="chat_voice">Voice Input</string>
+    <string name="chat_thinking">Nook is thinking...</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_switch_host">Switch Host</string>
+    <string name="settings_theme">Theme</string>
+    <string name="settings_about">About</string>
+    <string name="settings_logout">Logout</string>
+
+    <!-- Common -->
+    <string name="confirm">Confirm</string>
+    <string name="cancel">Cancel</string>
+    <string name="skip">Skip</string>
+    <string name="loading">Loading...</string>
+    <string name="error">Error</string>
+    <string name="success">Success</string>
+    <string name="back">Back</string>
+    <string name="exit">Exit</string>
+</resources>

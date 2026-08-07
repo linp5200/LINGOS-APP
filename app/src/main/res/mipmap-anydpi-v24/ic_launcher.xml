@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 背景层（自定义颜色） -->
+    <item android:drawable="@color/ic_launcher_background" />
+    <!-- 前景层（引用的照片） -->
+    <item>
+        <bitmap
+            android:src="@drawable/ling"
+            android:gravity="center" />
+    </item>
+</layer-list>
