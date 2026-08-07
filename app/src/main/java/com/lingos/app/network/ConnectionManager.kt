@@ -57,6 +57,10 @@ class ConnectionManager @Inject constructor(@ApplicationContext private val cont
     val connectionState: StateFlow<ConnectionState> = _connectionState.asStateFlow()
 
     private val writeLock = Any()
+    private var lastError: String? = null
+
+    /** 最近一次错误详情（供 UI 显示/排查） */
+    fun getLastError(): String? = lastError
 
     /** TCP 连接（非 WebSocket！服务端 2937 是 raw TCP） */
     suspend fun connect(host: String = DEFAULT_HOST, port: Int = DEFAULT_PORT, timeout: Long = 10000L): Result<Unit> = withContext(Dispatchers.IO) {
@@ -76,7 +80,8 @@ class ConnectionManager @Inject constructor(@ApplicationContext private val cont
             Logger.d(TAG, "TCP connected to $host:$port")
             Result.success(Unit)
         } catch (e: Exception) {
-            Logger.e(TAG, "TCP connect failed", e)
+            lastError = "连接失败: ${e.message} (host=$host port=$port)"
+            Logger.e(TAG, "TCP connect failed: ${e.message} (host=$host port=$port)", e)
             _connectionState.value = ConnectionState.Error(e.message ?: "连接异常")
             Result.failure(e.message ?: "连接失败")
         }
@@ -212,16 +217,27 @@ class ConnectionManager @Inject constructor(@ApplicationContext private val cont
     }
 
     private fun sendFrame(packet: ByteArray): Boolean {
-        val sock = socket ?: return false
+        val sock = socket ?: run {
+            lastError = "未连接（socket 为空）——请先完成 TCP 连接"
+            Logger.w(TAG, "sendFrame: socket is null（未连接）")
+            return false
+        }
         return try {
+            if (sock.isClosed || !sock.isConnected) {
+                lastError = "socket 已关闭或未连接（isClosed=${sock.isClosed}, isConnected=${sock.isConnected}）"
+                Logger.w(TAG, "sendFrame: socket 状态异常 ${lastError}")
+                return false
+            }
             synchronized(writeLock) {
                 val out = sock.getOutputStream()
                 out.write(packet)
                 out.flush()
             }
+            lastError = null
             true
         } catch (e: Exception) {
-            Logger.e(TAG, "Send failed", e)
+            lastError = "发送异常: ${e.message}（socket isClosed=${sock.isClosed}）"
+            Logger.e(TAG, "sendFrame 失败: ${e.message}（socket=${sock}, isClosed=${sock.isClosed}）", e)
             false
         }
     }
@@ -232,9 +248,13 @@ class ConnectionManager @Inject constructor(@ApplicationContext private val cont
     suspend fun verifyAuthCode(code: String): Result<Boolean> {
         if (code.isBlank()) return Result.failure("验证码为空")
         pendingAuth = CompletableDeferred()
-        if (!sendAuthCode(code)) return Result.failure("发送失败，请确认已连接")
+        if (!sendAuthCode(code)) {
+            val detail = getLastError() ?: "发送失败"
+            Logger.e(TAG, "验证码发送失败: $detail")
+            return Result.failure("发送失败：$detail")
+        }
         return withTimeoutOrNull(AUTH_TIMEOUT_MS) { pendingAuth.await() }
-            ?: Result.failure("验证码验证超时")
+            ?: Result.failure("验证码验证超时（${AUTH_TIMEOUT_MS / 1000}s 无响应）——请确认主机端已显示验证码")
     }
 
     /** 连接码校验（等待服务端 CONNECTION_RESPONSE） */
