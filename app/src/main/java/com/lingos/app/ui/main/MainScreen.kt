@@ -33,7 +33,46 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
 
 @Composable
 private fun MainTopBar(mode: MainMode, onModeToggle: () -> Unit, onMenuClick: () -> Unit) {
-    TopAppBar(title = { Text(text="LING OS", style=LINGOSTypography.titleMedium, color=Color.White) }, navigationIcon = { IconButton(onClick=onMenuClick) { Icon(Icons.Default.Menu, contentDescription=stringResource(R.string.settings_title), tint=Color.White) } }, actions = { IconButton(onClick=onModeToggle) { Icon(Icons.Default.SwapHoriz, contentDescription="Toggle mode", tint=if (mode == MainMode.AI) LINGOSColors.AccentRed else Color.White) }; Surface(modifier=Modifier.padding(end=8.dp).size(28.dp), shape=MaterialTheme.shapes.small, color=if (mode == MainMode.AI) LINGOSColors.AccentRed.copy(alpha=0.2f) else LINGOSColors.Success.copy(alpha=0.2f)) { Box(modifier=Modifier.fillMaxSize(), contentAlignment=androidx.compose.ui.Alignment.Center) { Text(text=if (mode == MainMode.AI) "AI" else "SYS", style=LINGOSTypography.labelSmall, color=if (mode == MainMode.AI) LINGOSColors.AccentRed else LINGOSColors.Success) } } } }, colors = TopAppBarDefaults.topAppBarColors(containerColor=LINGOSColors.Background, scrolledContainerColor=LINGOSColors.Background))
+    TopAppBar(
+        title = {
+            Text(text = "LING OS", style = LINGOSTypography.titleMedium, color = Color.White)
+        },
+        navigationIcon = {
+            IconButton(onClick = onMenuClick) {
+                Icon(Icons.Default.Menu, contentDescription = stringResource(R.string.settings_title), tint = Color.White)
+            }
+        },
+        actions = {
+            IconButton(onClick = onModeToggle) {
+                Icon(
+                    Icons.Default.SwapHoriz,
+                    contentDescription = "Toggle mode",
+                    tint = if (mode == MainMode.AI) LINGOSColors.AccentRed else Color.White
+                )
+            }
+            Surface(
+                modifier = Modifier.padding(end = 8.dp).size(28.dp),
+                shape = MaterialTheme.shapes.small,
+                color = if (mode == MainMode.AI) LINGOSColors.AccentRed.copy(alpha = 0.2f)
+                        else LINGOSColors.Success.copy(alpha = 0.2f)
+            ) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = androidx.compose.ui.Alignment.Center
+                ) {
+                    Text(
+                        text = if (mode == MainMode.AI) "AI" else "SYS",
+                        style = LINGOSTypography.labelSmall,
+                        color = if (mode == MainMode.AI) LINGOSColors.AccentRed else LINGOSColors.Success
+                    )
+                }
+            }
+        },
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = LINGOSColors.Background,
+            scrolledContainerColor = LINGOSColors.Background
+        )
+    )
 }
 
 @Composable
