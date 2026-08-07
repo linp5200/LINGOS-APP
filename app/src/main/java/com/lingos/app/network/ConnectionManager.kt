@@ -2,6 +2,8 @@ package com.lingos.app.network
 
 import android.content.Context
 import com.lingos.app.utils.Logger
+import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -19,7 +21,8 @@ import javax.net.ssl.SSLContext
 import javax.net.ssl.TrustManager
 import javax.net.ssl.X509TrustManager
 
-class ConnectionManager(private val context: Context) {
+@Inject
+class ConnectionManager(@ApplicationContext private val context: Context) {
 
     companion object {
         private const val TAG = "ConnectionManager"
