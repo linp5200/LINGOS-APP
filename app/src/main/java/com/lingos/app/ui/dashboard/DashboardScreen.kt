@@ -41,7 +41,7 @@ fun DashboardScreen(viewModel: DashboardViewModel = hiltViewModel()) {
                 }
             }
         }
-        return@Composable
+        return
     }
     LazyColumn(modifier = Modifier.fillMaxSize().background(LINGOSColors.Background).padding(horizontal=16.dp, vertical=12.dp)) {
         item { Text(text=stringResource(R.string.dashboard_title), style=LINGOSTypography.headlineSmall, color=Color.White, modifier=Modifier.padding(bottom=16.dp)) }

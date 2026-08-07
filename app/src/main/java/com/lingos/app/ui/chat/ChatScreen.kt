@@ -7,6 +7,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.MicOff
@@ -30,6 +31,7 @@ import java.util.Locale
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
@@ -103,10 +105,10 @@ fun ChatScreen(viewModel: ChatViewModel = hiltViewModel()) {
     val imagePicker = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         if (uri != null) {
             try {
-                val b64 = context.contentResolver.openInputStream(uri)?.use { input ->
-                    val bytes = input.readBytes()
-                    android.util.Base64.encodeToString(bytes, android.util.Base64.NO_WRAP)
-                }
+                val stream = context.contentResolver.openInputStream(uri)
+                val bytes = stream?.readBytes()
+                try { stream?.close() } catch (_: Exception) {}
+                val b64 = bytes?.let { android.util.Base64.encodeToString(it, android.util.Base64.NO_WRAP) }
                 if (!b64.isNullOrBlank()) viewModel.sendImage(b64)
             } catch (e: Exception) { Log.e("ChatScreen", "image read failed", e) }
         }
