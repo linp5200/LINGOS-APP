@@ -6,6 +6,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Lightbulb
+import androidx.compose.material.icons.filled.Power
+import androidx.compose.material.icons.filled.Thermostat
+import androidx.compose.material.icons.filled.PhoneAndroid
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -116,9 +121,9 @@ fun HAScreen(viewModel: HAViewModel = hiltViewModel()) {
         // 场景模板
         Text(text = "场景", style = LINGOSTypography.titleMedium, color = Color.White, modifier = Modifier.padding(bottom = 8.dp))
         LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            item { SceneButton("🏠 回家", LINGOSColors.Success) { viewModel.applyScene("home") } }
-            item { SceneButton("🚪 离家", LINGOSColors.Warning) { viewModel.applyScene("away") } }
-            item { SceneButton("🌙 睡眠", LINGOSColors.AccentCyan) { viewModel.applyScene("sleep") } }
+            item { SceneButton("回家", LINGOSColors.Success) { viewModel.applyScene("home") } }
+            item { SceneButton("离家", LINGOSColors.Warning) { viewModel.applyScene("away") } }
+            item { SceneButton("睡眠", LINGOSColors.AccentCyan) { viewModel.applyScene("sleep") } }
         }
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -137,7 +142,7 @@ fun HAScreen(viewModel: HAViewModel = hiltViewModel()) {
                         onClick = { viewModel.toggle(device) }
                     ) {
                         Row(modifier = Modifier.padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
-                            Text(text = when (device.type) { "light" -> "💡"; "switch" -> "🔌"; "climate" -> "🌡"; else -> "📱" }, style = LINGOSTypography.titleLarge)
+                            Icon(imageVector = when (device.type) { "light" -> Icons.Default.Lightbulb; "switch" -> Icons.Default.Power; "climate" -> Icons.Default.Thermostat; else -> Icons.Default.PhoneAndroid }, contentDescription = device.type, tint = LINGOSColors.AccentCyan, modifier = Modifier.size(24.dp))
                             Spacer(modifier = Modifier.width(12.dp))
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(text = device.name, style = LINGOSTypography.bodyMedium, color = Color.White)

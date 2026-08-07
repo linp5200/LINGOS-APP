@@ -21,6 +21,6 @@ object Logger {
     fun exit(tag: String, methodName: String = Thread.currentThread().stackTrace[2].methodName) { if (isEnabled && isVerbose) Log.d(tag, "◀ Exit: $methodName") }
     fun json(tag: String, json: String) { if (isEnabled) { try { val prettyJson = org.json.JSONObject(json).toString(2); Log.d(tag, "JSON:\n$prettyJson") } catch (e: Exception) { try { val prettyJson = org.json.JSONArray(json).toString(2); Log.d(tag, "JSON Array:\n$prettyJson") } catch (e2: Exception) { Log.d(tag, "Raw: $json") } } } }
     fun long(tag: String, message: String) { if (isEnabled) { val maxLogSize = 4000; if (message.length <= maxLogSize) { Log.d(tag, message) } else { var start = 0; while (start < message.length) { val end = (start + maxLogSize).coerceAtMost(message.length); Log.d(tag, message.substring(start, end)); start = end } } } }
-    fun time(tag: String, block: () -> Unit): Long { if (isEnabled) { val start = System.currentTimeMillis(); block(); val elapsed = System.currentTimeMillis() - start; Log.d(tag, "⏱ Elapsed: ${elapsed}ms"); return elapsed }; block(); return 0L }
+    fun time(tag: String, block: () -> Unit): Long { if (isEnabled) { val start = System.currentTimeMillis(); block(); val elapsed = System.currentTimeMillis() - start; Log.d(tag, "Elapsed: ${elapsed}ms"); return elapsed }; block(); return 0L }
     fun cond(tag: String, condition: Boolean, message: String) { if (isEnabled && condition) Log.d(tag, message) }
 }

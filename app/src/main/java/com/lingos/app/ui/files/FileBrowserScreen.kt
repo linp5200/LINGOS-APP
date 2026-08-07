@@ -7,6 +7,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Folder
+import androidx.compose.material.icons.filled.Description
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -146,7 +148,7 @@ fun FileBrowserScreen(viewModel: FileBrowserViewModel = hiltViewModel()) {
                         onClick = { viewModel.open(entry) }
                     ) {
                         Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                            Text(text = if (entry.isDir) "📁" else "📄", style = LINGOSTypography.titleMedium)
+                            Icon(imageVector = if (entry.isDir) Icons.Default.Folder else Icons.Default.Description, contentDescription = entry.name, tint = if (entry.isDir) LINGOSColors.Warning else LINGOSColors.AccentCyan, modifier = Modifier.size(20.dp))
                             Spacer(modifier = Modifier.width(10.dp))
                             Text(
                                 text = entry.name,

@@ -117,7 +117,7 @@ class ChatViewModel @Inject constructor(private val connectionManager: Connectio
         } catch (_: Exception) {}
         // 通知需要 Context——通过 ConnectionManager 间接不可得，此处仅记录
         Logger.i(TAG, "通知: $title - $body")
-        addSystemMessage("🔔 $title: $body")
+        addSystemMessage("[通知] $title: $body")
     }
 
     private fun handleWsEvent(text: String) {

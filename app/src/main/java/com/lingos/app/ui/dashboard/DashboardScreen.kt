@@ -8,6 +8,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.QrCodeScanner
+import androidx.compose.material.icons.filled.CloudOff
+import androidx.compose.material.icons.filled.Timer
+import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.Memory
+import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -32,7 +37,7 @@ fun DashboardScreen(viewModel: DashboardViewModel = hiltViewModel()) {
     if (state.error != null) {
         Box(modifier = Modifier.fillMaxSize().background(LINGOSColors.Background).padding(24.dp), contentAlignment = Alignment.Center) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(text = "📡", style = LINGOSTypography.headlineLarge)
+                Icon(imageVector = Icons.Default.CloudOff, contentDescription = "未连接", tint = LINGOSColors.TextSecondary, modifier = Modifier.size(48.dp))
                 Spacer(modifier = Modifier.height(12.dp))
                 Text(text = state.error ?: "", style = LINGOSTypography.bodyMedium, color = LINGOSColors.TextSecondary, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
                 Spacer(modifier = Modifier.height(16.dp))
@@ -45,8 +50,8 @@ fun DashboardScreen(viewModel: DashboardViewModel = hiltViewModel()) {
     }
     LazyColumn(modifier = Modifier.fillMaxSize().background(LINGOSColors.Background).padding(horizontal=16.dp, vertical=12.dp)) {
         item { Text(text=stringResource(R.string.dashboard_title), style=LINGOSTypography.headlineSmall, color=Color.White, modifier=Modifier.padding(bottom=16.dp)) }
-        item { Row(modifier=Modifier.fillMaxWidth(), horizontalArrangement=Arrangement.spacedBy(8.dp)) { ResourceCard(title=stringResource(R.string.dashboard_cpu), value="${sysInfo.cpuUsage.toInt()}%", icon="⚡", color=if (sysInfo.cpuUsage > 70) LINGOSColors.Disconnected else LINGOSColors.Success, modifier=Modifier.weight(1f)); ResourceCard(title=stringResource(R.string.dashboard_memory), value="${sysInfo.memoryUsage.toInt()}%", icon="🧠", color=if (sysInfo.memoryUsage > 80) LINGOSColors.Disconnected else LINGOSColors.Success, modifier=Modifier.weight(1f)) }; Spacer(modifier=Modifier.height(8.dp)) }
-        item { Row(modifier=Modifier.fillMaxWidth(), horizontalArrangement=Arrangement.spacedBy(8.dp)) { ResourceCard(title=stringResource(R.string.dashboard_network), value=formatBytes(sysInfo.networkRx) + " ↓", icon="📥", color=LINGOSColors.AccentCyan, modifier=Modifier.weight(1f)); ResourceCard(title="Uptime", value=formatUptime(sysInfo.uptime), icon="⏱", color=LINGOSColors.TextSecondary, modifier=Modifier.weight(1f)) }; Spacer(modifier=Modifier.height(16.dp)) }
+        item { Row(modifier=Modifier.fillMaxWidth(), horizontalArrangement=Arrangement.spacedBy(8.dp)) { ResourceCard(title=stringResource(R.string.dashboard_cpu), value="${sysInfo.cpuUsage.toInt()}%", icon=Icons.Default.Bolt, color=if (sysInfo.cpuUsage > 70) LINGOSColors.Disconnected else LINGOSColors.Success, modifier=Modifier.weight(1f)); ResourceCard(title=stringResource(R.string.dashboard_memory), value="${sysInfo.memoryUsage.toInt()}%", icon=Icons.Default.Memory, color=if (sysInfo.memoryUsage > 80) LINGOSColors.Disconnected else LINGOSColors.Success, modifier=Modifier.weight(1f)) }; Spacer(modifier=Modifier.height(8.dp)) }
+        item { Row(modifier=Modifier.fillMaxWidth(), horizontalArrangement=Arrangement.spacedBy(8.dp)) { ResourceCard(title=stringResource(R.string.dashboard_network), value=formatBytes(sysInfo.networkRx) + " ↓", icon=Icons.Default.Download, color=LINGOSColors.AccentCyan, modifier=Modifier.weight(1f)); ResourceCard(title="Uptime", value=formatUptime(sysInfo.uptime), icon=Icons.Default.Timer, color=LINGOSColors.TextSecondary, modifier=Modifier.weight(1f)) }; Spacer(modifier=Modifier.height(16.dp)) }
         item { QuickActionBar(onScan=viewModel::scanDevices, onMqtt=viewModel::startMqtt, onRefresh=viewModel::refresh); Spacer(modifier=Modifier.height(16.dp)) }
         item { Text(text=stringResource(R.string.dashboard_devices), style=LINGOSTypography.titleMedium, color=Color.White, modifier=Modifier.padding(bottom=8.dp)) }
         items(state.devices) { device -> DeviceList(devices=listOf(device), onDeviceToggle=viewModel::toggleDevice); Spacer(modifier=Modifier.height(4.dp)) }
