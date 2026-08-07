@@ -39,6 +39,7 @@ class ConnectionManager @Inject constructor(@ApplicationContext private val cont
         private const val MAX_PAYLOAD = 65536
     }
 
+    private var host: String? = null
     private var socket: Socket? = null
     private var receiveThread: Thread? = null
     private val running = AtomicBoolean(false)
@@ -62,6 +63,7 @@ class ConnectionManager @Inject constructor(@ApplicationContext private val cont
         try {
             _connectionState.value = ConnectionState.Connecting
             Logger.d(TAG, "TCP connecting to $host:$port")
+            this.host = host
             val sock = Socket()
             sock.connect(InetSocketAddress(host, port), timeout.toInt())
             sock.soTimeout = SOCKET_READ_TIMEOUT_MS
@@ -261,6 +263,7 @@ class ConnectionManager @Inject constructor(@ApplicationContext private val cont
         _connectionState.value = ConnectionState.Disconnected
     }
 
+    fun getHost(): String? = host
     fun getSessionId(): String? = sessionId
     fun getAuthCode(): String = authCode
     fun getConnectionCode(): String = connectionCode
