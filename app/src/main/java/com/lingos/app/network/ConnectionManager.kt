@@ -45,6 +45,7 @@ class ConnectionManager @Inject constructor(@ApplicationContext private val cont
     private var sessionId: String? = null
     private var authCode = ""
     private var connectionCode = ""
+    private var token: String? = null
 
     // 响应等待（同步化异步接收）
     private var pendingAuth = CompletableDeferred<Result<Boolean>>()
@@ -147,6 +148,7 @@ class ConnectionManager @Inject constructor(@ApplicationContext private val cont
             MessageType.CONNECTION_RESPONSE.value.toInt() -> {
                 if (text.contains("\"ok\"")) {
                     sessionId = extractSessionId(text)
+                    token = extractToken(text)
                     _connectionState.value = ConnectionState.Connected
                     pendingConnCode.complete(Result.success(true))
                 } else {
@@ -168,6 +170,15 @@ class ConnectionManager @Inject constructor(@ApplicationContext private val cont
             else -> Logger.w(TAG, "Unknown frame type 0x%04X", type)
         }
     }
+
+    private fun extractToken(text: String): String? {
+        return try {
+            val obj = org.json.JSONObject(text)
+            obj.optString("token").takeIf { it.isNotBlank() }
+        } catch (e: Exception) { null }
+    }
+
+    fun getToken(): String? = token
 
     private fun extractSessionId(text: String): String? {
         return try {

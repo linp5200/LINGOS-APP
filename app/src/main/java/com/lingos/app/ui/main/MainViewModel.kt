@@ -2,6 +2,7 @@ package com.lingos.app.ui.main
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.lingos.app.network.ConnectionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -14,8 +15,9 @@ import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.ui.graphics.vector.ImageVector
 
 @HiltViewModel
-class MainViewModel @Inject constructor() : ViewModel() {
+class MainViewModel @Inject constructor(private val connectionManager: ConnectionManager) : ViewModel() {
     private val _uiState = MutableStateFlow(MainUiState()); val uiState: StateFlow<MainUiState> = _uiState.asStateFlow()
+    val connectionState = connectionManager.connectionState
     fun selectTab(tab: MainTab) { _uiState.update { it.copy(currentTab=tab) } }
     fun toggleMode() { _uiState.update { state -> state.copy(currentMode=if (state.currentMode == MainMode.AI) MainMode.SYSTEM else MainMode.AI) } }
 }

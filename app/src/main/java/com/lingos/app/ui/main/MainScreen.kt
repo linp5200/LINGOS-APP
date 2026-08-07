@@ -2,6 +2,7 @@
 package com.lingos.app.ui.main
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Chat
@@ -26,6 +27,7 @@ import com.lingos.app.ui.theme.LINGOSTypography
 @Composable
 fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val connState by viewModel.connectionState.collectAsStateWithLifecycle()
     Scaffold(topBar = { MainTopBar(mode=uiState.currentMode, onModeToggle=viewModel::toggleMode, onMenuClick={}) }, bottomBar = { MainBottomBar(currentTab=uiState.currentTab, onTabSelected=viewModel::selectTab) }, containerColor = LINGOSColors.Background) { paddingValues ->
         Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) { when (uiState.currentTab) { MainTab.CHAT -> ChatScreen(); MainTab.DASHBOARD -> DashboardScreen() } }
     }
@@ -35,7 +37,13 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
 private fun MainTopBar(mode: MainMode, onModeToggle: () -> Unit, onMenuClick: () -> Unit) {
     TopAppBar(
         title = {
-            Text(text = "LING OS", style = LINGOSTypography.titleMedium, color = Color.White)
+            Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+                // 【B3】连接状态指示（绿=已连接 / 红=离线）
+                Box(modifier = Modifier.size(8.dp).clip(androidx.compose.foundation.shape.CircleShape)
+                    .background(if (connState == ConnectionManager.ConnectionState.Connected) LINGOSColors.Success else LINGOSColors.Disconnected))
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(text = "LING OS", style = LINGOSTypography.titleMedium, color = Color.White)
+            }
         },
         navigationIcon = {
             IconButton(onClick = onMenuClick) {
