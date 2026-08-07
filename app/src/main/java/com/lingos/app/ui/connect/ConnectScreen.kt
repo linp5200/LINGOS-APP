@@ -10,11 +10,12 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Scan
+import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Usb
 import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material3.*
+import androidx.compose.material3.OutlinedButtonDefaults
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -69,7 +70,7 @@ private fun LANConnectionContent(address: String, port: String, state: ConnectSt
         OutlinedTextField(value=address, onValueChange=onAddressChange, label={ Text(stringResource(R.string.connect_address)) }, modifier=Modifier.fillMaxWidth(), colors=textFieldColors(), textStyle=LINGOSTypography.bodyMedium); Spacer(modifier=Modifier.height(12.dp))
         OutlinedTextField(value=port, onValueChange=onPortChange, label={ Text(stringResource(R.string.connect_port)) }, modifier=Modifier.fillMaxWidth(), colors=textFieldColors(), textStyle=LINGOSTypography.bodyMedium); Spacer(modifier=Modifier.height(16.dp))
         Row(modifier=Modifier.fillMaxWidth(), horizontalArrangement=Arrangement.spacedBy(12.dp)) {
-            OutlinedButton(onClick=onScan, modifier=Modifier.weight(1f), colors=outlinedButtonColors()) { Icon(Icons.Default.Scan, contentDescription=null, modifier=Modifier.size(18.dp)); Spacer(modifier=Modifier.width(6.dp)); Text(stringResource(R.string.connect_scan)) }
+            OutlinedButton(onClick=onScan, modifier=Modifier.weight(1f), colors=outlinedButtonColors()) { Icon(Icons.Default.QrCodeScanner, contentDescription=null, modifier=Modifier.size(18.dp)); Spacer(modifier=Modifier.width(6.dp)); Text(stringResource(R.string.connect_scan)) }
             Button(onClick={ if (state is ConnectState.Failed) onRetry() else onConnect() }, modifier=Modifier.weight(1f), colors=buttonColors(), enabled=state !is ConnectState.Connecting) { Text(if (state is ConnectState.Failed) stringResource(R.string.connect_retry) else stringResource(R.string.confirm)) }
         }
         if (state is ConnectState.Scanning) { Spacer(modifier=Modifier.height(16.dp)); ScanResultList(devices=state.foundDevices, progress=state.progress) }

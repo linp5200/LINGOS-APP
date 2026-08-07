@@ -7,7 +7,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Scan
+import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -43,16 +43,16 @@ fun DashboardScreen(viewModel: DashboardViewModel = hiltViewModel()) {
 private fun QuickActionBar(onScan: () -> Unit, onMqtt: () -> Unit, onRefresh: () -> Unit) {
     Surface(modifier=Modifier.fillMaxWidth(), shape=RoundedCornerShape(8.dp), color=LINGOSColors.Surface) {
         Row(modifier=Modifier.fillMaxWidth().padding(12.dp), horizontalArrangement=Arrangement.spacedBy(8.dp)) {
-            ActionButton(icon=Icons.Default.Scan, label=stringResource(R.string.dashboard_scan), onClick=onScan)
-            ActionButton(icon=Icons.Default.Settings, label=stringResource(R.string.dashboard_mqtt), onClick=onMqtt)
-            ActionButton(icon=Icons.Default.Refresh, label="Refresh", onClick=onRefresh)
+            ActionButton(icon=Icons.Default.QrCodeScanner, label=stringResource(R.string.dashboard_scan), onClick=onScan, modifier=Modifier.weight(1f))
+            ActionButton(icon=Icons.Default.Settings, label=stringResource(R.string.dashboard_mqtt), onClick=onMqtt, modifier=Modifier.weight(1f))
+            ActionButton(icon=Icons.Default.Refresh, label="Refresh", onClick=onRefresh, modifier=Modifier.weight(1f))
         }
     }
 }
 
 @Composable
-private fun ActionButton(icon: androidx.compose.ui.graphics.vector.ImageVector, label: String, onClick: () -> Unit) {
-    Column(horizontalAlignment=Alignment.CenterHorizontally, modifier=Modifier.weight(1f)) {
+private fun ActionButton(icon: androidx.compose.ui.graphics.vector.ImageVector, label: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    Column(horizontalAlignment=Alignment.CenterHorizontally, modifier=modifier) {
         IconButton(onClick=onClick, modifier=Modifier.size(40.dp).clip(RoundedCornerShape(8.dp)).background(LINGOSColors.Background)) { Icon(imageVector=icon, contentDescription=label, tint=LINGOSColors.AccentRed, modifier=Modifier.size(20.dp)) }
         Text(text=label, style=LINGOSTypography.labelSmall, color=LINGOSColors.TextSecondary)
     }

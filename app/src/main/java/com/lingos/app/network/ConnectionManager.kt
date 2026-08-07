@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import okhttp3.*
 import okhttp3.logging.HttpLoggingInterceptor
+import okio.ByteString.Companion.toByteString
 import okio.ByteString
 import java.security.SecureRandom
 import java.security.cert.X509Certificate
@@ -21,8 +22,7 @@ import javax.net.ssl.SSLContext
 import javax.net.ssl.TrustManager
 import javax.net.ssl.X509TrustManager
 
-@Inject
-class ConnectionManager(@ApplicationContext private val context: Context) {
+class ConnectionManager @Inject constructor(@ApplicationContext private val context: Context) {
 
     companion object {
         private const val TAG = "ConnectionManager"
@@ -142,26 +142,26 @@ class ConnectionManager(@ApplicationContext private val context: Context) {
         val ws = webSocket ?: return false
         authCode = code
         val packet = Protocol.encodeAuthCode(code)
-        return ws.send(packet)
+        return ws.send(packet.toByteString())
     }
 
     fun sendConnectionCode(code: String): Boolean {
         val ws = webSocket ?: return false
         connectionCode = code
         val packet = Protocol.encodeConnectionCode(code)
-        return ws.send(packet)
+        return ws.send(packet.toByteString())
     }
 
     fun sendHeartbeat(): Boolean {
         val ws = webSocket ?: return false
         val packet = Protocol.encodeHeartbeat()
-        return ws.send(packet)
+        return ws.send(packet.toByteString())
     }
 
     fun sendCommand(command: String, params: Map<String, Any> = emptyMap()): Boolean {
         val ws = webSocket ?: return false
         val packet = Protocol.encodeCommand(command, params)
-        return ws.send(packet)
+        return ws.send(packet.toByteString())
     }
 
     fun disconnect() {
