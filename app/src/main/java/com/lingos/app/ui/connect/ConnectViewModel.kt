@@ -24,6 +24,16 @@ class ConnectViewModel @Inject constructor(
     private val connectionManager: ConnectionManager,
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
+    companion object { private const val TAG = "ConnectVM"; private const val SCAN_TIMEOUT = 5000L; private const val CONNECT_TIMEOUT = 10000L }
+    private val _state = MutableStateFlow<ConnectState>(ConnectState.Idle); val state: StateFlow<ConnectState> = _state.asStateFlow()
+    private val _selectedMethod = MutableStateFlow(ConnectionMethod.LAN); val selectedMethod: StateFlow<ConnectionMethod> = _selectedMethod.asStateFlow()
+    private val _address = MutableStateFlow("127.0.0.1"); val address: StateFlow<String> = _address.asStateFlow()
+    private val _port = MutableStateFlow("2937"); val port: StateFlow<String> = _port.asStateFlow()
+    private val _authCode = MutableStateFlow(""); val authCode: StateFlow<String> = _authCode.asStateFlow()
+    private val _connectionCode = MutableStateFlow(""); val connectionCode: StateFlow<String> = _connectionCode.asStateFlow()
+    private val _usbDevice = MutableStateFlow<String?>(null); val usbDevice: StateFlow<String?> = _usbDevice.asStateFlow()
+    private val _isUsbConnected = MutableStateFlow(false); val isUsbConnected: StateFlow<Boolean> = _isUsbConnected.asStateFlow()
+
     init {
         // 【B1】Splash 自动连接传递的主机信息 → 自动填入并触发连接（停在认证步）
         val hostIp = savedStateHandle.get<String>("host_ip")
@@ -37,15 +47,6 @@ class ConnectViewModel @Inject constructor(
     private fun autoConnectFromSplash() {
         viewModelScope.launch { delay(300); startConnect() }
     }
-    companion object { private const val TAG = "ConnectVM"; private const val SCAN_TIMEOUT = 5000L; private const val CONNECT_TIMEOUT = 10000L }
-    private val _state = MutableStateFlow<ConnectState>(ConnectState.Idle); val state: StateFlow<ConnectState> = _state.asStateFlow()
-    private val _selectedMethod = MutableStateFlow(ConnectionMethod.LAN); val selectedMethod: StateFlow<ConnectionMethod> = _selectedMethod.asStateFlow()
-    private val _address = MutableStateFlow("127.0.0.1"); val address: StateFlow<String> = _address.asStateFlow()
-    private val _port = MutableStateFlow("2937"); val port: StateFlow<String> = _port.asStateFlow()
-    private val _authCode = MutableStateFlow(""); val authCode: StateFlow<String> = _authCode.asStateFlow()
-    private val _connectionCode = MutableStateFlow(""); val connectionCode: StateFlow<String> = _connectionCode.asStateFlow()
-    private val _usbDevice = MutableStateFlow<String?>(null); val usbDevice: StateFlow<String?> = _usbDevice.asStateFlow()
-    private val _isUsbConnected = MutableStateFlow(false); val isUsbConnected: StateFlow<Boolean> = _isUsbConnected.asStateFlow()
 
     fun selectMethod(method: ConnectionMethod) { _selectedMethod.value = method; _state.value = ConnectState.Idle; Logger.d(TAG, "Method selected: $method") }
     fun updateAddress(address: String) { _address.value = address }

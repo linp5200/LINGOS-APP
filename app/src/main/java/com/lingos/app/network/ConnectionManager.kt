@@ -63,7 +63,7 @@ class ConnectionManager @Inject constructor(@ApplicationContext private val cont
         try {
             _connectionState.value = ConnectionState.Connecting
             Logger.d(TAG, "TCP connecting to $host:$port")
-            this.host = host
+            this@ConnectionManager.host = host
             val sock = Socket()
             sock.connect(InetSocketAddress(host, port), timeout.toInt())
             sock.soTimeout = SOCKET_READ_TIMEOUT_MS

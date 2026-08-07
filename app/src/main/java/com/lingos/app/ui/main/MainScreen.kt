@@ -14,8 +14,10 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
@@ -43,7 +45,7 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
-            ModalDrawerSheet(containerColor = LINGOSColors.Background) {
+            ModalDrawerSheet(drawerContainerColor = LINGOSColors.Background) {
                 Column(modifier = Modifier.fillMaxSize()) {
                     // 抽屉头部：品牌 + 连接状态
                     Column(modifier = Modifier.fillMaxWidth().padding(20.dp, 24.dp)) {
