@@ -236,8 +236,17 @@ class ConnectionManager @Inject constructor(@ApplicationContext private val cont
             lastError = null
             true
         } catch (e: Exception) {
-            lastError = "发送异常: ${e.message}（socket isClosed=${sock.isClosed}）"
-            Logger.e(TAG, "sendFrame 失败: ${e.message}（socket=${sock}, isClosed=${sock.isClosed}）", e)
+            // message 可能为 null（SocketException 等）——用异常类名补充诊断
+            val errClass = e.javaClass.simpleName
+            val detail = e.message ?: "连接已断开（主机可能已重启或网络中断）"
+            lastError = "发送异常($errClass): $detail（socket isClosed=${sock.isClosed}，本地未关闭但连接可能已死）"
+            Logger.e(TAG, "sendFrame 失败: class=$errClass msg=${e.message} isClosed=${sock.isClosed}", e)
+            // 写入失败 = 连接已死——主动标记断开，UI 显示离线
+            if (e is java.io.IOException) {
+                running.set(false)
+                _connectionState.value = ConnectionState.Disconnected
+                Logger.w(TAG, "检测到连接断开（写入失败）——已标记为离线，请重新连接")
+            }
             false
         }
     }
