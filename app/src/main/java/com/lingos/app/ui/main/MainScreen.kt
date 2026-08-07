@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.lingos.app.network.ConnectionManager
+import com.lingos.app.ui.alert.AlertCenterScreen
 import com.lingos.app.ui.chat.ChatScreen
 import com.lingos.app.ui.dashboard.DashboardScreen
 import com.lingos.app.ui.theme.LINGOSColors
@@ -93,7 +94,7 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
                     "chat" -> ChatScreen()
                     "dash" -> DashboardScreen()
                     "ha" -> PlaceholderPage("HA 智能联动\n（B13 批次开发中）")
-                    "alert" -> PlaceholderPage("预警中心\n（B7 批次开发中）")
+                    "alert" -> AlertCenterScreen()
                     else -> PlaceholderPage("设置\n（后续批次开发中）")
                 }
             }
