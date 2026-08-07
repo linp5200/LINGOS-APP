@@ -26,6 +26,7 @@ import com.lingos.app.ui.alert.AlertCenterScreen
 import com.lingos.app.ui.chat.ChatScreen
 import com.lingos.app.ui.dashboard.DashboardScreen
 import com.lingos.app.ui.files.FileBrowserScreen
+import com.lingos.app.ui.ha.HAScreen
 import com.lingos.app.ui.theme.LINGOSColors
 import com.lingos.app.ui.theme.LINGOSTypography
 import kotlinx.coroutines.launch
@@ -98,7 +99,7 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
                 when (currentPage) {
                     "chat" -> ChatScreen()
                     "dash" -> DashboardScreen()
-                    "ha" -> PlaceholderPage("HA 智能联动\n（B13 批次开发中）")
+                    "ha" -> HAScreen()
                     "alert" -> AlertCenterScreen()
                     "files" -> FileBrowserScreen()
                     else -> PlaceholderPage("设置\n（后续批次开发中）")
