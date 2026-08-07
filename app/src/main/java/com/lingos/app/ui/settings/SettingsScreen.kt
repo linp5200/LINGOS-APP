@@ -78,11 +78,25 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
         }
         Spacer(modifier = Modifier.height(12.dp))
 
+        // 生态与部署
+        Text(text = "生态", style = LINGOSTypography.titleMedium, color = Color.White, modifier = Modifier.padding(bottom = 8.dp))
+        SettingCard {
+            SettingRow("技能市场", "B16（官方仓库 + GitHub 拉取 + 沙箱）")
+            SettingRow("MCP 协议", "B16（服务器优先）")
+            SettingRow("桌面端", "B16（Web 壳，三平台 CI）")
+            SettingRow("远程访问", "B17（Tailscale/ZeroTier）")
+            SettingRow("备份恢复", "B17（每周 × 4 周，App 操作）")
+        }
+        Spacer(modifier = Modifier.height(12.dp))
+
         // 关于
         Text(text = "关于", style = LINGOSTypography.titleMedium, color = Color.White, modifier = Modifier.padding(bottom = 8.dp))
         SettingCard {
             SettingRow("版本", BuildConfig.VERSION_NAME + " (${BuildConfig.VERSION_CODE})")
             SettingRow("协议", "TLV 2937 + WS 2939 + UDP 发现")
+            TextButton(onClick = { /* B17: 检查 GitHub Release 更新 */ }, modifier = Modifier.fillMaxWidth()) {
+                Text(text = "检查更新（B17）", color = LINGOSColors.AccentCyan)
+            }
         }
     }
 }

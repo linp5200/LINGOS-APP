@@ -24,6 +24,9 @@ jobs:
         with:
           gradle-version: '8.7'
 
+      - name: 单元测试
+        run: gradle testDebugUnitTest --stacktrace
+
       - name: 编译 Debug APK
         run: gradle clean assembleDebug --stacktrace
 
