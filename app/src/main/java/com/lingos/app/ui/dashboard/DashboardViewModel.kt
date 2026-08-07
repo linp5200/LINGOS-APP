@@ -24,14 +24,15 @@ class DashboardViewModel @Inject constructor(private val connectionManager: Conn
     fun scanDevices() { viewModelScope.launch { _state.update { it.copy(isLoading=true) }; delay(2000); val newDevices = listOf(DeviceItem(id="device_${System.currentTimeMillis()}", name="新设备 ${Random.nextInt(100,999)}", type=DeviceType.SOCKET, status=DeviceStatus.ONLINE, ip="192.168.1.${Random.nextInt(100,200)}")); _state.update { it.copy(devices=it.devices + newDevices, isLoading=false) } } }
     fun startMqtt() { Logger.d(TAG, "MQTT service starting...") }
     private fun loadData() { viewModelScope.launch {
-        // 【B3】真实 system_info（未连接/失败时降级 mock）
+        // 【R3】先生原则：无假数据——真实 system_info；失败显示未连接（不 mock）
         val result = connectionManager.sendCommandAndAwait("system_info", emptyMap(), 8000L)
         if (result.isSuccess) {
             val sysInfo = parseSystemInfo(result.data ?: "")
-            _state.update { it.copy(systemInfo=sysInfo, devices=generateDevices()) }
+            _state.update { it.copy(systemInfo=sysInfo, devices=emptyList(), isLoading=false, error=null) }
         } else {
-            Logger.w(TAG, "system_info 失败，降级 mock: ${result.errorMessage}")
-            _state.update { it.copy(systemInfo=generateSystemInfo(), devices=generateDevices()) }
+            Logger.w(TAG, "system_info 失败（未连接或服务端异常）: ${result.errorMessage}")
+            _state.update { it.copy(systemInfo=SystemInfo(), devices=emptyList(), isLoading=false,
+                error="未连接 LING OS，无数据。请先在 Chat/连接页完成认证。") }
         }
     } }
     private fun startRefreshLoop() { viewModelScope.launch { while (true) { delay(5000); refresh() } } }
@@ -40,7 +41,7 @@ class DashboardViewModel @Inject constructor(private val connectionManager: Conn
     private fun parseSystemInfo(json: String): SystemInfo {
         return try {
             val root = org.json.JSONObject(json)
-            val data = root.optJSONObject("data") ?: return generateSystemInfo()
+            val data = root.optJSONObject("data") ?: return SystemInfo()
             val totalRam = data.optLong("total_ram", 0)
             val freeRam = data.optLong("free_ram", 0)
             SystemInfo(

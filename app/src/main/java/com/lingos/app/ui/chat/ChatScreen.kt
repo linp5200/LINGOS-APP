@@ -14,6 +14,19 @@ import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import android.content.Intent
+import android.speech.RecognizerIntent
+import android.speech.SpeechRecognizer
+import android.speech.RecognitionListener
+import android.os.Bundle
+import android.speech.tts.TextToSpeech
+import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import android.net.Uri
+import android.provider.OpenableColumns
+import android.content.Context
+import java.util.Locale
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -32,6 +45,72 @@ import com.lingos.app.ui.theme.LINGOSTypography
 @Composable
 fun ChatScreen(viewModel: ChatViewModel = hiltViewModel()) {
     val messages by viewModel.messages.collectAsStateWithLifecycle(); val inputText by viewModel.inputText.collectAsStateWithLifecycle(); val chatState by viewModel.chatState.collectAsStateWithLifecycle(); val isVoiceRecording by viewModel.isVoiceRecording.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+
+    // 【R6】系统免费 STT（语音识别）
+    var stt by remember { mutableStateOf<SpeechRecognizer?>(null) }
+    var tts by remember { mutableStateOf<TextToSpeech?>(null) }
+    DisposableEffect(Unit) {
+        val recognizer = SpeechRecognizer.createSpeechRecognizer(context)
+        stt = recognizer
+        val t = TextToSpeech(context) { status -> if (status == TextToSpeech.SUCCESS) { tts?.language = Locale.CHINESE } }
+        tts = t
+        onDispose { recognizer.destroy(); t?.shutdown() }
+    }
+
+    // TTS 朗读 AI 回复（新消息）
+    var lastTtsId by remember { mutableStateOf<Int>(-1) }
+    LaunchedEffect(messages.size) {
+        if (messages.isNotEmpty()) {
+            val last = messages.last()
+            if (last.sender == MessageSender.NOOK && last.id.hashCode() != lastTtsId) {
+                lastTtsId = last.id.hashCode()
+                try { tts?.speak(last.content, TextToSpeech.QUEUE_FLUSH, null, "nook") } catch (_: Exception) {}
+            }
+        }
+    }
+
+    fun startVoice() {
+        try {
+            val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+                putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+                putExtra(RecognizerIntent.EXTRA_LANGUAGE, "zh-CN")
+                putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1)
+            }
+            stt?.setRecognitionListener(object : RecognitionListener {
+                override fun onResults(results: Bundle?) {
+                    val texts = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
+                    if (!texts.isNullOrEmpty()) viewModel.onVoiceRecognized(texts[0])
+                }
+                override fun onReadyForSpeech(params: Bundle?) {}
+                override fun onBeginningOfSpeech() {}
+                override fun onRmsChanged(rmsdB: Float) {}
+                override fun onBufferReceived(buffer: ByteArray?) {}
+                override fun onEndOfSpeech() {}
+                override fun onError(error: Int) { Log.w("ChatScreen", "STT error: $error") }
+                override fun onPartialResults(partialResults: Bundle?) {}
+                override fun onEvent(eventType: Int, params: Bundle?) {}
+            })
+            stt?.startListening(intent)
+            viewModel.startVoiceRecording()
+        } catch (e: Exception) {
+            Log.e("ChatScreen", "STT start failed", e)
+        }
+    }
+    fun stopVoice() { try { stt?.stopListening() } catch (_: Exception) {}; viewModel.stopVoiceRecording() }
+
+    // 【R6】多模态：选图
+    val imagePicker = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+        if (uri != null) {
+            try {
+                val b64 = context.contentResolver.openInputStream(uri)?.use { input ->
+                    val bytes = input.readBytes()
+                    android.util.Base64.encodeToString(bytes, android.util.Base64.NO_WRAP)
+                }
+                if (!b64.isNullOrBlank()) viewModel.sendImage(b64)
+            } catch (e: Exception) { Log.e("ChatScreen", "image read failed", e) }
+        }
+    }
     val listState = rememberLazyListState(); val focusManager = LocalFocusManager.current
     LaunchedEffect(messages.size) { if (messages.isNotEmpty()) listState.animateScrollToItem(messages.size - 1) }
     Column(modifier = Modifier.fillMaxSize().background(LINGOSColors.Background)) {
@@ -39,7 +118,7 @@ fun ChatScreen(viewModel: ChatViewModel = hiltViewModel()) {
             items(messages) { message -> MessageBubble(message=message); Spacer(modifier=Modifier.height(8.dp)) }
             when (val state = chatState) { is ChatState.Thinking -> item { ThinkingIndicator() }; is ChatState.Streaming -> item { StreamingMessage(content=state.content) }; is ChatState.ToolCall -> item { ToolCallIndicator(toolName=state.toolName, args=state.args) }; is ChatState.Error -> item { ErrorIndicator(message=state.message) }; else -> {} }
         }
-        InputArea(inputText=inputText, onInputChange=viewModel::updateInputText, onSend=viewModel::sendMessage, isVoiceRecording=isVoiceRecording, onVoiceToggle={ if (isVoiceRecording) viewModel.stopVoiceRecording() else viewModel.startVoiceRecording() }, isProcessing=chatState is ChatState.Thinking)
+        InputArea(inputText=inputText, onInputChange=viewModel::updateInputText, onSend=viewModel::sendMessage, isVoiceRecording=isVoiceRecording, onVoiceToggle={ if (isVoiceRecording) stopVoice() else startVoice() }, isProcessing=chatState is ChatState.Thinking, onAttach={ imagePicker.launch("image/*") })
     }
 }
 
@@ -56,9 +135,10 @@ private fun ToolCallIndicator(toolName: String, args: String) { Row(modifier=Mod
 private fun ErrorIndicator(message: String) { Row(modifier=Modifier.fillMaxWidth().padding(vertical=4.dp), horizontalArrangement=Arrangement.Center) { Surface(shape=RoundedCornerShape(8.dp), color=LINGOSColors.Disconnected.copy(alpha=0.15f)) { Row(modifier=Modifier.padding(horizontal=12.dp, vertical=6.dp), verticalAlignment=Alignment.CenterVertically) { Text(text="⚠️ $message", style=LINGOSTypography.labelSmall, color=LINGOSColors.Disconnected) } } } }
 
 @Composable
-private fun InputArea(inputText: String, onInputChange: (String) -> Unit, onSend: () -> Unit, isVoiceRecording: Boolean, onVoiceToggle: () -> Unit, isProcessing: Boolean) {
+private fun InputArea(inputText: String, onInputChange: (String) -> Unit, onSend: () -> Unit, isVoiceRecording: Boolean, onVoiceToggle: () -> Unit, isProcessing: Boolean, onAttach: () -> Unit) {
     Surface(modifier=Modifier.fillMaxWidth().background(LINGOSColors.Surface).padding(horizontal=12.dp, vertical=8.dp)) {
         Row(modifier=Modifier.fillMaxWidth(), verticalAlignment=Alignment.CenterVertically, horizontalArrangement=Arrangement.spacedBy(8.dp)) {
+            IconButton(onClick=onAttach) { Icon(Icons.Default.Add, contentDescription="附件", tint=LINGOSColors.AccentCyan) }
             VoiceInputButton(isRecording=isVoiceRecording, onClick=onVoiceToggle)
             OutlinedTextField(value=inputText, onValueChange=onInputChange, placeholder={ Text(text=stringResource(R.string.chat_placeholder), style=LINGOSTypography.bodyMedium, color=LINGOSColors.TextHint) }, modifier=Modifier.weight(1f), shape=RoundedCornerShape(24.dp), colors=OutlinedTextFieldDefaults.colors(focusedBorderColor=LINGOSColors.AccentRed, unfocusedBorderColor=LINGOSColors.TextHint.copy(alpha=0.3f), focusedTextColor=Color.White, unfocusedTextColor=Color.White, cursorColor=LINGOSColors.AccentRed, focusedContainerColor=LINGOSColors.Background, unfocusedContainerColor=LINGOSColors.Background), textStyle=LINGOSTypography.bodyMedium, singleLine=true, enabled=!isProcessing)
             IconButton(onClick=onSend, enabled=inputText.isNotBlank() && !isProcessing) { Icon(Icons.Default.Send, contentDescription=stringResource(R.string.chat_send), tint=if (inputText.isNotBlank() && !isProcessing) LINGOSColors.AccentRed else LINGOSColors.TextHint) }

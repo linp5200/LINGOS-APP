@@ -29,6 +29,20 @@ import com.lingos.app.ui.theme.LINGOSTypography
 @Composable
 fun DashboardScreen(viewModel: DashboardViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle(); val sysInfo = state.systemInfo
+    if (state.error != null) {
+        Box(modifier = Modifier.fillMaxSize().background(LINGOSColors.Background).padding(24.dp), contentAlignment = Alignment.Center) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(text = "📡", style = LINGOSTypography.headlineLarge)
+                Spacer(modifier = Modifier.height(12.dp))
+                Text(text = state.error ?: "", style = LINGOSTypography.bodyMedium, color = LINGOSColors.TextSecondary, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(onClick = viewModel::refresh, colors = ButtonDefaults.buttonColors(containerColor = LINGOSColors.AccentRed)) {
+                    Text("重试")
+                }
+            }
+        }
+        return@Composable
+    }
     LazyColumn(modifier = Modifier.fillMaxSize().background(LINGOSColors.Background).padding(horizontal=16.dp, vertical=12.dp)) {
         item { Text(text=stringResource(R.string.dashboard_title), style=LINGOSTypography.headlineSmall, color=Color.White, modifier=Modifier.padding(bottom=16.dp)) }
         item { Row(modifier=Modifier.fillMaxWidth(), horizontalArrangement=Arrangement.spacedBy(8.dp)) { ResourceCard(title=stringResource(R.string.dashboard_cpu), value="${sysInfo.cpuUsage.toInt()}%", icon="⚡", color=if (sysInfo.cpuUsage > 70) LINGOSColors.Disconnected else LINGOSColors.Success, modifier=Modifier.weight(1f)); ResourceCard(title=stringResource(R.string.dashboard_memory), value="${sysInfo.memoryUsage.toInt()}%", icon="🧠", color=if (sysInfo.memoryUsage > 80) LINGOSColors.Disconnected else LINGOSColors.Success, modifier=Modifier.weight(1f)) }; Spacer(modifier=Modifier.height(8.dp)) }

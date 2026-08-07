@@ -61,6 +61,8 @@ class ConnectionManager @Inject constructor(@ApplicationContext private val cont
     /** TCP 连接（非 WebSocket！服务端 2937 是 raw TCP） */
     suspend fun connect(host: String = DEFAULT_HOST, port: Int = DEFAULT_PORT, timeout: Long = 10000L): Result<Unit> = withContext(Dispatchers.IO) {
         try {
+            // 【R1】先断开旧连接（防 socket 覆盖泄漏 + receiveLoop 多线程 + 服务端多会话）
+            disconnect()
             _connectionState.value = ConnectionState.Connecting
             Logger.d(TAG, "TCP connecting to $host:$port")
             this@ConnectionManager.host = host
@@ -261,6 +263,7 @@ class ConnectionManager @Inject constructor(@ApplicationContext private val cont
         try { socket?.close() } catch (_: Exception) {}
         socket = null
         _connectionState.value = ConnectionState.Disconnected
+        host = null
     }
 
     fun getHost(): String? = host

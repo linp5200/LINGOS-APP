@@ -9,6 +9,7 @@ import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Memory
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Warning
@@ -29,6 +30,7 @@ import com.lingos.app.ui.chat.ChatScreen
 import com.lingos.app.ui.dashboard.DashboardScreen
 import com.lingos.app.ui.files.FileBrowserScreen
 import com.lingos.app.ui.ha.HAScreen
+import com.lingos.app.ui.memory.MemoryScreen
 import com.lingos.app.ui.settings.SettingsScreen
 import com.lingos.app.ui.theme.LINGOSColors
 import com.lingos.app.ui.theme.LINGOSTypography
@@ -82,6 +84,9 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
                     DrawerItem("文件管理", Icons.Default.Folder, currentPage == "files") {
                         currentPage = "files"; scope.launch { drawerState.close() }
                     }
+                    DrawerItem("记忆管理", Icons.Default.Memory, currentPage == "memory") {
+                        currentPage = "memory"; scope.launch { drawerState.close() }
+                    }
                     DrawerItem("设置", Icons.Default.Settings, currentPage == "settings") {
                         currentPage = "settings"; scope.launch { drawerState.close() }
                     }
@@ -128,13 +133,6 @@ private fun DrawerItem(label: String, icon: ImageVector, selected: Boolean, onCl
         ),
         modifier = Modifier.padding(horizontal = 12.dp, vertical = 2.dp)
     )
-}
-
-@Composable
-private fun PlaceholderPage(text: String) {
-    Box(modifier = Modifier.fillMaxSize().background(LINGOSColors.Background), contentAlignment = Alignment.Center) {
-        Text(text = text, style = LINGOSTypography.bodyLarge, color = LINGOSColors.TextSecondary)
-    }
 }
 
 @Composable

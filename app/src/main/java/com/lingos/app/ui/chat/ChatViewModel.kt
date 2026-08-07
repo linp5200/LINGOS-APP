@@ -38,6 +38,24 @@ class ChatViewModel @Inject constructor(private val connectionManager: Connectio
     fun startVoiceRecording() { _isVoiceRecording.value = true; Logger.d(TAG, "Voice recording started") }
     fun stopVoiceRecording() { _isVoiceRecording.value = false; Logger.d(TAG, "Voice recording stopped（STT 识别在 ChatScreen 层）") }
     fun onVoiceRecognized(text: String) { if (text.isNotBlank()) sendVoiceCommand(text) }
+
+    /** 【R6】多模态：发送图片（base64）给 AI */
+    fun sendImage(base64Data: String, mimeType: String = "image/jpeg") {
+        val ws = webSocket ?: run {
+            addSystemMessage("AI 通道未连接（请先连接主机）")
+            return
+        }
+        if (base64Data.isBlank()) return
+        _chatState.value = ChatState.Thinking
+        streamingContent = ""
+        val json = org.json.JSONObject()
+            .put("type", "chat")
+            .put("prompt", "[图片] 请查看并分析这张图片")
+            .put("model", _currentModel.value)
+            .put("image", "data:$mimeType;base64,$base64Data")
+            .toString()
+        ws.send(json)
+    }
     fun cycleModel() {
         val idx = MODEL_LIST.indexOf(_currentModel.value)
         val next = MODEL_LIST[(idx + 1) % MODEL_LIST.size]
