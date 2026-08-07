@@ -33,7 +33,7 @@ fun DeviceDetailScreen(deviceId: String, viewModel: DeviceDetailViewModel = hilt
         when (val s = state) {
             is DeviceDetailState.Loading -> Box(modifier=Modifier.fillMaxSize().padding(paddingValues), contentAlignment=Alignment.Center) { CircularProgressIndicator(color=LINGOSColors.AccentRed) }
             is DeviceDetailState.Loaded -> DeviceDetailContent(state=s, onControl=viewModel::sendControlEvent, modifier=Modifier.padding(paddingValues))
-            is DeviceDetailState.Error -> Box(modifier=Modifier.fillMaxSize().padding(paddingValues), contentAlignment=Alignment.Center) { Column(horizontalAlignment=Alignment.CenterHorizontally) { Text(text="⚠️ ${s.message}", style=LINGOSTypography.bodyLarge, color=LINGOSColors.Disconnected); Spacer(modifier=Modifier.height(16.dp)); Button(onClick=viewModel::refresh, colors=ButtonDefaults.buttonColors(containerColor=LINGOSColors.AccentRed)) { Text("重试") } } }
+            is DeviceDetailState.Error -> Box(modifier=Modifier.fillMaxSize().padding(paddingValues), contentAlignment=Alignment.Center) { Column(horizontalAlignment=Alignment.CenterHorizontally) { Text(text="${s.message}", style=LINGOSTypography.bodyLarge, color=LINGOSColors.Disconnected); Spacer(modifier=Modifier.height(16.dp)); Button(onClick=viewModel::refresh, colors=ButtonDefaults.buttonColors(containerColor=LINGOSColors.AccentRed)) { Text("重试") } } }
         }
     }
 }

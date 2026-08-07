@@ -77,7 +77,7 @@ private fun LANConnectionContent(address: String, port: String, state: ConnectSt
             Spacer(modifier=Modifier.height(16.dp))
             Surface(shape=RoundedCornerShape(8.dp), color=LINGOSColors.Surface, modifier=Modifier.fillMaxWidth()) {
                 Column(modifier=Modifier.padding(12.dp)) {
-                    Text(text=if (state.step == AuthStep.AUTH_CODE) "⏳ TCP 已连接，请输入主机终端显示的验证码" else "✅ 验证码通过！请输入主机终端显示的连接码", style=LINGOSTypography.bodySmall, color=if (state.step == AuthStep.AUTH_CODE) LINGOSColors.TextSecondary else LINGOSColors.Success)
+                    Text(text=if (state.step == AuthStep.AUTH_CODE) "TCP 已连接，请输入主机终端显示的验证码" else "验证码通过！请输入主机终端显示的连接码", style=LINGOSTypography.bodySmall, color=if (state.step == AuthStep.AUTH_CODE) LINGOSColors.TextSecondary else LINGOSColors.Success)
                     Spacer(modifier=Modifier.height(8.dp))
                     if (state.step == AuthStep.AUTH_CODE) {
                         OutlinedTextField(value=authCode, onValueChange=onAuthCodeChange, label={ Text("验证码") }, modifier=Modifier.fillMaxWidth(), colors=textFieldColors(), textStyle=LINGOSTypography.bodyMedium, placeholder={ Text("主机终端 Auth Code", color=LINGOSColors.TextHint) })
@@ -103,7 +103,7 @@ private fun PublicConnectionContent(authCode: String, connectionCode: String, st
         Row(modifier=Modifier.fillMaxWidth(), horizontalArrangement=Arrangement.spacedBy(12.dp)) {
             Button(onClick={ if (state is ConnectState.Failed) onRetry() else onConnect() }, modifier=Modifier.weight(1f), colors=buttonColors(), enabled=state !is ConnectState.Connecting) { Text(if (state is ConnectState.Failed) stringResource(R.string.connect_retry) else stringResource(R.string.confirm)) }
         }
-        if (state is ConnectState.WaitingAuth) { Spacer(modifier=Modifier.height(12.dp)); when (state.step) { AuthStep.AUTH_CODE -> Text("⏳ Waiting for auth code...", style=LINGOSTypography.bodySmall, color=LINGOSColors.TextSecondary); AuthStep.CONNECTION_CODE -> Text("✅ Auth code verified! Please enter connection code from host screen.", style=LINGOSTypography.bodySmall, color=LINGOSColors.Success) } }
+        if (state is ConnectState.WaitingAuth) { Spacer(modifier=Modifier.height(12.dp)); when (state.step) { AuthStep.AUTH_CODE -> Text("Waiting for auth code...", style=LINGOSTypography.bodySmall, color=LINGOSColors.TextSecondary); AuthStep.CONNECTION_CODE -> Text("Auth code verified! Please enter connection code from host screen.", style=LINGOSTypography.bodySmall, color=LINGOSColors.Success) } }
     }
 }
 

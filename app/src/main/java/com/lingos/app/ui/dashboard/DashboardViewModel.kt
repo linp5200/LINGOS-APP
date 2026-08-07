@@ -55,9 +55,9 @@ class DashboardViewModel @Inject constructor(private val connectionManager: Conn
             )
         } catch (e: Exception) {
             Logger.w(TAG, "system_info 解析失败: ${e.message}")
-            generateSystemInfo()
+            SystemInfo()
         }
     }
-    private fun generateSystemInfo(): SystemInfo = SystemInfo(cpuUsage=Random.nextInt(5,60).toFloat(), memoryUsage=Random.nextInt(20,75).toFloat(), memoryTotal=16000000000, memoryFree=Random.nextLong(4000000000,12000000000), networkRx=Random.nextLong(100000,10000000), networkTx=Random.nextLong(50000,5000000), uptime=System.currentTimeMillis()/1000)
-    private fun generateDevices(): List<DeviceItem> = listOf(DeviceItem(id="1", name="路由器", type=DeviceType.ROUTER, status=DeviceStatus.ONLINE, ip="192.168.1.1", icon="📶"), DeviceItem(id="2", name="智能插座-客厅", type=DeviceType.SOCKET, status=DeviceStatus.ONLINE, ip="192.168.1.102", icon="🔌"), DeviceItem(id="3", name="摄像头-门口", type=DeviceType.CAMERA, status=DeviceStatus.OFFLINE, ip="192.168.1.103", icon="📷"), DeviceItem(id="4", name="台灯", type=DeviceType.LIGHT, status=DeviceStatus.ONLINE, ip="192.168.1.104", icon="💡"), DeviceItem(id="5", name="智能音箱", type=DeviceType.SPEAKER, status=DeviceStatus.ONLINE, ip="192.168.1.105", icon="🔊"))
+    /* mock 已移除（先生原则） */
+    /* mock 已移除（先生原则） */
 }
