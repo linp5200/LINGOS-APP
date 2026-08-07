@@ -23,6 +23,9 @@ class ChatViewModel @Inject constructor(private val connectionManager: Connectio
     companion object { private const val TAG = "ChatVM"; private val QUICK_COMMANDS = listOf("/file", "/status", "/help", "/memory", "/device"); private const val WS_PORT = 2939 }
     private var webSocket: WebSocket? = null
     private var streamingContent = ""
+    private val _currentModel = MutableStateFlow("deepseek-v4-flash")
+    val currentModel: StateFlow<String> = _currentModel.asStateFlow()
+    private val MODEL_LIST = listOf("deepseek-v4-flash", "deepseek-v4-pro", "ollama-local")
     private val _messages = MutableStateFlow<List<ChatMessage>>(emptyList()); val messages: StateFlow<List<ChatMessage>> = _messages.asStateFlow()
     private val _inputText = MutableStateFlow(""); val inputText: StateFlow<String> = _inputText.asStateFlow()
     private val _chatState = MutableStateFlow<ChatState>(ChatState.Idle); val chatState: StateFlow<ChatState> = _chatState.asStateFlow()
@@ -35,6 +38,13 @@ class ChatViewModel @Inject constructor(private val connectionManager: Connectio
     fun startVoiceRecording() { _isVoiceRecording.value = true; Logger.d(TAG, "Voice recording started") }
     fun stopVoiceRecording() { _isVoiceRecording.value = false; Logger.d(TAG, "Voice recording stopped（STT 识别在 ChatScreen 层）") }
     fun onVoiceRecognized(text: String) { if (text.isNotBlank()) sendVoiceCommand(text) }
+    fun cycleModel() {
+        val idx = MODEL_LIST.indexOf(_currentModel.value)
+        val next = MODEL_LIST[(idx + 1) % MODEL_LIST.size]
+        _currentModel.value = next
+        addSystemMessage("模型切换为: $next")
+    }
+
     fun clearMessages() { _messages.value = emptyList(); _chatState.value = ChatState.Idle; addSystemMessage("对话已清除") }
     private fun addSystemMessage(content: String) { _messages.update { it + ChatMessage(content=content, sender=MessageSender.SYSTEM, isHighlight=false) } }
     private fun handleQuickCommand(cmd: String, args: String) { when (cmd) { "/help" -> showHelp(); "/status" -> sendToAI("显示系统状态"); "/memory" -> sendToAI("显示记忆摘要"); "/device" -> sendToAI("列出所有设备"); "/file" -> sendToAI("文件操作: $args"); else -> addSystemMessage("未知命令: $cmd") } }
@@ -47,7 +57,11 @@ class ChatViewModel @Inject constructor(private val connectionManager: Connectio
         }
         _chatState.value = ChatState.Thinking
         streamingContent = ""
-        val json = org.json.JSONObject().put("type", "chat").put("prompt", prompt).toString()
+        val json = org.json.JSONObject()
+            .put("type", "chat")
+            .put("prompt", prompt)
+            .put("model", _currentModel.value)
+            .toString()
         ws.send(json)
     }
 
