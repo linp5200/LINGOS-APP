@@ -7,6 +7,7 @@ import com.lingos.app.R
 import androidx.compose.ui.graphics.Color
 import com.lingos.app.ui.theme.LINGOSColors
 import com.lingos.app.network.ConnectionManager
+import com.lingos.app.network.DiscoveryManager
 import com.lingos.app.utils.Logger
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -37,7 +38,37 @@ class SplashViewModel @Inject constructor(@ApplicationContext private val contex
     private fun getLog3(): String = getString(R.string.splash_log_3)
 
     fun startAnimation() { viewModelScope.launch { runWelcomePhase(); runGlitchAndLingPhase(); runLoadingPhase(); runLogsPhase(); _state.value = SplashState.Complete; Logger.d(TAG, "Splash animation complete") } }
-    fun attemptAutoConnect() { if (_isConnecting.value) return; _isConnecting.value = true; viewModelScope.launch { try { _connectionStatus.value = ConnectionStatus.Connecting; val result = connectionManager.connect(host="127.0.0.1", port=2937, timeout=3000L); if (result.isSuccess) { _connectionStatus.value = ConnectionStatus.Connected; Logger.d(TAG, "Auto-connect success") } else { val backupResult = connectionManager.connect(host="127.0.0.1", port=2938, timeout=2000L); if (backupResult.isSuccess) { _connectionStatus.value = ConnectionStatus.Connected; Logger.d(TAG, "Auto-connect via backup port success") } else { _connectionStatus.value = ConnectionStatus.Disconnected; Logger.w(TAG, "Auto-connect failed") } }; _isConnecting.value = false } catch (e: Exception) { Logger.e(TAG, "Auto-connect error", e); _connectionStatus.value = ConnectionStatus.Error(e.message ?: "Unknown error"); _isConnecting.value = false } } }
+    fun attemptAutoConnect() {
+        if (_isConnecting.value) return
+        _isConnecting.value = true
+        viewModelScope.launch {
+            try {
+                _connectionStatus.value = ConnectionStatus.Connecting
+                // 【方案A】UDP 局域网搜索替代固定 127.0.0.1（手机本地无意义）
+                val hosts = DiscoveryManager.scan(2000L)
+                if (hosts.isNotEmpty()) {
+                    val target = hosts.first()
+                    Logger.d(TAG, "Auto-connect to ${target.ip}:${target.port} v${target.version}")
+                    val result = connectionManager.connect(target.ip, target.port, 3000L)
+                    if (result.isSuccess) {
+                        _connectionStatus.value = ConnectionStatus.Connected
+                        Logger.d(TAG, "Auto-connect success: ${target.ip}:${target.port}")
+                    } else {
+                        _connectionStatus.value = ConnectionStatus.Disconnected
+                        Logger.w(TAG, "Auto-connect failed")
+                    }
+                } else {
+                    _connectionStatus.value = ConnectionStatus.Disconnected
+                    Logger.d(TAG, "No LING OS host found in LAN")
+                }
+            } catch (e: Exception) {
+                Logger.e(TAG, "Auto-connect error", e)
+                _connectionStatus.value = ConnectionStatus.Error(e.message ?: "Unknown error")
+            } finally {
+                _isConnecting.value = false
+            }
+        }
+    }
     fun shouldShowConnectScreen(): Boolean = _connectionStatus.value == ConnectionStatus.Disconnected || _connectionStatus.value is ConnectionStatus.Error
     fun resetConnection() { _connectionStatus.value = null; _isConnecting.value = false }
 

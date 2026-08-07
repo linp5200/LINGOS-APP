@@ -10,5 +10,5 @@ sealed class ConnectState {
 }
 enum class ConnectionMethod { LAN, PUBLIC, USB }
 enum class AuthStep { AUTH_CODE, CONNECTION_CODE }
-data class DetectedDevice(val ip: String, val hostname: String? = null, val port: Int = 2937, val isReachable: Boolean = false)
+data class DetectedDevice(val ip: String, val hostname: String? = null, val port: Int = 2937, val isReachable: Boolean = false, val version: String? = null)
 sealed class ConnectEvent { data class SelectMethod(val method: ConnectionMethod) : ConnectEvent(); data class UpdateAddress(val address: String) : ConnectEvent(); data class UpdatePort(val port: String) : ConnectEvent(); data class UpdateAuthCode(val code: String) : ConnectEvent(); data class UpdateConnectionCode(val code: String) : ConnectEvent(); object StartScan : ConnectEvent(); object StartConnect : ConnectEvent(); object Retry : ConnectEvent(); object Reset : ConnectEvent(); object GoBack : ConnectEvent() }

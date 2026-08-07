@@ -31,6 +31,8 @@ import kotlinx.coroutines.delay
 fun SplashScreen(viewModel: SplashViewModel = hiltViewModel(), onComplete: () -> Unit, onConnectFailed: () -> Unit) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val connectionStatus by viewModel.connectionStatus.collectAsStateWithLifecycle()
+    // 【修复-黑屏】启动 Splash 动画（此前缺失导致状态停在 Welcome(alpha=0) 全透明黑屏）
+    LaunchedEffect(Unit) { viewModel.startAnimation() }
     LaunchedEffect(state) {
         if (state is SplashState.Complete) {
             if (connectionStatus == ConnectionStatus.Connected) { delay(300L); onComplete() }

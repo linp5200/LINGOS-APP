@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.lingos.app.R
 import com.lingos.app.network.ConnectionManager
+import com.lingos.app.network.DiscoveryManager
 import com.lingos.app.utils.Logger
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -36,7 +37,19 @@ class ConnectViewModel @Inject constructor(@ApplicationContext private val conte
 
     fun startScan() { viewModelScope.launch {
         _state.value = ConnectState.Scanning(foundDevices=emptyList(), progress=0)
-        try { val devices = mutableListOf<DetectedDevice>(); for (i in 1..10) { val progress = (i * 10); val ip = "192.168.1.$i"; val reachable = i % 3 == 0; if (reachable) { devices.add(DetectedDevice(ip=ip, hostname=if (i==7) "LINGOS-HOST" else null, port=2937, isReachable=true)) }; _state.value = ConnectState.Scanning(foundDevices=devices.toList(), progress=progress); delay(300L) }; val lingosDevice = devices.find { it.hostname?.contains("LINGOS") == true }; if (lingosDevice != null) { _address.value = lingosDevice.ip; _state.value = ConnectState.Idle; Logger.d(TAG, "Auto-selected LINGOS host: ${lingosDevice.ip}") } else { _state.value = ConnectState.Idle } } catch (e: Exception) { Logger.e(TAG, "Scan error", e); _state.value = ConnectState.Idle } } }
+        try {
+            val hosts = DiscoveryManager.scan()
+            val devices = hosts.map { DetectedDevice(ip=it.ip, hostname=it.name, port=it.port, isReachable=true, version=it.version) }
+            _state.value = ConnectState.Scanning(foundDevices=devices, progress=100)
+            delay(300L)
+            if (devices.isNotEmpty()) {
+                val first = devices.first()
+                _address.value = first.ip
+                _port.value = first.port.toString()
+                Logger.i(TAG, "Auto-selected: ${first.ip}:${first.port}")
+            }
+            _state.value = ConnectState.Idle
+        } catch (e: Exception) { Logger.e(TAG, "Scan error", e); _state.value = ConnectState.Idle } } }
 
     fun startConnect() { viewModelScope.launch {
         val method = _selectedMethod.value; _state.value = ConnectState.Connecting(method=method, progress=0, message=context.getString(R.string.connect_status_connecting))
