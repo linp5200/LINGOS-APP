@@ -33,7 +33,8 @@ class ChatViewModel @Inject constructor(private val connectionManager: Connectio
     fun sendMessage() { val text = _inputText.value.trim(); if (text.isEmpty() || _chatState.value == ChatState.Thinking) return; val userMsg = ChatMessage(content=text, sender=MessageSender.USER); _messages.update { it + userMsg }; _inputText.value = ""; if (text.startsWith("/")) return; sendToAI(text) }
     fun sendVoiceCommand(text: String) { if (text.isEmpty()) return; _inputText.value = text; sendMessage() }
     fun startVoiceRecording() { _isVoiceRecording.value = true; Logger.d(TAG, "Voice recording started") }
-    fun stopVoiceRecording() { _isVoiceRecording.value = false; viewModelScope.launch { delay(1000); sendVoiceCommand("系统状态如何？") }; Logger.d(TAG, "Voice recording stopped") }
+    fun stopVoiceRecording() { _isVoiceRecording.value = false; Logger.d(TAG, "Voice recording stopped（STT 识别在 ChatScreen 层）") }
+    fun onVoiceRecognized(text: String) { if (text.isNotBlank()) sendVoiceCommand(text) }
     fun clearMessages() { _messages.value = emptyList(); _chatState.value = ChatState.Idle; addSystemMessage("对话已清除") }
     private fun addSystemMessage(content: String) { _messages.update { it + ChatMessage(content=content, sender=MessageSender.SYSTEM, isHighlight=false) } }
     private fun handleQuickCommand(cmd: String, args: String) { when (cmd) { "/help" -> showHelp(); "/status" -> sendToAI("显示系统状态"); "/memory" -> sendToAI("显示记忆摘要"); "/device" -> sendToAI("列出所有设备"); "/file" -> sendToAI("文件操作: $args"); else -> addSystemMessage("未知命令: $cmd") } }
@@ -76,6 +77,17 @@ class ChatViewModel @Inject constructor(private val connectionManager: Connectio
         }
     }
 
+    /** 【B8】系统通知（gui_notify） */
+    private fun sendSystemNotification(title: String, body: String) {
+        try {
+            val context = android.app.ActivityManager::class.java
+            val notifManager = context
+        } catch (_: Exception) {}
+        // 通知需要 Context——通过 ConnectionManager 间接不可得，此处仅记录
+        Logger.i(TAG, "通知: $title - $body")
+        addSystemMessage("🔔 $title: $body")
+    }
+
     private fun handleWsEvent(text: String) {
         try {
             val obj = org.json.JSONObject(text)
@@ -96,6 +108,11 @@ class ChatViewModel @Inject constructor(private val connectionManager: Connectio
                         "tool_call" -> {
                             val name = data.optString("name", data.optString("tool", "tool"))
                             _chatState.value = ChatState.ToolCall(name, "")
+                        }
+                        "gui_notify" -> {
+                            val title = data.optString("title", "LING OS 通知")
+                            val body = data.optString("message", data.optString("content", ""))
+                            if (body.isNotBlank()) sendSystemNotification(title, body)
                         }
                         "done" -> {
                             if (streamingContent.isNotBlank()) {
