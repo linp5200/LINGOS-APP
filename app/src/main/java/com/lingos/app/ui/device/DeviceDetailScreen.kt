@@ -30,10 +30,10 @@ fun DeviceDetailScreen(deviceId: String, viewModel: DeviceDetailViewModel = hilt
     val state by viewModel.state.collectAsStateWithLifecycle()
     LaunchedEffect(deviceId) { viewModel.loadDevice(deviceId) }
     Scaffold(topBar = { TopAppBar(title={ Text("设备详情", style=LINGOSTypography.titleMedium, color=Color.White) }, navigationIcon={ IconButton(onClick=onBack) { Icon(Icons.Default.ArrowBack, contentDescription="返回", tint=Color.White) } }, actions={ IconButton(onClick=viewModel::refresh) { Icon(Icons.Default.Refresh, contentDescription="刷新", tint=Color.White) } }, colors = TopAppBarDefaults.topAppBarColors(containerColor=LINGOSColors.Background, scrolledContainerColor=LINGOSColors.Background)) }, containerColor = LINGOSColors.Background) { paddingValues ->
-        when (state) {
+        when (val s = state) {
             is DeviceDetailState.Loading -> Box(modifier=Modifier.fillMaxSize().padding(paddingValues), contentAlignment=Alignment.Center) { CircularProgressIndicator(color=LINGOSColors.AccentRed) }
-            is DeviceDetailState.Loaded -> DeviceDetailContent(state=state, onControl=viewModel::sendControlEvent, modifier=Modifier.padding(paddingValues))
-            is DeviceDetailState.Error -> Box(modifier=Modifier.fillMaxSize().padding(paddingValues), contentAlignment=Alignment.Center) { Column(horizontalAlignment=Alignment.CenterHorizontally) { Text(text="⚠️ ${state.message}", style=LINGOSTypography.bodyLarge, color=LINGOSColors.Disconnected); Spacer(modifier=Modifier.height(16.dp)); Button(onClick=viewModel::refresh, colors=ButtonDefaults.buttonColors(containerColor=LINGOSColors.AccentRed)) { Text("重试") } } }
+            is DeviceDetailState.Loaded -> DeviceDetailContent(state=s, onControl=viewModel::sendControlEvent, modifier=Modifier.padding(paddingValues))
+            is DeviceDetailState.Error -> Box(modifier=Modifier.fillMaxSize().padding(paddingValues), contentAlignment=Alignment.Center) { Column(horizontalAlignment=Alignment.CenterHorizontally) { Text(text="⚠️ ${s.message}", style=LINGOSTypography.bodyLarge, color=LINGOSColors.Disconnected); Spacer(modifier=Modifier.height(16.dp)); Button(onClick=viewModel::refresh, colors=ButtonDefaults.buttonColors(containerColor=LINGOSColors.AccentRed)) { Text("重试") } } }
         }
     }
 }
@@ -75,11 +75,11 @@ private fun ControlPanel(device: com.lingos.app.data.model.Device, onControl: (D
         Column(modifier=Modifier.fillMaxWidth().padding(16.dp)) {
             Row(modifier=Modifier.fillMaxWidth(), horizontalArrangement=Arrangement.spacedBy(12.dp)) {
                 if (device.type.contains("灯") || device.type.contains("light")) {
-                    OutlinedButton(onClick={ onControl(DeviceControlEvent.SetBrightness(50)) }, modifier=Modifier.weight(1f), colors=OutlinedButtonDefaults.outlinedButtonColors(contentColor=LINGOSColors.AccentRed)) { Text("50% 亮度") }
-                    OutlinedButton(onClick={ onControl(DeviceControlEvent.SetBrightness(100)) }, modifier=Modifier.weight(1f), colors=OutlinedButtonDefaults.outlinedButtonColors(contentColor=LINGOSColors.AccentRed)) { Text("100% 亮度") }
+                    OutlinedButton(onClick={ onControl(DeviceControlEvent.SetBrightness(50)) }, modifier=Modifier.weight(1f), colors=ButtonDefaults.outlinedButtonColors(contentColor=LINGOSColors.AccentRed)) { Text("50% 亮度") }
+                    OutlinedButton(onClick={ onControl(DeviceControlEvent.SetBrightness(100)) }, modifier=Modifier.weight(1f), colors=ButtonDefaults.outlinedButtonColors(contentColor=LINGOSColors.AccentRed)) { Text("100% 亮度") }
                 } else {
-                    OutlinedButton(onClick={ onControl(DeviceControlEvent.SendCommand("reboot", emptyMap())) }, modifier=Modifier.weight(1f), colors=OutlinedButtonDefaults.outlinedButtonColors(contentColor=LINGOSColors.AccentRed)) { Text("重启") }
-                    OutlinedButton(onClick={ onControl(DeviceControlEvent.SendCommand("status", emptyMap())) }, modifier=Modifier.weight(1f), colors=OutlinedButtonDefaults.outlinedButtonColors(contentColor=LINGOSColors.AccentRed)) { Text("状态") }
+                    OutlinedButton(onClick={ onControl(DeviceControlEvent.SendCommand("reboot", emptyMap())) }, modifier=Modifier.weight(1f), colors=ButtonDefaults.outlinedButtonColors(contentColor=LINGOSColors.AccentRed)) { Text("重启") }
+                    OutlinedButton(onClick={ onControl(DeviceControlEvent.SendCommand("status", emptyMap())) }, modifier=Modifier.weight(1f), colors=ButtonDefaults.outlinedButtonColors(contentColor=LINGOSColors.AccentRed)) { Text("状态") }
                 }
             }
         }

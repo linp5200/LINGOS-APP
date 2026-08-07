@@ -15,7 +15,6 @@ import androidx.compose.material.icons.filled.Usb
 import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material3.*
-import androidx.compose.material3.OutlinedButtonDefaults
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -125,4 +124,4 @@ private fun textFieldColors() = OutlinedTextFieldDefaults.colors(focusedBorderCo
 @Composable
 private fun buttonColors() = ButtonDefaults.buttonColors(containerColor=LINGOSColors.AccentRed, contentColor=Color.White, disabledContainerColor=LINGOSColors.TextHint, disabledContentColor=LINGOSColors.TextSecondary)
 @Composable
-private fun outlinedButtonColors() = OutlinedButtonDefaults.outlinedButtonColors(contentColor=LINGOSColors.AccentRed)
+private fun outlinedButtonColors() = ButtonDefaults.outlinedButtonColors(contentColor=LINGOSColors.AccentRed)

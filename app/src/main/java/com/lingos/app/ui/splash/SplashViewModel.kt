@@ -4,6 +4,8 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.lingos.app.R
+import androidx.compose.ui.graphics.Color
+import com.lingos.app.ui.theme.LINGOSColors
 import com.lingos.app.network.ConnectionManager
 import com.lingos.app.utils.Logger
 import dagger.hilt.android.lifecycle.HiltViewModel

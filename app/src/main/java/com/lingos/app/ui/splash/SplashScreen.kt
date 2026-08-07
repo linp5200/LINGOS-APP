@@ -2,6 +2,7 @@ package com.lingos.app.ui.splash
 
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.material3.Text
@@ -9,7 +10,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.offset
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
@@ -54,7 +54,7 @@ fun SplashScreen(viewModel: SplashViewModel = hiltViewModel(), onComplete: () ->
 @Composable
 private fun WelcomePhase(state: SplashState.Welcome) {
     val density = LocalDensity.current; val offsetPx = with(density) { state.offsetY.dp.toPx() }
-    Text(text = stringResource(R.string.splash_welcome), style = SplashTypography.Welcome, color = Color.White, modifier = Modifier.alpha(state.alpha).offset(y = with(density) { (offsetPx * state.offsetY).dp }).align(Alignment.Center))
+    Text(text = stringResource(R.string.splash_welcome), style = SplashTypography.Welcome, color = Color.White, modifier = Modifier.alpha(state.alpha).offset(y = with(density) { (offsetPx * state.offsetY).dp }))
 }
 
 @Composable
