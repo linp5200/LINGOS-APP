@@ -7,6 +7,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.Dashboard
+import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Settings
@@ -24,6 +25,7 @@ import com.lingos.app.network.ConnectionManager
 import com.lingos.app.ui.alert.AlertCenterScreen
 import com.lingos.app.ui.chat.ChatScreen
 import com.lingos.app.ui.dashboard.DashboardScreen
+import com.lingos.app.ui.files.FileBrowserScreen
 import com.lingos.app.ui.theme.LINGOSColors
 import com.lingos.app.ui.theme.LINGOSTypography
 import kotlinx.coroutines.launch
@@ -73,6 +75,9 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
                     DrawerItem("预警中心", Icons.Default.Warning, currentPage == "alert") {
                         currentPage = "alert"; scope.launch { drawerState.close() }
                     }
+                    DrawerItem("文件管理", Icons.Default.Folder, currentPage == "files") {
+                        currentPage = "files"; scope.launch { drawerState.close() }
+                    }
                     DrawerItem("设置", Icons.Default.Settings, currentPage == "settings") {
                         currentPage = "settings"; scope.launch { drawerState.close() }
                     }
@@ -95,6 +100,7 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
                     "dash" -> DashboardScreen()
                     "ha" -> PlaceholderPage("HA 智能联动\n（B13 批次开发中）")
                     "alert" -> AlertCenterScreen()
+                    "files" -> FileBrowserScreen()
                     else -> PlaceholderPage("设置\n（后续批次开发中）")
                 }
             }
