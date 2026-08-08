@@ -46,7 +46,12 @@ jobs:
           tag_name: v${{ env.VERSION }}
           generate_release_notes: true
 
+      - name: 准备 artifact（安全文件名——冒号不兼容 NTFS）
+        run: |
+          mkdir -p /tmp/artifact
+          cp app/build/outputs/apk/debug/*.apk /tmp/artifact/app-debug.apk
+
       - uses: actions/upload-artifact@v4
         with:
           name: app-debug
-          path: app/build/outputs/apk/debug/*.apk
+          path: /tmp/artifact/app-debug.apk
