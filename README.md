@@ -1,5 +1,8 @@
-This repository is for personal development only, and all code within it is AI-generated.
+# LING OS App（Flutter 重写中）
 
-##Repository Description:
+旧版 Compose 代码已归档至 legacy-compose 分支（tag: legacy-compose-1.0.0.2）
 
-An Android app for connecting to LINGOS.
+- main: Flutter 重写（开发中——全部完成后统一编译上传）
+- legacy-compose: 旧 Android Compose 实现（参考/冻结）
+
+协议依据：LINGOS_PROTOCOL_v3.md
