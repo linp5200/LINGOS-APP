@@ -58,6 +58,7 @@ class ConnectionManager @Inject constructor(@ApplicationContext private val cont
 
     private val writeLock = Any()
     private var lastError: String? = null
+    @Volatile private var authenticated = false   // 认证完成标志（认证前禁止发心跳）
 
     /** 最近一次错误详情（供 UI 显示/排查） */
     fun getLastError(): String? = lastError
@@ -119,8 +120,9 @@ class ConnectionManager @Inject constructor(@ApplicationContext private val cont
                 if (!readFully(input, payload)) break
                 handleFrame(type, payload)
             } catch (e: SocketTimeoutException) {
-                // 读超时：保活心跳
-                sendHeartbeat()
+                // 【修复】读超时：仅认证完成后才发保活心跳
+                // （认证前发心跳(0x0008)会触发服务端 first_packet 检查拒绝——首包必须 AUTH_CODE）
+                if (authenticated) sendHeartbeat()
             } catch (e: Exception) {
                 if (running.get()) Logger.e(TAG, "Receive error", e)
                 break
@@ -155,6 +157,7 @@ class ConnectionManager @Inject constructor(@ApplicationContext private val cont
                 }
             }
             MessageType.CONNECTION_RESPONSE.value.toInt() -> {
+                authenticated = true   // 认证完成——此后才允许发送心跳
                 if (text.contains("\"ok\"")) {
                     sessionId = extractSessionId(text)
                     token = extractToken(text)
@@ -288,6 +291,7 @@ class ConnectionManager @Inject constructor(@ApplicationContext private val cont
     }
 
     fun disconnect() {
+        authenticated = false
         running.set(false)
         try { socket?.close() } catch (_: Exception) {}
         socket = null
