@@ -33,7 +33,7 @@ jobs:
       - name: 提取版本号
         id: version
         run: |
-          VERSION=$(grep -oP 'versionName\s*=\s*"\K[^"]+' app/build.gradle.kts)
+          VERSION=$(grep -oP 'val appVersion = "\K[^"]+' app/build.gradle.kts)
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "版本: $VERSION"
 
