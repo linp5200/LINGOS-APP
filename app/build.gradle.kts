@@ -5,6 +5,11 @@ plugins {
     id("com.google.dagger.hilt.android") version "2.48"
 }
 
+// ===== 版本参数（发版时同步更新） =====
+val appVersion = "1.0.0.2"                 // App 版本
+val serverVersion = "5.0.0.0-rc0.5"        // 配套服务端版本
+val lingVersionRange = "5.0.0.0~5.1.0.0"   // 支持主机版本范围（最低~最高）
+
 android {
     namespace = "com.lingos.app"
     compileSdk = 34
@@ -14,7 +19,7 @@ android {
         minSdk = 24
         targetSdk = 34
         versionCode = 5
-        versionName = "1.0.0.2"
+        versionName = appVersion
     }
 
     buildFeatures {
@@ -33,6 +38,15 @@ android {
 
     kotlinOptions {
         jvmTarget = "17"
+    }
+
+    // ===== 安装包命名规范：<abi>_appV:<appV>_serverV:<serverV>_LINGV:(<min>~<max>).apk =====
+    applicationVariants.all {
+        outputs.all {
+            val output = this as com.android.build.gradle.internal.api.BaseVariantOutputImpl
+            output.outputFileName =
+                "all_appV:${appVersion}_serverV:${serverVersion}_LINGV:(${lingVersionRange}).apk"
+        }
     }
 }
 
