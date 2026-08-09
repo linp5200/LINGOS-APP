@@ -65,9 +65,17 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
       final port = int.tryParse(_portCtrl.text.trim()) ?? 2937;
       final t = _mgr.tcp?.token ?? '';
       if (t.isNotEmpty) {
-        await _mgr.connectWsAndSave(host, port, t);
+        setState(() => _status = '认证成功——正在连接 WS（${host}:${port + 2}）...');
+        final wsOk = await _mgr.connectWsAndSave(host, port, t);
+        if (!mounted) return;
+        if (wsOk) {
+          setState(() => _status = '✅ 已连接（WS 就绪）');
+        } else {
+          setState(() => _status = '⚠️ WS 连接失败：${_mgr.lastError ?? '未知'}（命令将走 TCP 兜底）');
+        }
+        await Future.delayed(const Duration(milliseconds: 600));
+        if (!mounted) return;
       }
-      if (!mounted) return;
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (_) => const HomeShell()),
       );

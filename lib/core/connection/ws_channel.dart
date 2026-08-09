@@ -19,6 +19,8 @@ class WsChannel implements ConnectChannel {
   Timer? _heartbeat;
   ChannelListener? _listener;
   bool _connected = false;
+  String? lastError;
+  Timer? _handshakeTimeout;
 
   final String deviceId;
 
@@ -37,21 +39,26 @@ class WsChannel implements ConnectChannel {
 
   @override
   Future<bool> connect() async {
+    lastError = null;
     try {
       final channel = WebSocketChannel.connect(Uri.parse(url));
       _channel = channel;
       _sub = channel.stream.listen(
         (data) {
+          confirmHandshake();
           if (data is String) {
             _listener?.onData(data);
           }
         },
         onError: (e) {
-          _listener?.onError('WS 错误: $e');
+          lastError = 'WS 连接错误: $e';
+          _listener?.onError(lastError!);
           _connected = false;
         },
         onDone: () {
-          _listener?.onDisconnected('WS 连接关闭');
+          if (_connected) {
+            _listener?.onDisconnected('WS 连接关闭');
+          }
           _connected = false;
         },
         cancelOnError: true,
@@ -59,12 +66,28 @@ class WsChannel implements ConnectChannel {
       // 首帧 token 认证（协议 v3——带 device_id 设备绑定）
       channel.sink.add(jsonEncode({'type': 'auth', 'token': token, 'device_id': deviceId}));
       _connected = true;
+      // 【诊断】握手超时检测（5s——失败则报错——不再静默）
+      _handshakeTimeout?.cancel();
+      _handshakeTimeout = Timer(const Duration(seconds: 5), () {
+        if (_connected && _channel != null) {
+          lastError = 'WS 握手超时（5s 无确认——服务端未响应/地址错误）';
+          _listener?.onError(lastError!);
+          _connected = false;
+        }
+      });
       _startHeartbeat();
       return true;
     } catch (e) {
-      _listener?.onError('WS 连接失败: $e');
+      lastError = 'WS 连接异常: $e';
+      _listener?.onError(lastError!);
       return false;
     }
+  }
+
+  /// 确认握手完成（收到任意服务端帧——取消超时）
+  void confirmHandshake() {
+    _handshakeTimeout?.cancel();
+    _handshakeTimeout = null;
   }
 
   void _startHeartbeat() {
@@ -75,6 +98,9 @@ class WsChannel implements ConnectChannel {
       }
     });
   }
+
+  /// 认证状态（收到 auth_ok 置 true——App 判断 WS 可用）
+  bool authenticated = false;
 
   @override
   Future<void> send(String data) async {

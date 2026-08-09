@@ -89,6 +89,8 @@ class ConnectionManager implements ChannelListener {
     if (ok && wsToken.isNotEmpty) {
       await store.saveToken(wsToken);
       await store.saveHost(host, port);
+    } else if (!ok) {
+      lastError = ws!.lastError ?? 'WS 连接失败';
     }
     return ok;
   }
