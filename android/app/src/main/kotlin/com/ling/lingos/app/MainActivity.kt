@@ -1,4 +1,4 @@
-package com.lingos.lingos_app
+package com.ling.lingos.app
 
 import io.flutter.embedding.android.FlutterActivity
 
