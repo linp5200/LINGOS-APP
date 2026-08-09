@@ -31,18 +31,18 @@ jobs:
       - name: 编译 Release APK
         run: flutter build apk --release
 
-      - name: 提取版本号（先生四段式——非 pubspec semver）
+      - name: 提取版本号（SemVer——pubspec）
         id: version
         run: |
-          VERSION=$(echo "all_appV:0.1.0_serverV:5.1.0.0-rc0.1_LINGV:(5.0.0.0~5.1.0.0).apk" | grep -oP 'appV:\K[^ ]+(?=_serverV)')
+          VERSION=$(grep -oP '^version:\s*\K[^+\s]+' pubspec.yaml)
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "版本: $VERSION"
 
-      - name: 重命名 APK（先生命名规范）
+      - name: 重命名 APK（先生格式：<平台>_beta_<版本>.apk）
         run: |
           mkdir -p /tmp/release
-          cp build/app/outputs/flutter-apk/app-release.apk \
-            "/tmp/release/all_appV:0.1.0_serverV:5.1.0.0-rc0.1_LINGV:(5.0.0.0~5.1.0.0).apk"
+          V=$(grep -oP '^version:\s*\K[^+\s]+' pubspec.yaml)
+          cp build/app/outputs/flutter-apk/app-release.apk "/tmp/release/android_beta_${V}.apk"
           cp build/app/outputs/flutter-apk/app-release.apk /tmp/release/app-release-safe.apk
 
       - name: 发布到 GitHub Release
@@ -78,7 +78,8 @@ jobs:
       - name: 打包
         run: |
           mkdir -p /tmp/linux_out
-          tar -czf /tmp/linux_out/lingos_app_linux.tar.gz -C build/linux/x64/release/bundle .
+          V=$(grep -oP '^version:\s*\K[^+\s]+' pubspec.yaml)
+          tar -czf /tmp/linux_out/linux_beta_${V}.tar.gz -C build/linux/x64/release/bundle .
       - uses: actions/upload-artifact@v4
         with:
           name: lingos-linux
@@ -101,9 +102,10 @@ jobs:
       - name: 打包
         shell: powershell
         run: |
-          Compress-Archive -Path build/windows/x64/runner/Release/* -DestinationPath lingos_app_windows.zip
+          $V = Select-String -Path pubspec.yaml -Pattern '^version:\s*(\S+)' | ForEach-Object { $_.Matches[0].Groups[1].Value }
+          Compress-Archive -Path build/windows/x64/runner/Release/* -DestinationPath windows_beta_$V.zip
           mkdir -p /tmp/win_out
-          Move-Item lingos_app_windows.zip /tmp/win_out/
+          Move-Item windows_beta_$V.zip /tmp/win_out/
       - uses: actions/upload-artifact@v4
         with:
           name: lingos-windows
