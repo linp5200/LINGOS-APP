@@ -87,11 +87,14 @@ class ConnectionManager implements ChannelListener {
   Future<bool> connectWsAndSave(String host, int port, String wsToken) async {
     token = wsToken;
     final showTok = wsToken.isEmpty ? '【空！】' : '${wsToken.substring(0, wsToken.length > 8 ? 8 : wsToken.length)}...';
-    appLog('ConnectionManager', 'connectWsAndSave: host=$host tcpPort=$port wsPort=${port + 2} token=$showTok');
     final store = AppStore();
     final deviceId = await store.getDeviceId();
     final wsPort = port + 2;
-    ws = WsChannel(url: 'ws://$host:$wsPort', token: wsToken, deviceId: deviceId);
+    // 【先生决策】明文开关：默认加密（wss）——用户开明文才用 ws://
+    final allowPlain = await store.getAllowPlaintext();
+    final scheme = allowPlain ? 'ws' : 'wss';
+    appLog('ConnectionManager', 'connectWsAndSave: host=$host wsPort=$wsPort 协议=${allowPlain ? "明文(ws)" : "加密(wss)"} token=$showTok');
+    ws = WsChannel(url: '$scheme://$host:$wsPort', token: wsToken, deviceId: deviceId);
     ws!.setListener(this);
     final ok = await ws!.connect();
     appLog('ConnectionManager', 'WS 连接结果: ${ok ? "成功" : "失败(${ws!.lastError})"}');

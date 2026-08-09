@@ -1,0 +1,74 @@
+/// APP 设定（先生要求子菜单——明文传输开关——默认加密）
+library;
+
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../core/storage/app_store.dart';
+import '../../core/theme/app_theme.dart';
+
+class AppSettingsScreen extends ConsumerStatefulWidget {
+  const AppSettingsScreen({super.key});
+
+  @override
+  ConsumerState<AppSettingsScreen> createState() => _AppSettingsScreenState();
+}
+
+class _AppSettingsScreenState extends ConsumerState<AppSettingsScreen> {
+  final _store = AppStore();
+  bool _allowPlaintext = false;
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    final v = await _store.getAllowPlaintext();
+    if (!mounted) return;
+    setState(() {
+      _allowPlaintext = v;
+      _loading = false;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('APP 设定')),
+      body: _loading
+          ? const Center(child: CircularProgressIndicator())
+          : ListView(
+              padding: const EdgeInsets.all(16),
+              children: [
+                SwitchListTile(
+                  value: _allowPlaintext,
+                  onChanged: (v) async {
+                    setState(() => _allowPlaintext = v);
+                    await _store.saveAllowPlaintext(v);
+                    if (!context.mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('明文传输开关已更新')),
+                    );
+                  },
+                  title: const Text('允许明文传输'),
+                  subtitle: const Text(
+                    '加密模式默认（wss://）——本地服务端无 TLS 时需开启明文（ws://）',
+                    style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                  ),
+                ),
+                const Divider(),
+                const Padding(
+                  padding: EdgeInsets.all(12),
+                  child: Text(
+                    '安全说明：明文传输（ws://）不加密——仅用于本地/信任网络。默认关闭（加密优先——先生隐私原则）。',
+                    style: TextStyle(fontSize: 12, color: AppColors.textSecondary, height: 1.5),
+                  ),
+                ),
+              ],
+            ),
+    );
+  }
+}

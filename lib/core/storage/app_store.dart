@@ -15,6 +15,7 @@ class AppStore {
   static const _kPort = 'port';
   static const _kSessionId = 'session_id';
   static const _kDeviceId = 'device_id';
+  static const _kAllowPlaintext = 'allow_plaintext';
 
   final _secure = const FlutterSecureStorage(
     aOptions: AndroidOptions(encryptedSharedPreferences: true),
@@ -62,6 +63,17 @@ class AppStore {
   Future<String?> getSessionId() async {
     final sp = await SharedPreferences.getInstance();
     return sp.getString(_kSessionId);
+  }
+
+  // ---------- 明文传输开关（先生决策：默认加密——明文关） ----------
+  Future<void> saveAllowPlaintext(bool allow) async {
+    final sp = await SharedPreferences.getInstance();
+    await sp.setBool(_kAllowPlaintext, allow);
+  }
+
+  Future<bool> getAllowPlaintext() async {
+    final sp = await SharedPreferences.getInstance();
+    return sp.getBool(_kAllowPlaintext) ?? false; // 默认 false = 加密（不允许明文）
   }
 
   // ---------- 设备绑定（UUID 持久） ----------

@@ -41,7 +41,7 @@ class AppLogger {
 
   /// 导出日志（复制到剪贴板/分享——由 UI 调用）
   String exportText() {
-    final header = '=== LING OS App 日志 ===\n版本: 0.1.1\n时间: ${DateTime.now()}\n\n';
+    final header = '=== LING OS App 日志 ===\n版本: 0.1.2\n时间: ${DateTime.now()}\n\n';
     return header + logText;
   }
 
