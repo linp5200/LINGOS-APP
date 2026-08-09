@@ -65,8 +65,8 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
       final port = int.tryParse(_portCtrl.text.trim()) ?? 2937;
       final t = _mgr.tcp?.token ?? '';
       if (t.isNotEmpty) {
-        setState(() => _status = '认证成功——正在连接 WS（${host}:$port2）...');
         final wsPort = port + 2;
+        setState(() => _status = '认证成功——正在连接 WS（$host:$wsPort）...');
         final wsOk = await _mgr.connectWsAndSave(host, port, t);
         if (!mounted) return;
         if (wsOk) {
