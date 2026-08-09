@@ -141,13 +141,16 @@ class ConnectionManager implements ChannelListener {
   void onData(String line) {
     // 【方案B】token 事件驱动：connection_ok（token 已到）→ 自动连 WS
     if (line.contains('"type":"connection_ok"')) {
-      final t = token;
+      // 【修复】token 在 TcpChannel（tcp.token）——Manager.token 未同步
+      final t = tcp?.token ?? '';
       final host = _tcpHost;
       final port = _tcpPort;
       if (t.isNotEmpty && host != null && port != null &&
           (ws == null || !ws!.isConnected)) {
-        appLog('ConnectionManager', 'token 已到——自动连 WS（$host:${port + 2}）');
+        appLog('ConnectionManager', 'token 已到（tcp.token）——自动连 WS（$host:${port + 2}）');
         connectWsAndSave(host, port, t);
+      } else {
+        appLog('ConnectionManager', '自动连 WS 条件不满足: token=${t.isEmpty ? "空" : "有"} host=$host port=$port ws已连=${ws?.isConnected ?? false}');
       }
     }
     _eventController.add(line);
