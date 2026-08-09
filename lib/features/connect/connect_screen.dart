@@ -46,7 +46,7 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
   }
 
   Future<void> _submitAuth() async {
-    final ok = await _mgr.sendAuthCode(_authCtrl.text.trim());
+    final ok = await _mgr.sendAuthCode(_authCtrl.text.trim().toUpperCase());
     if (!mounted) return;
     setState(() {
       _waitingAuth = false;
@@ -56,7 +56,7 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
   }
 
   Future<void> _submitConnCode() async {
-    final ok = await _mgr.sendConnectionCode(_connCtrl.text.trim());
+    final ok = await _mgr.sendConnectionCode(_connCtrl.text.trim().toUpperCase());
     if (!mounted) return;
     if (ok) {
       _mgr.startHeartbeat();
@@ -121,6 +121,13 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
                   if (_waitingAuth) ...[
                     TextField(
                       controller: _authCtrl,
+                      textCapitalization: TextCapitalization.characters,
+                      onChanged: (v) {
+                        final u = v.toUpperCase();
+                        if (u != v) {
+                          _authCtrl.value = _authCtrl.value.copyWith(text: u, selection: TextSelection.collapsed(offset: u.length));
+                        }
+                      },
                       decoration: const InputDecoration(
                         labelText: '验证码（6 位——终端黄色显示）',
                         prefixIcon: Icon(Icons.password, size: 20),
@@ -136,6 +143,13 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
                   if (_waitingConnCode) ...[
                     TextField(
                       controller: _connCtrl,
+                      textCapitalization: TextCapitalization.characters,
+                      onChanged: (v) {
+                        final u = v.toUpperCase();
+                        if (u != v) {
+                          _connCtrl.value = _connCtrl.value.copyWith(text: u, selection: TextSelection.collapsed(offset: u.length));
+                        }
+                      },
                       decoration: const InputDecoration(
                         labelText: '连接码（XXXX-XXXX-XXXX）',
                         prefixIcon: Icon(Icons.vpn_key, size: 20),
