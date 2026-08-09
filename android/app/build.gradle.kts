@@ -25,11 +25,19 @@ android {
         versionName = flutter.versionName
     }
 
+    // 【正式签名】统一 release 签名（可覆盖安装——先生决策 A）
+    signingConfigs {
+        create("release") {
+            storeFile = file("../../lingos-release.jks")
+            storePassword = "lingos2026"
+            keyAlias = "lingos"
+            keyPassword = "lingos2026"
+        }
+    }
+
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.getByName("release")
         }
     }
 }
