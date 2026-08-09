@@ -1,0 +1,114 @@
+/// 连接管理器（协议 v3——认证状态机 + 双通道编排 + 会话管理）
+library;
+
+import 'dart:async';
+import 'dart:convert';
+
+import 'channel.dart';
+import 'tcp_channel.dart';
+import 'ws_channel.dart';
+
+enum ConnState { idle, connecting, waitingAuth, waitingConnCode, authenticated, error, disconnected }
+
+class ConnectionManager implements ChannelListener {
+  TcpChannel? tcp;
+  WsChannel? ws;
+
+  ConnState state = ConnState.idle;
+  String? lastError;
+  String token = '';
+
+  final _eventController = StreamController<String>.broadcast();
+  Stream<String> get events => _eventController.stream;
+
+  /// 连接 + 等待验证码（TCP 主通道——认证流程）
+  Future<bool> connectTcp(String host, int port) async {
+    state = ConnState.connecting;
+    tcp = TcpChannel(host: host, port: port);
+    tcp!.setListener(this);
+    final ok = await tcp!.connect();
+    if (ok) {
+      state = ConnState.waitingAuth;
+    } else {
+      state = ConnState.error;
+      lastError = tcp == null ? '连接失败' : '连接失败（见错误）';
+    }
+    return ok;
+  }
+
+  /// 发送验证码（两步认证第一步）
+  Future<bool> sendAuthCode(String code) async {
+    if (tcp == null || !tcp!.isConnected) {
+      lastError = '未连接——请先建立 TCP 连接';
+      state = ConnState.error;
+      return false;
+    }
+    return tcp!.sendFrame(0x0001, code);
+  }
+
+  /// 发送连接码（两步认证第二步——服务端签发 token）
+  Future<bool> sendConnectionCode(String code) async {
+    if (tcp == null || !tcp!.isConnected) return false;
+    return tcp!.sendFrame(0x0003, code);
+  }
+
+  /// 建立 WS 对话通道（token 直连——协议 v3）
+  Future<bool> connectWs(String host, int port, String wsToken) async {
+    token = wsToken;
+    ws = WsChannel(url: 'ws://$host:$port', token: wsToken);
+    ws!.setListener(this);
+    return ws!.connect();
+  }
+
+  /// 发送命令（TCP 主通道——COMMAND 帧）
+  Future<bool> sendCommand(Map<String, dynamic> cmd) async {
+    if (tcp == null || !tcp!.isConnected) return false;
+    return tcp!.sendFrame(0x0005, jsonEncode(cmd));
+  }
+
+  /// 发送对话（WS 通道——chat 事件）
+  Future<void> sendChat(String content, {String sessionId = 'default'}) async {
+    if (ws != null && ws!.isConnected) {
+      await ws!.send(jsonEncode({
+        'type': 'chat',
+        'content': content,
+        'session_id': sessionId,
+      }));
+    } else if (tcp != null && tcp!.isConnected) {
+      await sendCommand({'cmd': 'nook_ask', 'prompt': content, 'session_id': sessionId});
+    }
+  }
+
+  void startHeartbeat() {
+    tcp?.startHeartbeat(30);
+  }
+
+  @override
+  void onData(String line) {
+    _eventController.add(line);
+  }
+
+  @override
+  void onDisconnected(String reason) {
+    lastError = reason;
+    state = ConnState.disconnected;
+    _eventController.add('{"type":"disconnected","reason":"$reason"}');
+  }
+
+  @override
+  void onError(String message) {
+    lastError = message;
+    state = ConnState.error;
+    _eventController.add('{"type":"conn_error","message":"$message"}');
+  }
+
+  Future<void> disconnect() async {
+    await ws?.disconnect();
+    await tcp?.disconnect();
+    state = ConnState.disconnected;
+  }
+
+  void dispose() {
+    _eventController.close();
+  }
+}
