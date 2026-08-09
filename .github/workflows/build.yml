@@ -58,3 +58,53 @@ jobs:
         with:
           name: app-release
           path: /tmp/release/app-release-safe.apk
+
+  build_linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: 设置 Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.44.9'
+          channel: 'stable'
+          cache: true
+      - name: 安装 Linux 构建依赖
+        run: sudo apt-get update && sudo apt-get install -y libgtk-3-dev ninja-build pkg-config liblzma-dev
+      - name: 获取依赖
+        run: flutter pub get
+      - name: 构建 Linux
+        run: flutter build linux --release
+      - name: 打包
+        run: |
+          mkdir -p /tmp/linux_out
+          tar -czf /tmp/linux_out/lingos_app_linux.tar.gz -C build/linux/x64/release/bundle .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lingos-linux
+          path: /tmp/linux_out/lingos_app_linux.tar.gz
+
+  build_windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: 设置 Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.44.9'
+          channel: 'stable'
+          cache: true
+      - name: 获取依赖
+        run: flutter pub get
+      - name: 构建 Windows
+        run: flutter build windows --release
+      - name: 打包
+        shell: powershell
+        run: |
+          Compress-Archive -Path build/windows/x64/runner/Release/* -DestinationPath lingos_app_windows.zip
+          mkdir -p /tmp/win_out
+          Move-Item lingos_app_windows.zip /tmp/win_out/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lingos-windows
+          path: /tmp/win_out/lingos_app_windows.zip
