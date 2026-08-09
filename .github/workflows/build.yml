@@ -31,10 +31,10 @@ jobs:
       - name: 编译 Release APK
         run: flutter build apk --release
 
-      - name: 提取版本号
+      - name: 提取版本号（先生四段式——非 pubspec semver）
         id: version
         run: |
-          VERSION=$(grep -oP 'version:\s*\K[^\s]+' pubspec.yaml)
+          VERSION=$(echo "all_appV:2.0.0.2_serverV:5.1.0.0-rc0.1_LINGV:(5.0.0.0~5.1.0.0).apk" | grep -oP 'appV:\K[^_]+')
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "版本: $VERSION"
 
