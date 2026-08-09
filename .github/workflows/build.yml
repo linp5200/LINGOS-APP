@@ -52,7 +52,7 @@ jobs:
           files: /tmp/release/*.apk
           name: LING OS App ${{ env.VERSION }}
           tag_name: v${{ env.VERSION }}
-          generate_release_notes: true
+          generate_release_notes: false
 
       - uses: actions/upload-artifact@v4
         with:
