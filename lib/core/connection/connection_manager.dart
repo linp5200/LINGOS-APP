@@ -6,6 +6,7 @@ import 'dart:convert';
 
 import 'channel.dart';
 import 'tcp_channel.dart';
+import '../storage/app_store.dart';
 import 'ws_channel.dart';
 
 enum ConnState { idle, connecting, waitingAuth, waitingConnCode, authenticated, error, disconnected }
@@ -61,10 +62,32 @@ class ConnectionManager implements ChannelListener {
     return ws!.connect();
   }
 
-  /// 发送命令（TCP 主通道——COMMAND 帧）
+  /// 发送命令（先生决策：走 WS 命令事件 → Python 直通——Web/App 统一）
   Future<bool> sendCommand(Map<String, dynamic> cmd) async {
-    if (tcp == null || !tcp!.isConnected) return false;
-    return tcp!.sendFrame(0x0005, jsonEncode(cmd));
+    // WS 优先（认证后 App 连 WS——token 直连——命令走 WS）
+    if (ws != null && ws!.isConnected) {
+      await ws!.send(jsonEncode({'type': 'command', 'cmd': cmd['cmd'], 'params': cmd}));
+      return true;
+    }
+    // 兜底：TCP COMMAND 帧（C 端仅支持 ping/system_status 等）
+    if (tcp != null && tcp!.isConnected) {
+      return tcp!.sendFrame(0x0005, jsonEncode({'command': cmd['cmd'], ...cmd}));
+    }
+    return false;
+  }
+
+  /// 建立 WS 对话通道（token 直连——协议 v3）并保存 token
+  Future<bool> connectWsAndSave(String host, int port, String wsToken) async {
+    token = wsToken;
+    ws = WsChannel(url: 'ws://$host:$port', token: wsToken);
+    ws!.setListener(this);
+    final ok = await ws!.connect();
+    if (ok && wsToken.isNotEmpty) {
+      final store = AppStore();
+      await store.saveToken(wsToken);
+      await store.saveHost(host, port);
+    }
+    return ok;
   }
 
   /// 发送对话（WS 通道——chat 事件）

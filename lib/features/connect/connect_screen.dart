@@ -60,11 +60,12 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
     if (!mounted) return;
     if (ok) {
       _mgr.startHeartbeat();
-      // 保存 token 持久化（协议 v3——WS token 直连复用）
-      final store = AppStore();
-      if (_mgr.tcp?.token.isNotEmpty ?? false) {
-        await store.saveToken(_mgr.tcp!.token);
-        await store.saveHost(_hostCtrl.text.trim(), int.tryParse(_portCtrl.text.trim()) ?? 2937);
+      // 认证成功：连 WS（token 直连）并持久化（先生决策：退出恢复）
+      final host = _hostCtrl.text.trim();
+      final port = int.tryParse(_portCtrl.text.trim()) ?? 2937;
+      final t = _mgr.tcp?.token ?? '';
+      if (t.isNotEmpty) {
+        await _mgr.connectWsAndSave(host, port, t);
       }
       if (!mounted) return;
       Navigator.of(context).pushReplacement(
@@ -72,6 +73,36 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
       );
     } else {
       setState(() => _status = '连接码发送失败');
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _autoResume();
+  }
+
+  /// 【先生决策】token 自动恢复：重进 App → 持久 token → WS 直连免认证
+  Future<void> _autoResume() async {
+    final store = AppStore();
+    final token = await store.getToken();
+    final host = await store.getHost();
+    final port = await store.getPort();
+    if (token == null || token.isEmpty || host == null || port == null) return;
+    if (!mounted) return;
+    setState(() {
+      _status = '检测到已保存会话——自动恢复连接...';
+    });
+    final ok = await _mgr.connectWsAndSave(host, port, token);
+    if (!mounted) return;
+    if (ok) {
+      setState(() => _status = '✅ 会话已恢复（WS token 直连）');
+      await Future.delayed(const Duration(milliseconds: 400));
+      if (!mounted) return;
+      Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const HomeShell()));
+    } else {
+      setState(() => _status = 'token 失效——请重新认证');
+      await _mgr.disconnect();
     }
   }
 
