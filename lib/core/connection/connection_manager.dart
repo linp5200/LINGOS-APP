@@ -79,15 +79,32 @@ class ConnectionManager implements ChannelListener {
   /// 建立 WS 对话通道（token 直连——协议 v3）并保存 token
   Future<bool> connectWsAndSave(String host, int port, String wsToken) async {
     token = wsToken;
-    ws = WsChannel(url: 'ws://$host:$port', token: wsToken);
+    final store = AppStore();
+    final deviceId = await store.getDeviceId();
+    ws = WsChannel(url: 'ws://$host:$port', token: wsToken, deviceId: deviceId);
     ws!.setListener(this);
     final ok = await ws!.connect();
     if (ok && wsToken.isNotEmpty) {
-      final store = AppStore();
       await store.saveToken(wsToken);
       await store.saveHost(host, port);
     }
     return ok;
+  }
+
+  /// 注销（清除本地 + 通知服务端吊销——先生决策安全）
+  Future<void> logout() async {
+    try {
+      if (ws != null && ws!.isConnected) {
+        final store = AppStore();
+        final deviceId = await store.getDeviceId();
+        await ws!.send(jsonEncode({'type': 'logout', 'device_id': deviceId}));
+      }
+    } catch (_) {}
+    await ws?.disconnect();
+    await tcp?.disconnect();
+    final store = AppStore();
+    await store.logout();
+    state = ConnState.disconnected;
   }
 
   /// 发送对话（WS 通道——chat 事件）

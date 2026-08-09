@@ -1,25 +1,43 @@
-/// 本地存储（shared_preferences——token/主机/设置持久化——协议 v3）
-/// 说明：小数据用 SP（无需 codegen）；会话历史/缓存后续用 Isar
+/// 本地存储（安全分层——先生决策：token 加密 + 设备绑定）
+/// token → flutter_secure_storage（Android Keystore 加密）
+/// host/port/sessionId → shared_preferences（非敏感）
+/// deviceId → 持久 UUID（设备绑定——服务端 token↔device）
 library;
 
+import 'dart:math';
+
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AppStore {
-  static const _kToken = 'token';
+  static const _secToken = 'lingos_token';
   static const _kHost = 'host';
   static const _kPort = 'port';
   static const _kSessionId = 'session_id';
+  static const _kDeviceId = 'device_id';
 
+  final _secure = const FlutterSecureStorage(
+    aOptions: AndroidOptions(encryptedSharedPreferences: true),
+  );
+
+  // ---------- token（加密存储） ----------
   Future<void> saveToken(String token) async {
-    final sp = await SharedPreferences.getInstance();
-    await sp.setString(_kToken, token);
+    await _secure.write(key: _secToken, value: token);
   }
 
   Future<String?> getToken() async {
-    final sp = await SharedPreferences.getInstance();
-    return sp.getString(_kToken);
+    try {
+      return await _secure.read(key: _secToken);
+    } catch (_) {
+      return null;
+    }
   }
 
+  Future<void> clearToken() async {
+    await _secure.delete(key: _secToken);
+  }
+
+  // ---------- 主机/端口（非敏感——SP） ----------
   Future<void> saveHost(String host, int port) async {
     final sp = await SharedPreferences.getInstance();
     await sp.setString(_kHost, host);
@@ -46,8 +64,36 @@ class AppStore {
     return sp.getString(_kSessionId);
   }
 
-  Future<void> clear() async {
+  // ---------- 设备绑定（UUID 持久） ----------
+  Future<String> getDeviceId() async {
     final sp = await SharedPreferences.getInstance();
-    await sp.clear();
+    var id = sp.getString(_kDeviceId);
+    if (id == null || id.isEmpty) {
+      id = _generateUuid();
+      await sp.setString(_kDeviceId, id);
+    }
+    return id;
+  }
+
+  String _generateUuid() {
+    final rnd = Random();
+    final bytes = List<int>.generate(16, (_) => rnd.nextInt(256));
+    bytes[6] = (bytes[6] & 0x0F) | 0x40;
+    bytes[8] = (bytes[8] & 0x3F) | 0x80;
+    final hex = bytes.map((b) => b.toRadixString(16).padLeft(2, '0')).join();
+    return '${hex.substring(0, 8)}-${hex.substring(8, 12)}-${hex.substring(12, 16)}-${hex.substring(16, 20)}-${hex.substring(20)}';
+  }
+
+  // ---------- 注销（完整清除） ----------
+  Future<void> logout() async {
+    await _secure.deleteAll();
+    final sp = await SharedPreferences.getInstance();
+    await sp.remove(_kHost);
+    await sp.remove(_kPort);
+    await sp.remove(_kSessionId);
+  }
+
+  Future<void> clear() async {
+    await logout();
   }
 }

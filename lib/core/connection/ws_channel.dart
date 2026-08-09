@@ -20,9 +20,12 @@ class WsChannel implements ConnectChannel {
   ChannelListener? _listener;
   bool _connected = false;
 
+  final String deviceId;
+
   WsChannel({
     required this.url,
     required this.token,
+    this.deviceId = '',
     this.heartbeatIntervalSeconds = 30,
   });
 
@@ -53,8 +56,8 @@ class WsChannel implements ConnectChannel {
         },
         cancelOnError: true,
       );
-      // 首帧 token 认证（协议 v3）
-      channel.sink.add(jsonEncode({'type': 'auth', 'token': token}));
+      // 首帧 token 认证（协议 v3——带 device_id 设备绑定）
+      channel.sink.add(jsonEncode({'type': 'auth', 'token': token, 'device_id': deviceId}));
       _connected = true;
       _startHeartbeat();
       return true;

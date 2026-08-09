@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/providers.dart';
+import '../connect/connect_screen.dart';
 import '../../core/storage/app_store.dart';
 import '../../core/theme/app_theme.dart';
 
@@ -71,14 +72,29 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           const Divider(),
           _section('操作'),
           ListTile(
-            leading: const Icon(Icons.delete_sweep_outlined, size: 20),
-            title: const Text('清除本地数据'),
-            subtitle: const Text('Token/主机/会话记录', style: TextStyle(color: AppColors.textSecondary)),
+            leading: const Icon(Icons.logout, size: 20, color: AppColors.brandRed),
+            title: const Text('退出登录', style: TextStyle(color: AppColors.brandRed)),
+            subtitle: const Text('清除 token（加密存储）+ 吊销 + 设备解绑', style: TextStyle(color: AppColors.textSecondary)),
             onTap: () async {
-              await _store.clear();
-              await _load();
-              if (!context.mounted) return;
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('已清除')));
+              final ok = await showDialog<bool>(
+                context: context,
+                builder: (ctx) => AlertDialog(
+                  title: const Text('退出登录'),
+                  content: const Text('将清除本地 token 并吊销服务端会话，需重新认证。确认退出？'),
+                  actions: [
+                    TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('取消')),
+                    FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('退出')),
+                  ],
+                ),
+              );
+              if (ok == true) {
+                await ref.read(connectionProvider).logout();
+                if (!context.mounted) return;
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (_) => const ConnectScreen()),
+                  (r) => false,
+                );
+              }
             },
           ),
         ],

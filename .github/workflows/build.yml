@@ -42,7 +42,7 @@ jobs:
         run: |
           mkdir -p /tmp/release
           cp build/app/outputs/flutter-apk/app-release.apk \
-            "/tmp/release/all_appV:2.0.0.0_serverV:5.1.0.0-rc0.1_LINGV:(5.0.0.0~5.1.0.0).apk"
+            "/tmp/release/all_appV:2.0.0.2_serverV:5.1.0.0-rc0.1_LINGV:(5.0.0.0~5.1.0.0).apk"
           cp build/app/outputs/flutter-apk/app-release.apk /tmp/release/app-release-safe.apk
 
       - name: 发布到 GitHub Release
