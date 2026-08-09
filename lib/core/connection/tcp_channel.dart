@@ -24,6 +24,7 @@ class TcpChannel implements ConnectChannel {
   /// 认证状态
   bool authenticated = false;
   String token = '';
+  String? lastError;
 
   TcpChannel({
     required this.host,
@@ -59,9 +60,24 @@ class TcpChannel implements ConnectChannel {
       );
       return true;
     } catch (e) {
-      _listener?.onError('连接失败: $e');
+      lastError = _errDetail(e);
+      _listener?.onError('连接失败: $lastError');
       return false;
     }
+  }
+
+  /// 错误详情提取（SocketException 等）
+  String _errDetail(Object e) {
+    if (e is SocketException) {
+      final msg = e.message;
+      final osErr = e.osError?.message ?? '';
+      final detail = [msg, osErr].where((s) => s.isNotEmpty).join(' | ');
+      return 'Socket异常: $detail';
+    }
+    if (e is TimeoutException) {
+      return '连接超时（${connectTimeoutMs}ms 无响应）';
+    }
+    return '连接失败: $e';
   }
 
   /// 发送 TLV 帧

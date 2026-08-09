@@ -41,7 +41,7 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
     setState(() {
       _connecting = false;
       _waitingAuth = ok;
-      _status = ok ? '已连接——请输入终端显示的验证码' : '连接失败：${_mgr.lastError ?? '未知错误'}';
+      _status = ok ? '已连接——请输入终端显示的验证码' : '连接失败：${_mgr.lastError ?? '未知错误'}（检查主机 IP/端口/服务是否启动）';
     });
   }
 

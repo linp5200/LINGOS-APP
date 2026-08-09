@@ -31,7 +31,8 @@ class ConnectionManager implements ChannelListener {
       state = ConnState.waitingAuth;
     } else {
       state = ConnState.error;
-      lastError = tcp == null ? '连接失败' : '连接失败（见错误）';
+      lastError = tcp!.lastError ?? '未知错误';
+      _eventController.add('{"type":"conn_error","message":"$lastError"}');
     }
     return ok;
   }
