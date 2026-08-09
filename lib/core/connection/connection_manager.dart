@@ -24,7 +24,12 @@ class ConnectionManager implements ChannelListener {
   Stream<String> get events => _eventController.stream;
 
   /// 连接 + 等待验证码（TCP 主通道——认证流程）
+  String? _tcpHost;
+  int? _tcpPort;
+
   Future<bool> connectTcp(String host, int port) async {
+    _tcpHost = host;
+    _tcpPort = port;
     state = ConnState.connecting;
     tcp = TcpChannel(host: host, port: port);
     tcp!.setListener(this);
@@ -134,6 +139,17 @@ class ConnectionManager implements ChannelListener {
 
   @override
   void onData(String line) {
+    // 【方案B】token 事件驱动：connection_ok（token 已到）→ 自动连 WS
+    if (line.contains('"type":"connection_ok"')) {
+      final t = token;
+      final host = _tcpHost;
+      final port = _tcpPort;
+      if (t.isNotEmpty && host != null && port != null &&
+          (ws == null || !ws!.isConnected)) {
+        appLog('ConnectionManager', 'token 已到——自动连 WS（$host:${port + 2}）');
+        connectWsAndSave(host, port, t);
+      }
+    }
     _eventController.add(line);
   }
 

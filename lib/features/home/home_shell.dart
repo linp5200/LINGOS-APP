@@ -39,7 +39,7 @@ class _HomeShellState extends ConsumerState<HomeShell> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 Text('LING OS', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
-                Text('v2.0.1.0_rc', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                Text('v0.1.0', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
               ],
             ),
           ),

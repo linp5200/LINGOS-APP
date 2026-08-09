@@ -63,25 +63,11 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
     if (!mounted) return;
     if (ok) {
       _mgr.startHeartbeat();
-      // 认证成功：连 WS（token 直连）并持久化（先生决策：退出恢复）
-      final host = _hostCtrl.text.trim();
-      final port = int.tryParse(_portCtrl.text.trim()) ?? 2937;
-      final t = _mgr.tcp?.token ?? '';
-      final showTok = t.isEmpty ? '【空！——根因候选：token 异步未到，跳过 WS 连接】' : '${t.substring(0, t.length > 8 ? 8 : t.length)}...';
-      appLog('Connect', '认证成功——准备连 WS。token=$showTok');
-      if (t.isNotEmpty) {
-        final wsPort = port + 2;
-        setState(() => _status = '认证成功——正在连接 WS（$host:$wsPort）...');
-        final wsOk = await _mgr.connectWsAndSave(host, port, t);
-        if (!mounted) return;
-        if (wsOk) {
-          setState(() => _status = '✅ 已连接（WS 就绪）');
-        } else {
-          setState(() => _status = '⚠️ WS 连接失败：${_mgr.lastError ?? '未知'}（命令将走 TCP 兜底）');
-        }
-        await Future.delayed(const Duration(milliseconds: 600));
-        if (!mounted) return;
-      }
+      // 【方案B】认证成功——WS 由 ConnectionManager 在 token 收到时自动连接
+      appLog('Connect', '认证成功——等待 token 事件自动连 WS');
+      setState(() => _status = '认证成功——正在连接...');
+      await Future.delayed(const Duration(milliseconds: 1500));
+      if (!mounted) return;
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (_) => const HomeShell()),
       );
