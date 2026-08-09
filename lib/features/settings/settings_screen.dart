@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/providers.dart';
 import '../connect/connect_screen.dart';
+import '../logs/logs_screen.dart';
 import '../../core/storage/app_store.dart';
 import '../../core/theme/app_theme.dart';
 
@@ -71,6 +72,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
           const Divider(),
           _section('操作'),
+          ListTile(
+            leading: const Icon(Icons.article_outlined, size: 20),
+            title: const Text('日志'),
+            subtitle: const Text('连接/WS/命令全链路日志——查看与导出', style: TextStyle(color: AppColors.textSecondary)),
+            onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const LogsScreen())),
+          ),
           ListTile(
             leading: const Icon(Icons.logout, size: 20, color: AppColors.brandRed),
             title: const Text('退出登录', style: TextStyle(color: AppColors.brandRed)),

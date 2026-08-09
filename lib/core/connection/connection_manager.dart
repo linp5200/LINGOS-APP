@@ -8,6 +8,7 @@ import 'channel.dart';
 import 'tcp_channel.dart';
 import '../storage/app_store.dart';
 import 'ws_channel.dart';
+import '../logging/app_logger.dart';
 
 enum ConnState { idle, connecting, waitingAuth, waitingConnCode, authenticated, error, disconnected }
 
@@ -80,12 +81,15 @@ class ConnectionManager implements ChannelListener {
   /// 【修复】WS 端口 = TCP 端口 + 2（2937→2939——协议约定——曾用错端口导致 WS 未连）
   Future<bool> connectWsAndSave(String host, int port, String wsToken) async {
     token = wsToken;
+    final showTok = wsToken.isEmpty ? '【空！】' : '${wsToken.substring(0, wsToken.length > 8 ? 8 : wsToken.length)}...';
+    appLog('ConnectionManager', 'connectWsAndSave: host=$host tcpPort=$port wsPort=${port + 2} token=$showTok');
     final store = AppStore();
     final deviceId = await store.getDeviceId();
     final wsPort = port + 2;
     ws = WsChannel(url: 'ws://$host:$wsPort', token: wsToken, deviceId: deviceId);
     ws!.setListener(this);
     final ok = await ws!.connect();
+    appLog('ConnectionManager', 'WS 连接结果: ${ok ? "成功" : "失败(${ws!.lastError})"}');
     if (ok && wsToken.isNotEmpty) {
       await store.saveToken(wsToken);
       await store.saveHost(host, port);

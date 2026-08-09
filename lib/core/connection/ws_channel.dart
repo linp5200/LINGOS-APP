@@ -8,6 +8,7 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:web_socket_channel/status.dart' as ws_status;
 
 import 'channel.dart';
+import '../logging/app_logger.dart';
 
 class WsChannel implements ConnectChannel {
   final String url; // ws://host:2939
@@ -41,17 +42,28 @@ class WsChannel implements ConnectChannel {
   Future<bool> connect() async {
     lastError = null;
     try {
+      final showTok = token.length > 8 ? '${token.substring(0, 8)}...' : token;
+      appLog('WsChannel', '连接 $url（token: $showTok device: $deviceId）');
       final channel = WebSocketChannel.connect(Uri.parse(url));
       _channel = channel;
       _sub = channel.stream.listen(
         (data) {
           confirmHandshake();
           if (data is String) {
+            final showData = data.length > 150 ? '${data.substring(0, 150)}...' : data;
+            appLog('WsChannel', '收到: $showData');
+            // 认证状态检测（auth_ok/auth_error）
+            if (data.contains('auth_ok')) authenticated = true;
+            if (data.contains('auth_error')) {
+              authenticated = false;
+              lastError = data;
+            }
             _listener?.onData(data);
           }
         },
         onError: (e) {
           lastError = 'WS 连接错误: $e';
+          appLog('WsChannel', '错误: $e');
           _listener?.onError(lastError!);
           _connected = false;
         },
@@ -71,6 +83,7 @@ class WsChannel implements ConnectChannel {
       _handshakeTimeout = Timer(const Duration(seconds: 5), () {
         if (_connected && _channel != null) {
           lastError = 'WS 握手超时（5s 无确认——服务端未响应/地址错误）';
+          appLog('WsChannel', '握手超时——服务端未响应');
           _listener?.onError(lastError!);
           _connected = false;
         }

@@ -34,7 +34,7 @@ jobs:
       - name: 提取版本号（先生四段式——非 pubspec semver）
         id: version
         run: |
-          VERSION=$(echo "all_appV:2.0.0.3_serverV:5.1.0.0-rc0.1_LINGV:(5.0.0.0~5.1.0.0).apk" | grep -oP 'appV:\K[^_]+')
+          VERSION=$(echo "all_appV:2.0.1.0_rc_serverV:5.1.0.0-rc0.1_LINGV:(5.0.0.0~5.1.0.0).apk" | grep -oP 'appV:\K[^ ]+(?=_serverV)')
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "版本: $VERSION"
 
@@ -42,7 +42,7 @@ jobs:
         run: |
           mkdir -p /tmp/release
           cp build/app/outputs/flutter-apk/app-release.apk \
-            "/tmp/release/all_appV:2.0.0.3_serverV:5.1.0.0-rc0.1_LINGV:(5.0.0.0~5.1.0.0).apk"
+            "/tmp/release/all_appV:2.0.1.0_rc_serverV:5.1.0.0-rc0.1_LINGV:(5.0.0.0~5.1.0.0).apk"
           cp build/app/outputs/flutter-apk/app-release.apk /tmp/release/app-release-safe.apk
 
       - name: 发布到 GitHub Release

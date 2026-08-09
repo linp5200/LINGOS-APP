@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme/app_theme.dart';
 import '../../core/providers.dart';
+import '../../core/logging/app_logger.dart';
 import '../../core/storage/app_store.dart';
 import '../home/home_shell.dart';
 
@@ -56,7 +57,9 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
   }
 
   Future<void> _submitConnCode() async {
+    appLog('Connect', '提交连接码: ${_connCtrl.text.trim().toUpperCase()}');
     final ok = await _mgr.sendConnectionCode(_connCtrl.text.trim().toUpperCase());
+    appLog('Connect', '连接码发送结果: ${ok ? "成功" : "失败(${_mgr.lastError})"}');
     if (!mounted) return;
     if (ok) {
       _mgr.startHeartbeat();
@@ -64,6 +67,8 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
       final host = _hostCtrl.text.trim();
       final port = int.tryParse(_portCtrl.text.trim()) ?? 2937;
       final t = _mgr.tcp?.token ?? '';
+      final showTok = t.isEmpty ? '【空！——根因候选：token 异步未到，跳过 WS 连接】' : '${t.substring(0, t.length > 8 ? 8 : t.length)}...';
+      appLog('Connect', '认证成功——准备连 WS。token=$showTok');
       if (t.isNotEmpty) {
         final wsPort = port + 2;
         setState(() => _status = '认证成功——正在连接 WS（$host:$wsPort）...');
@@ -97,6 +102,7 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
     final token = await store.getToken();
     final host = await store.getHost();
     final port = await store.getPort();
+    appLog('Connect', '自动恢复检查: token=${token == null ? "无" : token.isEmpty ? "空" : "有"} host=$host port=$port');
     if (token == null || token.isEmpty || host == null || port == null) return;
     if (!mounted) return;
     setState(() {

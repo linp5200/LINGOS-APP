@@ -9,6 +9,7 @@ import 'dart:typed_data';
 
 import '../protocol/tlv.dart';
 import 'channel.dart';
+import '../logging/app_logger.dart';
 
 class TcpChannel implements ConnectChannel {
   final String host;
@@ -45,6 +46,7 @@ class TcpChannel implements ConnectChannel {
           timeout: Duration(milliseconds: connectTimeoutMs));
       _socket = socket;
       _disposed = false;
+      appLog('TcpChannel', '已连接 $host:$port');
 
       socket.listen(
         _onRawData,
@@ -61,6 +63,7 @@ class TcpChannel implements ConnectChannel {
       return true;
     } catch (e) {
       lastError = _errDetail(e);
+      appLog('TcpChannel', '连接失败 $host:$port → ${_errDetail(e)}');
       _listener?.onError('连接失败: $lastError');
       return false;
     }
@@ -87,8 +90,11 @@ class TcpChannel implements ConnectChannel {
       final frame = TlvFrame(type, Uint8List.fromList(utf8.encode(payload)));
       _socket!.add(frame.encode());
       await _socket!.flush();
+      final showPayload = payload.length > 60 ? '${payload.substring(0, 60)}...' : payload;
+      appLog('TcpChannel', '发送帧 0x${type.toRadixString(16).padLeft(4, '0')} payload=$showPayload');
       return true;
     } catch (e) {
+      appLog('TcpChannel', '发送失败: $e');
       _listener?.onError('发送失败: $e');
       return false;
     }
@@ -155,11 +161,14 @@ class TcpChannel implements ConnectChannel {
       if (map is Map<String, dynamic> && map['status'] == 'ok') {
         token = map['token']?.toString() ?? '';
         authenticated = token.isNotEmpty;
+        appLog('TcpChannel', '连接响应 OK——token 收到: ${token.substring(0, token.length > 8 ? 8 : token.length)}... expires_in=${map['expires_in']}');
         _listener?.onData('{"type":"connection_ok","token":"$token"}');
       } else {
+        appLog('TcpChannel', '连接响应失败: $payload');
         _listener?.onData('{"type":"connection_error","data":"$payload"}');
       }
     } catch (_) {
+      appLog('TcpChannel', '连接响应解析失败: $payload');
       _listener?.onData('{"type":"connection_error","data":"$payload"}');
     }
   }
