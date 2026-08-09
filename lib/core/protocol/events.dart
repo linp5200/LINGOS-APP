@@ -42,4 +42,8 @@ class EvtType {
   static const String done = 'done'; // 结束
   static const String authRequest = 'auth_request'; // 授权请求
   static const String authRespOk = 'auth_resp_ok';
+  // 连接层事件（ConnectionManager 发出）
+  static const String connectionOk = 'connection_ok';
+  static const String connError = 'conn_error';
+  static const String disconnected = 'disconnected';
 }

@@ -6,6 +6,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme/app_theme.dart';
 import '../../core/providers.dart';
+import '../../core/storage/app_store.dart';
+import '../home/home_shell.dart';
 
 class ConnectScreen extends ConsumerStatefulWidget {
   const ConnectScreen({super.key});
@@ -58,10 +60,16 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
     if (!mounted) return;
     if (ok) {
       _mgr.startHeartbeat();
-      setState(() {
-        _waitingConnCode = false;
-        _status = '✅ 认证成功——Token 已签发';
-      });
+      // 保存 token 持久化（协议 v3——WS token 直连复用）
+      final store = AppStore();
+      if (_mgr.tcp?.token.isNotEmpty ?? false) {
+        await store.saveToken(_mgr.tcp!.token);
+        await store.saveHost(_hostCtrl.text.trim(), int.tryParse(_portCtrl.text.trim()) ?? 2937);
+      }
+      if (!mounted) return;
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const HomeShell()),
+      );
     } else {
       setState(() => _status = '连接码发送失败');
     }
