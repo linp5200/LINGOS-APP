@@ -77,11 +77,13 @@ class ConnectionManager implements ChannelListener {
   }
 
   /// 建立 WS 对话通道（token 直连——协议 v3）并保存 token
+  /// 【修复】WS 端口 = TCP 端口 + 2（2937→2939——协议约定——曾用错端口导致 WS 未连）
   Future<bool> connectWsAndSave(String host, int port, String wsToken) async {
     token = wsToken;
     final store = AppStore();
     final deviceId = await store.getDeviceId();
-    ws = WsChannel(url: 'ws://$host:$port', token: wsToken, deviceId: deviceId);
+    final wsPort = port + 2;
+    ws = WsChannel(url: 'ws://$host:$wsPort', token: wsToken, deviceId: deviceId);
     ws!.setListener(this);
     final ok = await ws!.connect();
     if (ok && wsToken.isNotEmpty) {

@@ -1,7 +1,7 @@
 name: lingos_app
 description: "LING OS App - Flutter 重写版（协议 v3）"
 publish_to: 'none'
-version: 2.0.0+3  # App 2.0.0.2（versionCode=3）
+version: 2.0.0+4  # App 2.0.0.3（versionCode=4）
 
 environment:
   sdk: '>=3.4.0 <4.0.0'
