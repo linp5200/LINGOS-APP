@@ -35,16 +35,17 @@ class RawWebSocket {
         'Sec-WebSocket-Key: $key\r\n'
         'Sec-WebSocket-Version: 13\r\n'
         '\r\n');
-    // 4. 事件驱动读响应头（完整 \r\n\r\n）
+    // 4/5. 单监听状态机（握手头 → 帧循环——socket 流只监听一次）
     final respCompleter = Completer<Map<String, String>>();
     final acc = <int>[];
-    late StreamSubscription<List<int>> hsub;
-    hsub = socket.listen((data) {
-      acc.addAll(data);
-      final s = utf8.decode(acc, allowMalformed: true);
-      final idx = s.indexOf('\r\n\r\n');
-      if (idx >= 0) {
-        hsub.cancel();
+    var handshakeDone = false;
+    socket.listen((data) {
+      if (!handshakeDone) {
+        acc.addAll(data);
+        final s = utf8.decode(acc, allowMalformed: true);
+        final idx = s.indexOf('\r\n\r\n');
+        if (idx < 0) return; // 头未完整——继续等
+        handshakeDone = true;
         final headStr = s.substring(0, idx);
         final lines = headStr.split('\r\n');
         final statusLine = lines.first;
@@ -56,28 +57,44 @@ class RawWebSocket {
           }
         }
         if (!statusLine.contains('101')) {
-          respCompleter.completeError(StateError('握手失败: $statusLine'));
+          if (!respCompleter.isCompleted) respCompleter.completeError(StateError('握手失败: $statusLine'));
           return;
         }
         // 校验 accept（RFC 6455）
-        final expected = base64Encode(sha1.convert(utf8.encode('$key${'258EAFA5-E914-47DA-95CA-C5AB0DC85B11'}')).bytes);
+        final expected = base64Encode(
+            sha1.convert(utf8.encode('$key${'258EAFA5-E914-47DA-95CA-C5AB0DC85B11'}')).bytes);
         final actual = headers['sec-websocket-accept'] ?? '';
         if (expected != actual) {
-          respCompleter.completeError(StateError('Sec-WebSocket-Accept 校验失败'));
+          if (!respCompleter.isCompleted) {
+            respCompleter.completeError(StateError('Sec-WebSocket-Accept 校验失败'));
+          }
           return;
         }
-        // 剩余数据（可能含首帧）入缓冲
+        // 剩余数据（可能含首帧）入帧缓冲
         final rest = acc.sublist(idx + 4);
         if (rest.isNotEmpty) {
           ws._frameBuffer.addAll(rest);
           ws._processFrames();
         }
-        respCompleter.complete(headers);
+        if (!respCompleter.isCompleted) respCompleter.complete(headers);
+      } else {
+        // 帧数据
+        ws._frameBuffer.addAll(data);
+        ws._processFrames();
       }
     }, onError: (e) {
       if (!respCompleter.isCompleted) respCompleter.completeError(e);
+      ws._errors.add(e);
+      ws._closed = true;
     }, onDone: () {
-      if (!respCompleter.isCompleted) respCompleter.completeError(const SocketException('连接关闭'));
+      if (!respCompleter.isCompleted) {
+        respCompleter.completeError(const SocketException('连接关闭'));
+      }
+      if (!ws._closed) {
+        ws._messages.close();
+        ws._errors.add(const SocketException('连接关闭'));
+        ws._closed = true;
+      }
     });
     try {
       await respCompleter.future;
@@ -85,20 +102,6 @@ class RawWebSocket {
       socket.destroy();
       rethrow;
     }
-    // 5. 帧事件循环
-    socket.listen((data) {
-      ws._frameBuffer.addAll(data);
-      ws._processFrames();
-    }, onError: (e) {
-      ws._errors.add(e);
-      ws._closed = true;
-    }, onDone: () {
-      if (!ws._closed) {
-        ws._messages.close();
-        ws._errors.add(const SocketException('连接关闭'));
-        ws._closed = true;
-      }
-    });
     return ws;
   }
 

@@ -71,6 +71,15 @@ class ConnectionManager implements ChannelListener {
   }
 
   /// 发送命令（先生决策：走 WS 命令事件 → Python 直通——Web/App 统一）
+  /// 【先生要求】连接成功自动同步核心数据（system_info + session_list——仪表盘/会话页）
+  void _autoSync() {
+    Future.delayed(const Duration(milliseconds: 500), () async {
+      appLog('ConnectionManager', '自动同步核心数据（system_info + session_list）');
+      await sendCommand({'cmd': 'system_info'});
+      await sendCommand({'cmd': 'session_list'});
+    });
+  }
+
   Future<bool> sendCommand(Map<String, dynamic> cmd) async {
     // WS 优先（认证后 App 连 WS——token 直连——命令走 WS）
     if (ws != null && ws!.isConnected) {
@@ -153,6 +162,10 @@ class ConnectionManager implements ChannelListener {
       NotificationService.instance.show('LING OS', '连接失败：${lastError ?? '未知'}');
     } else if (line.contains('"type":"disconnected"')) {
       NotificationService.instance.show('LING OS', '连接已断开');
+    }
+    // 【先生要求】同步：WS 认证成功（auth_ok）→ 自动拉取核心数据（完善服务端数据请求）
+    if (line.contains('auth_ok')) {
+      _autoSync();
     }
     // 【方案B】token 事件驱动：connection_ok（token 已到）→ 自动连 WS
     if (line.contains('"type":"connection_ok"')) {
