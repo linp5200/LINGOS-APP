@@ -14,11 +14,16 @@ class AppLogger {
   final int maxLines = 500;
   File? _logFile;
 
+  /// 当前 App 版本（发版同步）
+  static const appVersion = '0.1.4';
+
   Future<void> init() async {
     try {
       final dir = await getApplicationDocumentsDirectory();
       _logFile = File('${dir.path}/lingos_app.log');
     } catch (_) {}
+    // 【先生要求】日志提供当前版本 + 环境
+    log('Env', 'App 版本: $appVersion | 平台: ${Platform.operatingSystem} ${Platform.operatingSystemVersion} | 架构: ${Platform.operatingSystem}');
   }
 
   void log(String tag, String message) {
@@ -41,7 +46,7 @@ class AppLogger {
 
   /// 导出日志（复制到剪贴板/分享——由 UI 调用）
   String exportText() {
-    final header = '=== LING OS App 日志 ===\n版本: 0.1.3\n时间: ${DateTime.now()}\n\n';
+    final header = '=== LING OS App 日志 ===\n版本: $appVersion\n时间: ${DateTime.now()}\n\n';
     return header + logText;
   }
 

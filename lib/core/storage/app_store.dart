@@ -16,6 +16,7 @@ class AppStore {
   static const _kSessionId = 'session_id';
   static const _kDeviceId = 'device_id';
   static const _kAllowPlaintext = 'allow_plaintext';
+  static const _kDirectConnect = 'direct_connect';
 
   final _secure = const FlutterSecureStorage(
     aOptions: AndroidOptions(encryptedSharedPreferences: true),
@@ -74,6 +75,17 @@ class AppStore {
   Future<bool> getAllowPlaintext() async {
     final sp = await SharedPreferences.getInstance();
     return sp.getBool(_kAllowPlaintext) ?? false; // 默认 false = 加密（不允许明文）
+  }
+
+  // ---------- 自定义直连（先生要求：默认关——DIRECT 绕过代理） ----------
+  Future<void> saveDirectConnect(bool enable) async {
+    final sp = await SharedPreferences.getInstance();
+    await sp.setBool(_kDirectConnect, enable);
+  }
+
+  Future<bool> getDirectConnect() async {
+    final sp = await SharedPreferences.getInstance();
+    return sp.getBool(_kDirectConnect) ?? false; // 默认关（不强连）
   }
 
   // ---------- 设备绑定（UUID 持久） ----------

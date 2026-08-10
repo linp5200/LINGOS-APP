@@ -9,6 +9,7 @@ import 'tcp_channel.dart';
 import '../storage/app_store.dart';
 import 'ws_channel.dart';
 import '../logging/app_logger.dart';
+import '../services/notification_service.dart';
 
 enum ConnState { idle, connecting, waitingAuth, waitingConnCode, authenticated, error, disconnected }
 
@@ -92,9 +93,10 @@ class ConnectionManager implements ChannelListener {
     final wsPort = port + 2;
     // 【先生决策】明文开关：默认加密（wss）——用户开明文才用 ws://
     final allowPlain = await store.getAllowPlaintext();
+    final directConnect = await store.getDirectConnect();
     final scheme = allowPlain ? 'ws' : 'wss';
-    appLog('ConnectionManager', 'connectWsAndSave: host=$host wsPort=$wsPort 协议=${allowPlain ? "明文(ws)" : "加密(wss)"} token=$showTok');
-    ws = WsChannel(url: '$scheme://$host:$wsPort', token: wsToken, deviceId: deviceId);
+    appLog('ConnectionManager', 'connectWsAndSave: host=$host wsPort=$wsPort 协议=${allowPlain ? "明文(ws)" : "加密(wss)"} 直连=${directConnect ? "开(DIRECT)" : "关(系统)"} token=$showTok');
+    ws = WsChannel(url: '$scheme://$host:$wsPort', token: wsToken, deviceId: deviceId, directConnect: directConnect);
     ws!.setListener(this);
     final ok = await ws!.connect();
     appLog('ConnectionManager', 'WS 连接结果: ${ok ? "成功" : "失败(${ws!.lastError})"}');
@@ -142,6 +144,14 @@ class ConnectionManager implements ChannelListener {
 
   @override
   void onData(String line) {
+    // 【先生要求】连接状态通知（连接成功/失败——通知栏）
+    if (line.contains('"type":"connection_ok"')) {
+      NotificationService.instance.show('LING OS', '已连接——认证成功');
+    } else if (line.contains('"type":"conn_error"')) {
+      NotificationService.instance.show('LING OS', '连接失败：${lastError ?? '未知'}');
+    } else if (line.contains('"type":"disconnected"')) {
+      NotificationService.instance.show('LING OS', '连接已断开');
+    }
     // 【方案B】token 事件驱动：connection_ok（token 已到）→ 自动连 WS
     if (line.contains('"type":"connection_ok"')) {
       // 【修复】token 在 TcpChannel（tcp.token）——Manager.token 未同步

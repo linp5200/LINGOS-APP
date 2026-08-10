@@ -17,6 +17,7 @@ class AppSettingsScreen extends ConsumerStatefulWidget {
 class _AppSettingsScreenState extends ConsumerState<AppSettingsScreen> {
   final _store = AppStore();
   bool _allowPlaintext = false;
+  bool _directConnect = false;
   bool _loading = true;
 
   @override
@@ -27,9 +28,11 @@ class _AppSettingsScreenState extends ConsumerState<AppSettingsScreen> {
 
   Future<void> _load() async {
     final v = await _store.getAllowPlaintext();
+    final d = await _store.getDirectConnect();
     if (!mounted) return;
     setState(() {
       _allowPlaintext = v;
+      _directConnect = d;
       _loading = false;
     });
   }
@@ -56,6 +59,23 @@ class _AppSettingsScreenState extends ConsumerState<AppSettingsScreen> {
                   title: const Text('允许明文传输'),
                   subtitle: const Text(
                     '加密模式默认（wss://）——本地服务端无 TLS 时需开启明文（ws://）',
+                    style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                  ),
+                ),
+                const Divider(),
+                SwitchListTile(
+                  value: _directConnect,
+                  onChanged: (v) async {
+                    setState(() => _directConnect = v);
+                    await _store.saveDirectConnect(v);
+                    if (!context.mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(v ? '已开启自定义直连（DIRECT）' : '已关闭自定义直连（系统默认）')),
+                    );
+                  },
+                  title: const Text('自定义直连（DIRECT）'),
+                  subtitle: const Text(
+                    '默认关闭。如果持续无法发送指令，开启该选项可能解决（绕过系统代理直连）',
                     style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
                   ),
                 ),

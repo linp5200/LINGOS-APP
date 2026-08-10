@@ -4,11 +4,15 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'core/logging/app_logger.dart';
+import 'core/services/notification_service.dart';
 import 'core/theme/app_theme.dart';
 import 'features/connect/connect_screen.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await AppLogger.instance.init();          // 日志（版本+环境）
+  await NotificationService.instance.init(); // 通知服务
   runApp(const ProviderScope(child: LingOsApp()));
 }
 

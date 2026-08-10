@@ -1,7 +1,7 @@
 name: lingos_app
 description: "LING OS App - Flutter 重写版（协议 v3）"
 publish_to: 'none'
-version: 0.1.3+4  # App 0.1.3（SemVer 修订——统一批）
+version: 0.1.4+5  # App 0.1.4（直连开关/日志环境/通知）
 
 environment:
   sdk: '>=3.4.0 <4.0.0'
@@ -16,6 +16,7 @@ dependencies:
   dio: ^5.4.0
   crypto: ^3.0.3
   shared_preferences: ^2.2.3
+  flutter_local_notifications: ^17.2.2
   flutter_secure_storage: ^9.2.2
 
 dev_dependencies:
