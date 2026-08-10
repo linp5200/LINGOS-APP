@@ -6,6 +6,7 @@ import 'dart:convert';
 
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'connection_mode.dart';
+import 'raw_ws.dart';
 import 'package:web_socket_channel/status.dart' as ws_status;
 
 import 'channel.dart';
@@ -17,6 +18,7 @@ class WsChannel implements ConnectChannel {
   final int heartbeatIntervalSeconds;
 
   WebSocketChannel? _channel;
+  RawWebSocket? _raw;
   StreamSubscription? _sub;
   Timer? _heartbeat;
   ChannelListener? _listener;
@@ -50,6 +52,48 @@ class WsChannel implements ConnectChannel {
       // 【修复】自定义 HttpClient：强制 DIRECT（不走系统代理——Android 代理导致 127.0.0.1 连接被拦截 → Connection closed）
       // 【先生要求】连接方式选项（native 默认——http_client 兼容——预留自定义 API）
       appLog('WsChannel', '连接方式: ${connectionMode.label}');
+      if (connectionMode == ConnectionMode.native) {
+        // 【先生全权】原始 socket WebSocket（绕开 HttpClient 101 兼容问题）
+        final raw = await RawWebSocket.connect(url);
+        _raw = raw;
+        _sub = raw.stream.listen(
+          (data) {
+            confirmHandshake();
+            final showData = data.length > 150 ? '${data.substring(0, 150)}...' : data;
+            appLog('WsChannel', '收到: $showData');
+            if (data.contains('auth_ok')) authenticated = true;
+            if (data.contains('auth_error')) {
+              authenticated = false;
+              lastError = data;
+            }
+            _listener?.onData(data);
+          },
+          onError: (e) {
+            lastError = 'WS 连接错误: $e';
+            appLog('WsChannel', '错误: $e');
+            _listener?.onError(lastError!);
+            _connected = false;
+          },
+          onDone: () {
+            if (_connected) _listener?.onDisconnected('WS 连接关闭');
+            _connected = false;
+          },
+          cancelOnError: true,
+        );
+        // 首帧 token 认证
+        raw.send(jsonEncode({'type': 'auth', 'token': token, 'device_id': deviceId}));
+        _connected = true;
+        _handshakeTimeout?.cancel();
+        _handshakeTimeout = Timer(const Duration(seconds: 5), () {
+          if (_connected) {
+            lastError = 'WS 握手超时（5s 无确认——服务端未响应/地址错误）';
+            appLog('WsChannel', '握手超时——服务端未响应');
+            _listener?.onError(lastError!);
+            _connected = false;
+          }
+        });
+        return true;
+      }
       final channel = await connectByMode(Uri.parse(url), mode: connectionMode);
       _channel = channel;
       _sub = channel.stream.listen(
@@ -113,7 +157,7 @@ class WsChannel implements ConnectChannel {
     _heartbeat?.cancel();
     _heartbeat = Timer.periodic(Duration(seconds: heartbeatIntervalSeconds), (_) {
       if (_connected) {
-        _channel?.sink.add(jsonEncode({'type': 'ping', 'ts': DateTime.now().millisecondsSinceEpoch}));
+        _sendMessage(jsonEncode({'type': 'ping', 'ts': DateTime.now().millisecondsSinceEpoch}));
       }
     });
   }
@@ -121,10 +165,19 @@ class WsChannel implements ConnectChannel {
   /// 认证状态（收到 auth_ok 置 true——App 判断 WS 可用）
   bool authenticated = false;
 
+  /// 统一发送（raw / channel 分支）
+  void _sendMessage(String data) {
+    if (_raw != null) {
+      _raw!.send(data);
+    } else {
+      _channel?.sink.add(data);
+    }
+  }
+
   @override
   Future<void> send(String data) async {
     try {
-      _channel?.sink.add(data);
+      _sendMessage(data);
     } catch (e) {
       _listener?.onError('WS 发送失败: $e');
     }
@@ -137,6 +190,10 @@ class WsChannel implements ConnectChannel {
     _connected = false;
     try {
       await _sub?.cancel();
+      if (_raw != null) {
+        await _raw?.close();
+        _raw = null;
+      }
       await _channel?.sink.close(ws_status.normalClosure);
     } catch (_) {}
   }

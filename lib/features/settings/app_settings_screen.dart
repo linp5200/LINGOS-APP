@@ -64,28 +64,34 @@ class _AppSettingsScreenState extends ConsumerState<AppSettingsScreen> {
                   ),
                 ),
                 const Divider(),
-                const Padding(
-                  padding: EdgeInsets.fromLTRB(16, 12, 16, 4),
-                  child: Text('连接方式（选项——可扩展）',
-                      style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
-                ),
-                RadioGroup<String>(
-                  groupValue: _connectionModeId,
-                  onChanged: (v) async {
-                    if (v == null) return;
-                    setState(() => _connectionModeId = v);
-                    await _store.saveConnectionMode(v);
-                  },
-                  child: Column(
-                    children: ConnectionMode.values
-                        .map((m) => RadioListTile<String>(
+                // 【先生要求】一行下拉（节省空间——可展开）
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+                  child: DropdownButtonFormField<String>(
+                    initialValue: _connectionModeId,
+                    decoration: const InputDecoration(
+                      labelText: '连接方式',
+                      border: OutlineInputBorder(),
+                      isDense: true,
+                    ),
+                    items: ConnectionMode.values
+                        .map((m) => DropdownMenuItem<String>(
                               value: m.id,
-                              title: Text(m.label),
-                              subtitle: Text(m.description,
-                                  style: const TextStyle(
-                                      fontSize: 11, color: AppColors.textSecondary)),
+                              child: Text(m.label),
                             ))
                         .toList(),
+                    onChanged: (v) async {
+                      if (v == null) return;
+                      setState(() => _connectionModeId = v);
+                      await _store.saveConnectionMode(v);
+                    },
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                  child: Text(
+                    ConnectionMode.fromId(_connectionModeId).description,
+                    style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
                   ),
                 ),
                 const Divider(),
