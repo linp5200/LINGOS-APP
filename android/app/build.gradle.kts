@@ -12,6 +12,8 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
+        // 【修复】flutter_local_notifications 需要 core library desugaring
+        isCoreLibraryDesugaringEnabled = true
     }
 
     defaultConfig {
