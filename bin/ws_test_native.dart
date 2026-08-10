@@ -1,8 +1,7 @@
 // native 连接方式测试（connectByMode——连 3940 分片服务）
 import 'dart:async';
 import 'dart:io';
-import '../lib/core/connection/connection_mode.dart';
-import 'package:web_socket_channel/web_socket_channel.dart';
+import 'package:lingos_app/core/connection/connection_mode.dart';
 
 Future<void> main() async {
   const url = 'ws://127.0.0.1:3940';
