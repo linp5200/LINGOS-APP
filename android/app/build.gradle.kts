@@ -22,7 +22,7 @@ android {
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
-        versionName = "0.1.2"
+        versionName = "0.1.3"
     }
 
     // 【正式签名】统一 release 签名（可覆盖安装——先生决策 A）

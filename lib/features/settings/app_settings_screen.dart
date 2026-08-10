@@ -1,4 +1,4 @@
-/// APP 设定（先生要求子菜单——明文传输开关——默认加密）
+/// APP 设定（子菜单——明文传输开关——默认加密）
 library;
 
 import 'package:flutter/material.dart';
@@ -63,7 +63,7 @@ class _AppSettingsScreenState extends ConsumerState<AppSettingsScreen> {
                 const Padding(
                   padding: EdgeInsets.all(12),
                   child: Text(
-                    '安全说明：明文传输（ws://）不加密——仅用于本地/信任网络。默认关闭（加密优先——先生隐私原则）。',
+                    '安全说明：明文传输（ws://）不加密——仅用于本地/信任网络。默认关闭（加密优先——隐私保护原则）。',
                     style: TextStyle(fontSize: 12, color: AppColors.textSecondary, height: 1.5),
                   ),
                 ),
