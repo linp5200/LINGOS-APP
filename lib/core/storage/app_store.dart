@@ -16,7 +16,7 @@ class AppStore {
   static const _kSessionId = 'session_id';
   static const _kDeviceId = 'device_id';
   static const _kAllowPlaintext = 'allow_plaintext';
-  static const _kDirectConnect = 'direct_connect';
+  static const _kConnectionMode = 'connection_mode';
 
   final _secure = const FlutterSecureStorage(
     aOptions: AndroidOptions(encryptedSharedPreferences: true),
@@ -77,15 +77,15 @@ class AppStore {
     return sp.getBool(_kAllowPlaintext) ?? false; // 默认 false = 加密（不允许明文）
   }
 
-  // ---------- 自定义直连（先生要求：默认关——DIRECT 绕过代理） ----------
-  Future<void> saveDirectConnect(bool enable) async {
+  // ---------- 连接方式（先生要求：选项形式——默认原生 WebSocket） ----------
+  Future<void> saveConnectionMode(String modeId) async {
     final sp = await SharedPreferences.getInstance();
-    await sp.setBool(_kDirectConnect, enable);
+    await sp.setString(_kConnectionMode, modeId);
   }
 
-  Future<bool> getDirectConnect() async {
+  Future<String> getConnectionModeId() async {
     final sp = await SharedPreferences.getInstance();
-    return sp.getBool(_kDirectConnect) ?? false; // 默认关（不强连）
+    return sp.getString(_kConnectionMode) ?? 'native'; // 默认原生
   }
 
   // ---------- 设备绑定（UUID 持久） ----------

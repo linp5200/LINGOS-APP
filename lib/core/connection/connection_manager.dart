@@ -8,6 +8,7 @@ import 'channel.dart';
 import 'tcp_channel.dart';
 import '../storage/app_store.dart';
 import 'ws_channel.dart';
+import 'connection_mode.dart';
 import '../logging/app_logger.dart';
 import '../services/notification_service.dart';
 
@@ -93,10 +94,11 @@ class ConnectionManager implements ChannelListener {
     final wsPort = port + 2;
     // 【先生决策】明文开关：默认加密（wss）——用户开明文才用 ws://
     final allowPlain = await store.getAllowPlaintext();
-    final directConnect = await store.getDirectConnect();
+    final modeId = await store.getConnectionModeId();
+    final mode = ConnectionMode.fromId(modeId);
     final scheme = allowPlain ? 'ws' : 'wss';
-    appLog('ConnectionManager', 'connectWsAndSave: host=$host wsPort=$wsPort 协议=${allowPlain ? "明文(ws)" : "加密(wss)"} 直连=${directConnect ? "开(DIRECT)" : "关(系统)"} token=$showTok');
-    ws = WsChannel(url: '$scheme://$host:$wsPort', token: wsToken, deviceId: deviceId, directConnect: directConnect);
+    appLog('ConnectionManager', 'connectWsAndSave: host=$host wsPort=$wsPort 协议=${allowPlain ? "明文(ws)" : "加密(wss)"} 连接方式=${mode.label} token=$showTok');
+    ws = WsChannel(url: '$scheme://$host:$wsPort', token: wsToken, deviceId: deviceId, connectionMode: mode);
     ws!.setListener(this);
     final ok = await ws!.connect();
     appLog('ConnectionManager', 'WS 连接结果: ${ok ? "成功" : "失败(${ws!.lastError})"}');

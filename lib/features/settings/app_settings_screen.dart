@@ -4,6 +4,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/connection/connection_mode.dart';
 import '../../core/storage/app_store.dart';
 import '../../core/theme/app_theme.dart';
 
@@ -17,7 +18,7 @@ class AppSettingsScreen extends ConsumerStatefulWidget {
 class _AppSettingsScreenState extends ConsumerState<AppSettingsScreen> {
   final _store = AppStore();
   bool _allowPlaintext = false;
-  bool _directConnect = false;
+  String _connectionModeId = 'native';
   bool _loading = true;
 
   @override
@@ -28,11 +29,11 @@ class _AppSettingsScreenState extends ConsumerState<AppSettingsScreen> {
 
   Future<void> _load() async {
     final v = await _store.getAllowPlaintext();
-    final d = await _store.getDirectConnect();
+    final m = await _store.getConnectionModeId();
     if (!mounted) return;
     setState(() {
       _allowPlaintext = v;
-      _directConnect = d;
+      _connectionModeId = m;
       _loading = false;
     });
   }
@@ -63,20 +64,28 @@ class _AppSettingsScreenState extends ConsumerState<AppSettingsScreen> {
                   ),
                 ),
                 const Divider(),
-                SwitchListTile(
-                  value: _directConnect,
+                const Padding(
+                  padding: EdgeInsets.fromLTRB(16, 12, 16, 4),
+                  child: Text('连接方式（选项——可扩展）',
+                      style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+                ),
+                RadioGroup<String>(
+                  groupValue: _connectionModeId,
                   onChanged: (v) async {
-                    setState(() => _directConnect = v);
-                    await _store.saveDirectConnect(v);
-                    if (!context.mounted) return;
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(v ? '已开启自定义直连（DIRECT）' : '已关闭自定义直连（系统默认）')),
-                    );
+                    if (v == null) return;
+                    setState(() => _connectionModeId = v);
+                    await _store.saveConnectionMode(v);
                   },
-                  title: const Text('自定义直连（DIRECT）'),
-                  subtitle: const Text(
-                    '默认关闭。如果持续无法发送指令，开启该选项可能解决（绕过系统代理直连）',
-                    style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                  child: Column(
+                    children: ConnectionMode.values
+                        .map((m) => RadioListTile<String>(
+                              value: m.id,
+                              title: Text(m.label),
+                              subtitle: Text(m.description,
+                                  style: const TextStyle(
+                                      fontSize: 11, color: AppColors.textSecondary)),
+                            ))
+                        .toList(),
                   ),
                 ),
                 const Divider(),

@@ -3,10 +3,9 @@ library;
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:web_socket_channel/web_socket_channel.dart';
-import 'package:web_socket_channel/io.dart';
+import 'connection_mode.dart';
 import 'package:web_socket_channel/status.dart' as ws_status;
 
 import 'channel.dart';
@@ -26,13 +25,13 @@ class WsChannel implements ConnectChannel {
   Timer? _handshakeTimeout;
 
   final String deviceId;
-  final bool directConnect;
+  final ConnectionMode connectionMode;
 
   WsChannel({
     required this.url,
     required this.token,
     this.deviceId = '',
-    this.directConnect = false,
+    this.connectionMode = ConnectionMode.native,
     this.heartbeatIntervalSeconds = 30,
   });
 
@@ -49,14 +48,9 @@ class WsChannel implements ConnectChannel {
       final showTok = token.length > 8 ? '${token.substring(0, 8)}...' : token;
       appLog('WsChannel', '连接 $url（token: $showTok device: $deviceId——DIRECT 直连）');
       // 【修复】自定义 HttpClient：强制 DIRECT（不走系统代理——Android 代理导致 127.0.0.1 连接被拦截 → Connection closed）
-      // 按开关：开=DIRECT 直连（绕过代理）；关=默认（系统）
-      final HttpClient httpClient = HttpClient()
-        ..connectionTimeout = const Duration(seconds: 5);
-      if (directConnect) {
-        httpClient.findProxy = ((uri) => 'DIRECT');
-        appLog('WsChannel', '自定义直连开启——DIRECT（绕过系统代理）');
-      }
-      final channel = IOWebSocketChannel.connect(Uri.parse(url), customClient: httpClient);
+      // 【先生要求】连接方式选项（native 默认——http_client 兼容——预留自定义 API）
+      appLog('WsChannel', '连接方式: ${connectionMode.label}');
+      final channel = await connectByMode(Uri.parse(url), mode: connectionMode);
       _channel = channel;
       _sub = channel.stream.listen(
         (data) {
