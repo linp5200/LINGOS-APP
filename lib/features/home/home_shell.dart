@@ -67,7 +67,7 @@ class _HomeShellState extends ConsumerState<HomeShell> {
             const Text(
               '若新令牌仍被拒绝：可在主机端输入 token remove login <当前App的IP> <时间> 强行使用（受限模式——危险操作不允许）。\n'
               '或输入 token login again <验证码> 重新验证。',
-              style: TextStyle(color: AppColors.warning, fontSize: 11),
+              style: TextStyle(color: AppColors.textSecondary, fontSize: 11),
             ),
             const SizedBox(height: 8),
             TextField(
