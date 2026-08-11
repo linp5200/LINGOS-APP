@@ -5,9 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/providers.dart';
+import '../../core/storage/app_store.dart';
 import '../../core/theme/app_theme.dart';
 import '../alerts/alerts_screen.dart';
 import '../chat/chat_screen.dart';
+import '../connect/connect_screen.dart';
 import '../dashboard/dashboard_screen.dart';
 import '../files/files_screen.dart';
 import '../ha/ha_screen.dart';
@@ -24,8 +26,91 @@ class HomeShell extends ConsumerStatefulWidget {
 
 class _HomeShellState extends ConsumerState<HomeShell> {
   int _index = 0;
+  bool _tokenListenerAttached = false;
 
   static const _pages = [ChatScreen(), DashboardScreen(), SettingsScreen()];
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_tokenListenerAttached) {
+      _tokenListenerAttached = true;
+      final cm = ref.read(connectionProvider);
+      cm.events.listen((line) {
+        if (line.contains('token_invalid')) {
+          _showTokenInvalidDialog();
+        }
+      });
+    }
+  }
+
+  /// 【先生设计】令牌无效弹窗（手动重新验证——验证码/登出）
+  Future<void> _showTokenInvalidDialog() async {
+    if (!mounted) return;
+    final cm = ref.read(connectionProvider);
+    final store = AppStore();
+    final oldToken = await store.getToken() ?? '';
+    final codeCtrl = TextEditingController();
+    if (!mounted) return;
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        title: const Text('令牌无法使用', style: TextStyle(color: AppColors.textPrimary)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('当前令牌已被服务端拒绝——需要重新验证。',
+                style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+            const SizedBox(height: 6),
+            const Text(
+              '若新令牌仍被拒绝：可在主机端输入 token remove login <当前App的IP> <时间> 强行使用（受限模式——危险操作不允许）。\n'
+              '或输入 token login again <验证码> 重新验证。',
+              style: TextStyle(color: AppColors.warning, fontSize: 11),
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: codeCtrl,
+              style: const TextStyle(color: AppColors.textPrimary),
+              decoration: const InputDecoration(
+                labelText: '主机端验证码（token login again <验证码>）',
+                border: OutlineInputBorder(),
+                isDense: true,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () async {
+              // 登出并重新连接（清 token——回连接页）
+              await store.clearToken();
+              if (ctx.mounted) {
+                Navigator.of(ctx).pop();
+                Navigator.of(ctx).pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (_) => const ConnectScreen()),
+                  (route) => false,
+                );
+              }
+            },
+            child: const Text('登出并重新连接'),
+          ),
+          FilledButton(
+            onPressed: () async {
+              final code = codeCtrl.text.trim();
+              if (code.isEmpty) return;
+              // 发送验证码 + 旧 token（服务端匹配 pending——新 token + 删旧）
+              final payload = '$code|$oldToken';
+              await cm.sendConnectionCode(payload);
+              if (ctx.mounted) Navigator.of(ctx).pop();
+            },
+            child: const Text('发送验证码'),
+          ),
+        ],
+      ),
+    );
+  }
 
   Widget _buildDrawer(BuildContext context) {
     return Drawer(
@@ -39,7 +124,7 @@ class _HomeShellState extends ConsumerState<HomeShell> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 Text('LING OS', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
-                Text('v0.1.7', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                Text('v0.1.8', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
               ],
             ),
           ),

@@ -15,7 +15,7 @@ class AppLogger {
   File? _logFile;
 
   /// 当前 App 版本（发版同步）
-  static const appVersion = '0.1.7';
+  static const appVersion = '0.1.8';
 
   Future<void> init() async {
     try {

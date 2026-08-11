@@ -167,6 +167,11 @@ class ConnectionManager implements ChannelListener {
     if (line.contains('auth_ok')) {
       _autoSync();
     }
+    // 【先生设计】token 无效（auth_error invalid token）→ 弹窗事件（手动重新验证）
+    if (line.contains('auth_error') && line.contains('invalid token')) {
+      appLog('ConnectionManager', 'token 无效——触发重新验证弹窗');
+      _eventController.add('{"type":"token_invalid","message":"当前令牌无法使用"}');
+    }
     // 【方案B】token 事件驱动：connection_ok（token 已到）→ 自动连 WS
     if (line.contains('"type":"connection_ok"')) {
       // 【修复】token 在 TcpChannel（tcp.token）——Manager.token 未同步
