@@ -42,7 +42,6 @@ class _PersonalityScreenState extends ConsumerState<PersonalityScreen> {
   String _current = 'nook';
   bool _loading = true;
   String? _error;
-  bool _syncing = false;
   StreamSubscription? _sub;
 
   @override
@@ -91,12 +90,8 @@ class _PersonalityScreenState extends ConsumerState<PersonalityScreen> {
   }
 
   void _select(String id) async {
-    setState(() => _syncing = true);
     ref.read(connectionProvider).sendCommand({'cmd': 'personality_set', 'name': id});
-    setState(() {
-      _current = id;
-      _syncing = false;
-    });
+    setState(() => _current = id);
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('已切换人格')));
@@ -196,7 +191,7 @@ class _PersonalityScreenState extends ConsumerState<PersonalityScreen> {
             value: value.toDouble(),
             max: 10,
             divisions: 10,
-            activeColor: AppColors.brandCyan,
+            activeThumbColor: AppColors.brandCyan,
             onChanged: null, // 只读展示（配置化后续批次）
           ),
         ),

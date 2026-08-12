@@ -34,7 +34,9 @@ String skillGroup(String name) {
       name.startsWith('user_') || name.startsWith('cron_') ||
       name.startsWith('service_') || name == 'sys_command' ||
       name.startsWith('config_') || name.startsWith('script_') ||
-      name.startsWith('read_log')) return '系统';
+      name.startsWith('read_log')) {
+    return '系统';
+  }
   if (name.startsWith('git_')) return 'Git';
   if (name.startsWith('web_')) return '网络';
   if (name.startsWith('ha_') || name.startsWith('agent_') || name.startsWith('sub_ai')) return 'AI 助手';
@@ -220,7 +222,7 @@ class _SkillsScreenState extends ConsumerState<SkillsScreen> {
         trailing: Switch(
           value: enabled,
           onChanged: (v) => _toggle(s, v),
-          activeColor: AppColors.brandCyan,
+          activeThumbColor: AppColors.brandCyan,
         ),
       ),
     );

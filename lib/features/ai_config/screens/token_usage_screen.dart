@@ -24,7 +24,6 @@ class _TokenUsageScreenState extends ConsumerState<TokenUsageScreen> {
   String? _error;
   String _range = 'all'; // all/7d/30d/today
   StreamSubscription? _sub;
-  final Set<String> _expanded = {};
 
   @override
   void initState() {
