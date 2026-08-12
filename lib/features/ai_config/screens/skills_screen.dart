@@ -222,7 +222,6 @@ class _SkillsScreenState extends ConsumerState<SkillsScreen> {
         trailing: Switch(
           value: enabled,
           onChanged: (v) => _toggle(s, v),
-          activeColor: AppColors.brandCyan,
         ),
       ),
     );

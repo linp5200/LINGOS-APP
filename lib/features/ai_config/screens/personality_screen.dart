@@ -94,7 +94,7 @@ class _PersonalityScreenState extends ConsumerState<PersonalityScreen> {
     setState(() => _current = id);
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('已切换人格')));
+        const SnackBar(content: Text('已切换人格')));
   }
 
   @override
@@ -191,7 +191,6 @@ class _PersonalityScreenState extends ConsumerState<PersonalityScreen> {
             value: value.toDouble(),
             max: 10,
             divisions: 10,
-            activeColor: AppColors.brandCyan,
             onChanged: null, // 只读展示（配置化后续批次）
           ),
         ),

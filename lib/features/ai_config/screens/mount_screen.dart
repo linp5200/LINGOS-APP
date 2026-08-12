@@ -69,7 +69,8 @@ class _MountScreenState extends State<MountScreen> {
                     children: [
                       const Icon(Icons.link_off, size: 48, color: AppColors.textSecondary),
                       const SizedBox(height: 12),
-                      const Text('暂无挂载——点击 + 添加', style: TextStyle(color: AppColors.textSecondary)),
+                      const Text('暂无挂载——点击 + 添加',
+                          style: TextStyle(color: AppColors.textSecondary)),
                     ],
                   ),
                 )
