@@ -308,9 +308,9 @@ class _McpAddScreenState extends State<_McpAddScreen> {
               controller: _tokenCtrl,
               obscureText: true,
               style: const TextStyle(fontSize: 14),
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: _authType == 'api_key' ? 'API Key' : 'Bearer Token',
-                border: OutlineInputBorder(),
+                border: const OutlineInputBorder(),
                 isDense: true,
               ),
             ),
