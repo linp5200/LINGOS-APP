@@ -92,6 +92,42 @@ class AppStore {
   // ---------- 【0.1.9】AI 提供商配置（本地加密存储） ----------
   static const _kProviders = 'ai_providers_json';
   static const _kProviderKeys = 'ai_provider_keys_json'; // 密钥单独存（展示不泄露）
+  static const _kVoiceProxy = 'voice_proxy_enabled'; // 【0.2.0】音频提供商使用服务端代理开关
+  static const _kAutoRead = 'voice_auto_read'; // 【0.2.0】自动朗读开关（默认关）
+  static const _kContinuousChat = 'voice_continuous_chat'; // 【0.2.0】连续对话开关
+
+  /// 【0.2.0】音频提供商使用服务端代理（先生决策：本地直连/服务端代理可选）
+  Future<void> saveVoiceProxy(bool enabled) async {
+    final sp = await SharedPreferences.getInstance();
+    await sp.setBool(_kVoiceProxy, enabled);
+  }
+
+  Future<bool> getVoiceProxy() async {
+    final sp = await SharedPreferences.getInstance();
+    return sp.getBool(_kVoiceProxy) ?? true; // 默认服务端代理（密钥在主机——隐私第一）
+  }
+
+  /// 【0.2.0】自动朗读（默认关——先生决策）
+  Future<void> saveAutoRead(bool enabled) async {
+    final sp = await SharedPreferences.getInstance();
+    await sp.setBool(_kAutoRead, enabled);
+  }
+
+  Future<bool> getAutoRead() async {
+    final sp = await SharedPreferences.getInstance();
+    return sp.getBool(_kAutoRead) ?? false;
+  }
+
+  /// 【0.2.0】连续对话（家居等情景默认开——先生决策）
+  Future<void> saveContinuousChat(bool enabled) async {
+    final sp = await SharedPreferences.getInstance();
+    await sp.setBool(_kContinuousChat, enabled);
+  }
+
+  Future<bool> getContinuousChat() async {
+    final sp = await SharedPreferences.getInstance();
+    return sp.getBool(_kContinuousChat) ?? false;
+  }
 
   Future<void> saveProviders(List<Map<String, dynamic>> providers) async {
     final sp = await SharedPreferences.getInstance();

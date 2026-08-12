@@ -28,6 +28,10 @@ class _ConnSettingsScreenState extends ConsumerState<ConnSettingsScreen> {
   bool _allowPlaintext = false;
   String _connectionModeId = 'native';
   bool _loading = true;
+  // 【0.2.0】语音设置
+  bool _voiceProxy = true;
+  bool _autoRead = false;
+  bool _continuousChat = false;
 
   @override
   void initState() {
@@ -41,6 +45,9 @@ class _ConnSettingsScreenState extends ConsumerState<ConnSettingsScreen> {
     final port = await _store.getPort();
     final plain = await _store.getAllowPlaintext();
     final mode = await _store.getConnectionModeId();
+    final voiceProxy = await _store.getVoiceProxy();
+    final autoRead = await _store.getAutoRead();
+    final continuousChat = await _store.getContinuousChat();
     if (!mounted) return;
     setState(() {
       _token = token;
@@ -48,6 +55,9 @@ class _ConnSettingsScreenState extends ConsumerState<ConnSettingsScreen> {
       _port = port;
       _allowPlaintext = plain;
       _connectionModeId = mode;
+      _voiceProxy = voiceProxy;
+      _autoRead = autoRead;
+      _continuousChat = continuousChat;
       _loading = false;
     });
   }
@@ -145,6 +155,45 @@ class _ConnSettingsScreenState extends ConsumerState<ConnSettingsScreen> {
                   title: const Text('加密'),
                   subtitle: const Text(
                     '加密模式默认（wss://）——本地服务端无 TLS 时需开启明文（ws://）',
+                    style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                  ),
+                ),
+                // 【0.2.0】音频提供商使用服务端代理（先生决策：本地直连/代理可选）
+                SwitchListTile(
+                  value: _voiceProxy,
+                  onChanged: (v) async {
+                    setState(() => _voiceProxy = v);
+                    await _store.saveVoiceProxy(v);
+                  },
+                  title: const Text('音频提供商使用服务端代理'),
+                  subtitle: const Text(
+                    '开：语音经主机端合成/识别（密钥存主机，词组机可用）\n关：App 本地直连提供商（密钥存本机）',
+                    style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                  ),
+                ),
+                // 【0.2.0】自动朗读（默认关——先生决策）
+                SwitchListTile(
+                  value: _autoRead,
+                  onChanged: (v) async {
+                    setState(() => _autoRead = v);
+                    await _store.saveAutoRead(v);
+                  },
+                  title: const Text('自动朗读'),
+                  subtitle: const Text(
+                    'AI 回复完成后自动语音朗读（默认关）',
+                    style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                  ),
+                ),
+                // 【0.2.0】连续对话（家居等情景默认开——先生决策）
+                SwitchListTile(
+                  value: _continuousChat,
+                  onChanged: (v) async {
+                    setState(() => _continuousChat = v);
+                    await _store.saveContinuousChat(v);
+                  },
+                  title: const Text('连续对话'),
+                  subtitle: const Text(
+                    '家居等语音场景默认连续对话（免按持续交互）；关 = 一次性交互',
                     style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
                   ),
                 ),

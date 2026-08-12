@@ -1,9 +1,12 @@
 /// 添加提供商（0.1.9——三段式：已配置列表 → 选择提供商（竖向） → 密钥配置）
 /// LLM 类写入服务端（ai_config_set 命令）；语音类先本地存储标"待接入"
+/// 【0.2.0】模型同步：主机端 provider.json 模型列表 App 同步显示 + 点击切换（model_switch）
 library;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/providers.dart';
 import '../../../core/storage/app_store.dart';
 import '../../../core/theme/app_theme.dart';
 
@@ -34,17 +37,21 @@ const kProviderPresets = [
 ];
 
 /// 第一段：已配置提供商列表（竖向）
-class ProvidersScreen extends StatefulWidget {
+class ProvidersScreen extends ConsumerStatefulWidget {
   const ProvidersScreen({super.key});
 
   @override
-  State<ProvidersScreen> createState() => _ProvidersScreenState();
+  ConsumerState<ProvidersScreen> createState() => _ProvidersScreenState();
 }
 
-class _ProvidersScreenState extends State<ProvidersScreen> {
+class _ProvidersScreenState extends ConsumerState<ProvidersScreen> {
   final _store = AppStore();
   List<Map<String, dynamic>> _providers = [];
   bool _loading = true;
+  // 【0.2.0】主机端模型列表（provider_list——App 同步显示可切换）
+  List<Map<String, dynamic>> _serverModels = [];
+  String _activeModel = '';
+  bool _modelsLoaded = false;
 
   @override
   void initState() {
@@ -59,6 +66,41 @@ class _ProvidersScreenState extends State<ProvidersScreen> {
       _providers = list;
       _loading = false;
     });
+    _loadServerModels();
+  }
+
+  /// 【0.2.0】同步主机端模型列表 + 活跃模型
+  Future<void> _loadServerModels() async {
+    final cm = ref.read(connectionProvider);
+    if (cm.ws == null || !cm.ws!.isConnected) return;
+    final resp = await cm.requestJson({'cmd': 'provider_list'});
+    if (resp == null || !mounted) return;
+    final data = resp['data'];
+    if (data is Map && data['providers'] is List) {
+      setState(() {
+        _serverModels = (data['providers'] as List).whereType<Map<String, dynamic>>().toList();
+        _activeModel = data['active']?.toString() ?? '';
+        _modelsLoaded = true;
+      });
+    }
+  }
+
+  /// 【0.2.0】切换当前模型（model_switch）
+  Future<void> _switchModel(String modelId) async {
+    final cm = ref.read(connectionProvider);
+    final resp = await cm.requestJson({'cmd': 'model_switch', 'model_id': modelId});
+    if (!mounted) return;
+    final ok = resp?['status']?.toString() == 'ok';
+    if (ok) {
+      setState(() => _activeModel = modelId);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('已切换模型：$modelId'), duration: const Duration(seconds: 1)),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('切换失败：${resp?['msg'] ?? '未知'}')),
+      );
+    }
   }
 
   Future<void> _addFlow() async {
@@ -124,6 +166,53 @@ class _ProvidersScreenState extends State<ProvidersScreen> {
     }
   }
 
+  /// 【0.2.0】主机端模型切换区块（模型列表 App 同步——点击切换）
+  Widget _buildServerModels() {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.model_training, size: 16, color: AppColors.brandCyan),
+                const SizedBox(width: 6),
+                Text('主机端模型（点击切换）',
+                    style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                const Spacer(),
+                if (_activeModel.isNotEmpty)
+                  Text('当前: $_activeModel',
+                      style: const TextStyle(fontSize: 11, color: AppColors.brandCyan)),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: _serverModels.map((m) {
+                final id = m['id']?.toString() ?? '';
+                final name = m['name']?.toString() ?? id;
+                final model = m['model']?.toString() ?? '';
+                final isActive = id == _activeModel;
+                return ActionChip(
+                  label: Text(
+                    '$name${model.isNotEmpty ? '·$model' : ''}',
+                    style: TextStyle(fontSize: 11,
+                        color: isActive ? Colors.white : AppColors.textPrimary),
+                  ),
+                  backgroundColor: isActive ? AppColors.brandRed : AppColors.surface,
+                  onPressed: isActive ? null : () => _switchModel(id),
+                );
+              }).toList(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -151,9 +240,14 @@ class _ProvidersScreenState extends State<ProvidersScreen> {
                 )
               : ListView.builder(
                   padding: const EdgeInsets.all(16),
-                  itemCount: _providers.length,
+                  // 【0.2.0】第一项为主机端模型切换区块（模型同步——先生决策）
+                  itemCount: _providers.length + ((_modelsLoaded && _serverModels.isNotEmpty) ? 1 : 0),
                   itemBuilder: (ctx, i) {
-                    final p = _providers[i];
+                    if (_modelsLoaded && _serverModels.isNotEmpty && i == 0) {
+                      return _buildServerModels();
+                    }
+                    final idx = i - ((_modelsLoaded && _serverModels.isNotEmpty) ? 1 : 0);
+                    final p = _providers[idx];
                     ProviderPreset? preset;
                     for (final e in kProviderPresets) {
                       if (e.id == p['id']) { preset = e; break; }

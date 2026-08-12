@@ -39,7 +39,7 @@ class EvtType {
   static const String guiClipboard = 'gui_clipboard'; // 剪贴板
   static const String image = 'image'; // 图片透传
   static const String error = 'error'; // 错误
-  static const String done = 'done'; // 结束
+  static const String done = 'done'; // 结束（携带 model/usage）
   static const String authRequest = 'auth_request'; // 授权请求
   static const String authRespOk = 'auth_resp_ok';
   // 【0.1.9】chat 包装层与中断
@@ -48,6 +48,17 @@ class EvtType {
   static const String chatInterrupted = 'chat_interrupted'; // 已被中断
   static const String chatError = 'chat_error'; // 转发错误
   static const String interruptAck = 'interrupt_ack'; // 中断已确认
+  // 【0.2.0】上下文/错误/会话头部
+  static const String context = 'context'; // 上下文压缩通知（action: summarized）
+  static const String toolError = 'tool_error'; // 工具错误详细（error_type/error/action）
+  static const String meta = 'meta'; // 会话头部（model/max_tokens/context_tokens）
+  // 【0.2.0】语音（WS 信令——音频本体走 HTTP REST）
+  static const String ttsRequest = 'tts_request'; // App→服务端 TTS 请求
+  static const String ttsResult = 'tts_result'; // 服务端→App TTS 完成（file）
+  static const String ttsError = 'tts_error'; // TTS 错误
+  static const String sttRequest = 'stt_request'; // App→服务端 STT 请求
+  static const String sttResult = 'stt_result'; // 服务端→App STT 结果（text）
+  static const String sttError = 'stt_error'; // STT 错误
   // 连接层事件（ConnectionManager 发出）
   static const String connectionOk = 'connection_ok';
   static const String connError = 'conn_error';

@@ -1,7 +1,7 @@
 name: lingos_app
 description: "LING OS App - Flutter 重写版（协议 v3）"
 publish_to: 'none'
-version: 0.1.9+10  # App 0.1.9（chat prompt 适配 + 中断继续 + AI 配置 + 预警适配）
+version: 0.2.0+11  # App 0.2.0（统一 LLM 调用层 + 上下文压缩 + 工具错误 17 类 + 语音系统 + 模型切换）
 
 environment:
   sdk: '>=3.4.0 <4.0.0'
@@ -20,6 +20,8 @@ dependencies:
   flutter_secure_storage: ^9.2.2
   permission_handler: ^11.3.1 # 【A4修复】真实 Android 授权
   shizuku_api: ^1.2.2 # 【A5】Shizuku 特权——AI 经 adb 执行命令
+  record: ^7.1.1 # 【0.2.0】语音——录音（STT 输入）
+  audioplayers: ^6.8.1 # 【0.2.0】语音——播放（TTS 输出）
 
 dev_dependencies:
   flutter_test:

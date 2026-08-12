@@ -93,6 +93,26 @@ class ConnectionManager implements ChannelListener {
     return false;
   }
 
+  /// 【0.2.0】请求-响应配对：发送命令并等待 command_response
+  /// （WS 单会话串行——发送后第一个 command_response 即本命令响应）
+  Future<Map<String, dynamic>?> requestJson(
+      Map<String, dynamic> cmd, {Duration timeout = const Duration(seconds: 8)}) async {
+    final comp = Completer<Map<String, dynamic>>();
+    late StreamSubscription sub;
+    sub = _eventController.stream.listen((line) {
+      try {
+        final m = jsonDecode(line);
+        if (m is Map && m['type'] == 'command_response' && !comp.isCompleted) {
+          comp.complete(m.cast<String, dynamic>());
+        }
+      } catch (_) {}
+    });
+    await sendCommand(cmd);
+    final result = await comp.future.timeout(timeout, onTimeout: () => null);
+    await sub.cancel();
+    return result;
+  }
+
   /// 建立 WS 对话通道（token 直连——协议 v3）并保存 token
   /// 【修复】WS 端口 = TCP 端口 + 2（2937→2939——协议约定——曾用错端口导致 WS 未连）
   Future<bool> connectWsAndSave(String host, int port, String wsToken) async {
@@ -157,6 +177,26 @@ class ConnectionManager implements ChannelListener {
       return true;
     }
     return false;
+  }
+
+  /// 【0.2.0】切换模型（主机端配置的模型列表——先生决策：可切换）
+  Future<bool> switchModel(String modelId) async {
+    return sendCommand({'cmd': 'model_switch', 'model_id': modelId});
+  }
+
+  /// 【0.2.0】查询当前上下文状态（会话页入口）
+  Future<bool> queryContextStatus({String sessionId = 'default'}) async {
+    return sendCommand({'cmd': 'context_status', 'session_id': sessionId});
+  }
+
+  /// 【0.2.0】TTS 合成（服务端代理——音频落盘主机，返回 file 路径）
+  Future<bool> voiceTts(String text, {String provider = '', String voice = ''}) async {
+    return sendCommand({'cmd': 'voice_tts', 'text': text, 'provider': provider, 'voice': voice});
+  }
+
+  /// 【0.2.0】STT 识别（服务端代理——上传录音文件路径）
+  Future<bool> voiceStt(String file, {String provider = ''}) async {
+    return sendCommand({'cmd': 'voice_stt', 'file': file, 'provider': provider});
   }
 
   void startHeartbeat() {

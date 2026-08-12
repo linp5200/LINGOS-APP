@@ -4,14 +4,68 @@
 
 ---
 
-## [0.2.0] - 规划中（先生指示下一版本）
+## [0.2.0] - 2026-08-12（已实施——一批次完）
 
-### 新增（计划）
-- AI 配置 15 子菜单剩余项填充（Rootfs 沙箱运行引擎对接 Termux proot）
-- MCP 工具注册为技能（独立 MCP 技能组——AI 对话可调用）
-- 服务端 ai_config_set 写提供商生效（LLM 类配置真实切换）
-- 语音类提供商服务端通道（TTS/识别）
-- 预警系统深化（App 推送联动 alert_query）
+### 修复（Bug Fixes）
+- **工具调用后续轮 HTTP 400**（0.1.9 已知问题）：统一 LLM 调用层重写——消息规范化（tool 消息 content 非空置 `(no output)`；assistant 带 tool_calls 时 content=""）+ 400 自动回退（去掉 reasoning_effort 重发一次）
+- **token 用量假 0 落盘**：DeepSeek 流式 usage 真实提取（stream_options include_usage + 流末尾 usage 字段）→ done.usage + token_usage.jsonl 真落盘
+- **tool_result 事件名硬编码 "tool"**：改为真实技能名（App 显示工具名）
+- **tool 错误提示笼统**：17 类错误分类 + tool_error 事件 + 建议动作
+- **50 条硬截断丢主线**：去掉——按 token 预算管理（70% 预压缩后继续累积）
+- **错误响应无法定位**：格式错误落盘 /LINGOS/logs/api_debug/（原始请求体 + 服务端返回详情，API Key 脱敏）
+
+### 新增（Features）
+- **统一 LLM 调用层（AI-AGENT#7）**：
+  - 原生直连不做转换——openai/anthropic 两 adapter，用哪个模型用哪个格式
+  - OpenAI 格式：DeepSeek/Kimi/GLM/通义/Compatible API/Ollama（/v1/chat/completions 兼容 tools+reasoning_effort）
+  - Anthropic 原生 Messages API（tool_use/tool_result/thinking 流式解析）
+  - provider.json 配置化（id/base_url/api_key/model/format/context_window）
+  - **模型列表 App 同步显示 + 切换**（provider_list / model_switch / provider_add / provider_remove）
+  - 错误分类（400/401/402/403/404/405/413/429/5xx/超时/网络——中文说明+建议）
+  - 429/5xx 指数退避重试 1 次
+  - 上下文窗口动态获取（显式配置 → 内置映射表 → /v1/models → 无限）
+- **上下文引擎**：
+  - **双记忆**：重要记忆（AI 自决 importance:high，`[重要]` 前缀）自动注入（≤800 token）；普通记忆 AI 自主调用（协议 AI-AGENT#5）
+  - 状态外部化延续：plan.md/notes.md 路径指针注入（上下文放指针不放内容）
+  - 70% 预算预压缩（不等超限）+ `context` 事件（App 提示条）
+  - 压缩前落盘 /LINGOS/data/session_archives/（AI 可回溯）
+  - `context_status` 命令（会话页查询上下文 token 状态）
+  - 记忆索引增强：search_keywords / find_important / search_constants（保存重要信息去除杂乱）
+  - `session_read` / `session_search` 技能（AI 查看/搜索其他会话——默认允许）
+- **工具调用（AI-AGENT#9）**：
+  - 17 类错误说明（先生清单 + 空数据 + 被中断）：不存在的参数/缺少参数(列明)/缺少依赖路径/未能找到内容/未能找到包/下载失败/timeout/安装失败/没有那个文件或目录/权限不足/用户阻止/用户拒绝/系统内部错误/非法地址拒绝/不存在的工具/空数据/被中断
+  - 错误分类体系：MissingDependency/ExecutionError/AuthDenied/Timeout/InvalidArgs/NetworkError/Unknown 等
+  - 工具报错自动查询知识库（不再靠 AI 自觉）
+  - 并行结果 tool_call_id 回填
+  - schema 注入 A+B：全部技能精简描述 + 核心高频组（~47 个）全量注入
+- **提示词精简（E1）**：合并重复段（guide/memory_guide/skills_desc 去重）→ system prompt token 显著下降
+- **语音系统（AI-AGENT#8）**：
+  - TTS + STT 都要；本地直连/服务端代理可选（连接设置"音频提供商使用服务端代理"开关）
+  - 降级链：提供商 → 服务端本地 TTS（espeak-ng/piper，装进安装系统）→ 设备本地 TTS
+  - **音频不走 WS**：WS 信令 + HTTP(8088) REST（POST /api/audio/tts、POST /api/audio/stt、GET /api/audio/file——Bearer token）
+  - 提供商直连（原生 REST）：ElevenLabs/Deepgram/Azure/MiniMax/百炼/火山/MiMo（讯飞暂不接入）
+  - 词组机开放：主机其他服务/设备可调用语音（HTTP REST）
+  - 用量统计 voice_usage.jsonl（字符数/时长/次数）+ voice_usage_query
+  - 音频 24h 自动清理 + audio_clear 手动清空
+  - 自动朗读开关（默认关）/ 连续对话开关（家居默认开）——App 设置
+- **App 端**：
+  - 新事件适配：context（压缩提示条）/ tool_error（错误卡片红底+建议）/ meta（会话头部）
+  - 状态行：model + token 上传↑/下载↓ + 缓存命中 + AI 输出字数 + 已压缩标记
+  - 模型切换 UI（主机端模型列表 ActionChip 点击切换）
+  - 语音 UI：录音按钮（点击录音→STT→发送）+ AI 消息朗读按钮（TTS 下载播放）
+  - manifest 权限补全（FOREGROUND_SERVICE/MICROPHONE/WAKE_LOCK/READ_MEDIA_AUDIO/MODIFY_AUDIO_SETTINGS）
+  - 新依赖：record ^7.1.1（录音）+ audioplayers ^6.8.1（播放）
+
+### 服务端配套（先生环境复制 src/python/ 即生效）
+- 新增文件：llm_unified.py（统一调用层）、voice_service.py（语音服务）
+- 改造：ai_server.py（统一层包装/上下文引擎/错误分类/新命令/HTTP 8088）、skill_handlers.py（memory importance）、memory_retrieval.py（双记忆/索引增强）
+- 新增命令：provider_list / model_switch / provider_add / provider_remove / context_status / voice_tts / voice_stt / voice_usage_query / audio_clear
+- 新事件：context / tool_error / meta / tts_* / stt_*
+- 协议 v2 已更新（AI-AGENT#7/8/9 + 事件清单 + 已知问题 11-15）
+
+### 技术备注
+- Ollama 走 OpenAI 兼容端点 /v1/chat/completions（官方文档确认 tools+reasoning_effort 兼容，api_key 任意被忽略）
+- 未配置 provider.json 时保留 DeepSeek 直连为默认（向后兼容）
 
 ---
 

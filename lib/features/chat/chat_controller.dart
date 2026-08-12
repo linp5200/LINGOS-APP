@@ -11,7 +11,7 @@ import '../../core/providers.dart';
 import '../../core/protocol/events.dart';
 
 /// 消息类型
-enum ChatMsgType { user, ai, thinking, tool, system }
+enum ChatMsgType { user, ai, thinking, tool, system, toolError }
 
 class ChatMsg {
   final ChatMsgType type;
@@ -19,15 +19,20 @@ class ChatMsg {
   final String? toolName;
   final bool streaming;
   final bool interrupted; // 【0.1.9】该条 AI 回复是否被中断
+  // 【0.2.0】工具错误卡片
+  final String? errorType;
+  final String? errorAction;
 
   const ChatMsg(this.type, this.content,
-      {this.toolName, this.streaming = false, this.interrupted = false});
+      {this.toolName, this.streaming = false, this.interrupted = false,
+      this.errorType, this.errorAction});
 
   ChatMsg copyWith({String? content, bool? streaming, bool? interrupted}) =>
       ChatMsg(type, content ?? this.content,
           toolName: toolName,
           streaming: streaming ?? this.streaming,
-          interrupted: interrupted ?? this.interrupted);
+          interrupted: interrupted ?? this.interrupted,
+          errorType: errorType, errorAction: errorAction);
 }
 
 class ChatState {
@@ -36,26 +41,51 @@ class ChatState {
   final String sessionId;
   final bool interrupted; // 【0.1.9】最近一轮是否被中断
   final String? lastUserText; // 【0.1.9】最近发送的用户原文（继续用）
+  // 【0.2.0】状态行数据（done.usage / meta 事件）
+  final String? model;
+  final String? provider;
+  final int promptTokens;
+  final int completionTokens;
+  final int cacheHit;
+  final bool contextCompressed;
 
   const ChatState(
       {this.messages = const [],
       this.aiBusy = false,
       this.sessionId = 'default',
       this.interrupted = false,
-      this.lastUserText});
+      this.lastUserText,
+      this.model,
+      this.provider,
+      this.promptTokens = 0,
+      this.completionTokens = 0,
+      this.cacheHit = 0,
+      this.contextCompressed = false});
 
   ChatState copyWith(
           {List<ChatMsg>? messages,
           bool? aiBusy,
           String? sessionId,
           bool? interrupted,
-          String? lastUserText}) =>
+          String? lastUserText,
+          String? model,
+          String? provider,
+          int? promptTokens,
+          int? completionTokens,
+          int? cacheHit,
+          bool? contextCompressed}) =>
       ChatState(
           messages: messages ?? this.messages,
           aiBusy: aiBusy ?? this.aiBusy,
           sessionId: sessionId ?? this.sessionId,
           interrupted: interrupted ?? this.interrupted,
-          lastUserText: lastUserText ?? this.lastUserText);
+          lastUserText: lastUserText ?? this.lastUserText,
+          model: model ?? this.model,
+          provider: provider ?? this.provider,
+          promptTokens: promptTokens ?? this.promptTokens,
+          completionTokens: completionTokens ?? this.completionTokens,
+          cacheHit: cacheHit ?? this.cacheHit,
+          contextCompressed: contextCompressed ?? this.contextCompressed);
 }
 
 class ChatController extends StateNotifier<ChatState> {
@@ -84,10 +114,52 @@ class ChatController extends StateNotifier<ChatState> {
         _appendTool(evt.data['name']?.toString() ?? '工具', evt.data['args']?.toString() ?? '');
       case EvtType.done:
         _endAi(false);
+        // 【0.2.0】状态行数据（真实 token 用量 + 模型）
+        final u = evt.data['usage'];
+        if (u is Map) {
+          state = state.copyWith(
+            promptTokens: (u['prompt_tokens'] as num?)?.toInt() ?? 0,
+            completionTokens: (u['completion_tokens'] as num?)?.toInt() ?? 0,
+            cacheHit: (u['cache_hit'] as num?)?.toInt() ?? 0,
+          );
+        }
+        if (evt.data['model'] != null) {
+          state = state.copyWith(model: evt.data['model']?.toString());
+        }
       case EvtType.guiNotify:
         _appendSystem('📢 ${evt.data['title']}');
       case EvtType.error:
         _appendSystem('⚠️ ${evt.data['msg'] ?? evt.data['message'] ?? '错误'}');
+      // 【0.2.0】上下文压缩通知（先生决策：App 显示提示条）
+      case EvtType.context:
+        if ((evt.data['action']?.toString() ?? '') == 'summarized') {
+          final removed = evt.data['removed']?.toString() ?? '?';
+          _appendSystem('📋 上下文已压缩（移除 $removed 条旧消息——历史已存档可回溯）');
+          state = state.copyWith(contextCompressed: true);
+        }
+      // 【0.2.0】工具错误卡片（先生决策：17 类详细说明）
+      case EvtType.toolError:
+        _appendToolError(
+          evt.data['name']?.toString() ?? '工具',
+          evt.data['error_type']?.toString() ?? 'Unknown',
+          evt.data['error']?.toString() ?? '',
+          evt.data['action']?.toString() ?? '',
+        );
+      // 【0.2.0】会话头部（model/上下文 token）
+      case EvtType.meta:
+        state = state.copyWith(
+          model: evt.data['model']?.toString(),
+          provider: evt.data['provider']?.toString(),
+        );
+      // 【0.2.0】语音事件
+      case EvtType.ttsResult:
+        _appendSystem('🔊 语音合成完成：${evt.data['file']}');
+      case EvtType.ttsError:
+        _appendSystem('⚠️ 语音合成失败：${evt.data['msg'] ?? evt.data['error'] ?? '未知'}');
+      case EvtType.sttResult:
+        _appendSystem('🎤 识别结果：${evt.data['text']}');
+      case EvtType.sttError:
+        _appendSystem('⚠️ 语音识别失败：${evt.data['msg'] ?? evt.data['error'] ?? '未知'}');
       // 【0.1.9】chat_event 解包：服务端把 AI 事件包装为 {"type":"chat_event","data":{...}}
       case EvtType.chatEvent:
         final inner = evt.data['data'];
@@ -162,7 +234,20 @@ class ChatController extends StateNotifier<ChatState> {
   }
 
   void _appendTool(String name, String args) {
-    _appendSystem('▸ $name $args');
+    final short = args.length > 60 ? '${args.substring(0, 60)}...' : args;
+    state = state.copyWith(messages: [
+      ...state.messages,
+      ChatMsg(ChatMsgType.tool, short, toolName: name)
+    ]);
+  }
+
+  /// 【0.2.0】工具错误卡片（错误类型 + 建议动作）
+  void _appendToolError(String name, String type, String error, String action) {
+    state = state.copyWith(messages: [
+      ...state.messages,
+      ChatMsg(ChatMsgType.toolError, error,
+          toolName: name, errorType: type, errorAction: action)
+    ]);
   }
 
   /// 发送消息（记录原文——继续用）
