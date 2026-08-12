@@ -174,7 +174,6 @@ class _PrivilegeScreenState extends State<PrivilegeScreen> {
                   title: const Text('AI 可经 Shizuku 执行命令', style: TextStyle(fontSize: 14)),
                   subtitle: const Text('授权后 AI（Nook）可通过 Shizuku 执行 adb 级命令（高危命令仍需确认）',
                       style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
-                  activeColor: AppColors.brandCyan,
                 ),
                 const Divider(),
                 const Text(

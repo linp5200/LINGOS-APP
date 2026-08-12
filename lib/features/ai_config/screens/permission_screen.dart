@@ -65,7 +65,6 @@ class PermissionScreen extends ConsumerStatefulWidget {
 }
 
 class _PermissionScreenState extends ConsumerState<PermissionScreen> {
-  List<String> _perms = [];
   List<String> _modes = [];
   Map<String, dynamic> _current = {};
   bool _loading = true;
@@ -101,7 +100,6 @@ class _PermissionScreenState extends ConsumerState<PermissionScreen> {
         final info = resp['data'];
         if (info is Map && info['perms'] is List) {
           setState(() {
-            _perms = (info['perms'] as List).map((e) => e.toString()).toList();
             _modes = (info['modes'] as List).map((e) => e.toString()).toList();
             _current = info['current'] is Map
                 ? Map<String, dynamic>.from(info['current'] as Map)
