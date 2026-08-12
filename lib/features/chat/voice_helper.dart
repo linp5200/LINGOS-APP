@@ -5,8 +5,6 @@
 library;
 
 import 'dart:async';
-import 'dart:convert';
-import 'dart:io';
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:dio/dio.dart';
@@ -43,7 +41,7 @@ class VoiceHelper {
     try {
       final dir = await getTemporaryDirectory();
       final path = '${dir.path}/lingos_rec_${DateTime.now().millisecondsSinceEpoch}.m4a';
-      final cfg = RecordConfig(
+      final cfg = const RecordConfig(
         encoder: AudioEncoder.aacLc,
         sampleRate: 44100,
         numChannels: 1,

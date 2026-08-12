@@ -179,8 +179,8 @@ class _ProvidersScreenState extends ConsumerState<ProvidersScreen> {
               children: [
                 const Icon(Icons.model_training, size: 16, color: AppColors.brandCyan),
                 const SizedBox(width: 6),
-                Text('主机端模型（点击切换）',
-                    style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                const Text('主机端模型（点击切换）',
+                    style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
                 const Spacer(),
                 if (_activeModel.isNotEmpty)
                   Text('当前: $_activeModel',

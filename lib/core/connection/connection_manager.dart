@@ -108,9 +108,13 @@ class ConnectionManager implements ChannelListener {
       } catch (_) {}
     });
     await sendCommand(cmd);
-    final result = await comp.future.timeout(timeout, onTimeout: () => null);
-    await sub.cancel();
-    return result;
+    try {
+      return await comp.future.timeout(timeout);
+    } on TimeoutException {
+      return null;
+    } finally {
+      await sub.cancel();
+    }
   }
 
   /// 建立 WS 对话通道（token 直连——协议 v3）并保存 token

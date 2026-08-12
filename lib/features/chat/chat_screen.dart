@@ -323,6 +323,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           _inputCtrl.text = text;
           _send();
         } else {
+          if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('语音识别失败（服务端 STT 不可用）')),
           );
@@ -331,6 +332,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     } else {
       final ok = await _voice.ensureMicPermission();
       if (!ok) {
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('需要麦克风权限才能语音输入')),
         );
