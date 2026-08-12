@@ -191,7 +191,7 @@ class _PersonalityScreenState extends ConsumerState<PersonalityScreen> {
             value: value.toDouble(),
             max: 10,
             divisions: 10,
-            activeThumbColor: AppColors.brandCyan,
+            activeColor: AppColors.brandCyan,
             onChanged: null, // 只读展示（配置化后续批次）
           ),
         ),
