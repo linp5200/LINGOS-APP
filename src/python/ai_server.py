@@ -533,13 +533,29 @@ def load_config():
 
 
 def _ensure_legacy_providers():
-    """provider.json 为空时用旧配置兜底构造（保持现有行为不破坏）"""
+    """provider.json 为空时用旧配置兜底构造（兼容扁平/嵌套两种 ai_config.json 格式）"""
     providers = []
-    if deepseek_api_key:
+    ds_key, ds_url, ds_model = deepseek_api_key, deepseek_base_url, deepseek_model
+    # 【0.2.0 兼容修复】cmd_ai_config_set 曾写扁平字段（deepseek_api_key 顶层）——load_config 只读嵌套
+    try:
+        for cfg_path in ("/LINGOS/config/ai_config.json", CONFIG_PATH):
+            if os.path.exists(cfg_path):
+                with open(cfg_path) as f:
+                    cfg = json.load(f)
+                if cfg.get("deepseek_api_key") and not ds_key:
+                    ds_key = cfg["deepseek_api_key"]
+                if cfg.get("deepseek_base_url"):
+                    ds_url = cfg["deepseek_base_url"]
+                if cfg.get("deepseek_model"):
+                    ds_model = cfg["deepseek_model"]
+                break
+    except Exception:
+        pass
+    if ds_key:
         providers.append(llm_unified.LLMProvider({
             "id": "deepseek", "name": "DeepSeek", "format": "openai",
-            "base_url": deepseek_base_url, "api_key": deepseek_api_key,
-            "model": deepseek_model,
+            "base_url": ds_url, "api_key": ds_key,
+            "model": ds_model,
             "supports_reasoning": deepseek_reasoning_effort in ("high", "max"),
             "extra": {"reasoning_effort": deepseek_reasoning_effort},
         }))
@@ -547,7 +563,7 @@ def _ensure_legacy_providers():
         "id": "ollama", "name": "Ollama", "format": "openai",
         "base_url": ollama_url, "api_key": "", "model": ollama_model,
     }))
-    active = "deepseek" if deepseek_api_key else "ollama"
+    active = "deepseek" if ds_key else "ollama"
     llm_unified.save_providers(providers, active)
     logger.info("legacy providers ensured: %d (active=%s)", len(providers), active)
 
