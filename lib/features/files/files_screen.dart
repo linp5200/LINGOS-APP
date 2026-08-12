@@ -23,6 +23,7 @@ class _FilesScreenState extends ConsumerState<FilesScreen> {
   bool _loading = false;
   StreamSubscription? _sub;
   final List<String> _history = [];
+  String? _pendingViewPath; // 【0.1.9】待查看的文件（响应含 content）
 
   @override
   void initState() {
@@ -42,20 +43,58 @@ class _FilesScreenState extends ConsumerState<FilesScreen> {
       final evt = jsonDecode(line);
       if (evt is Map && evt['type'] == 'command_response') {
         final data = evt['data'];
+        Map<String, dynamic>? resp;
         if (data is String) {
-          final resp = jsonDecode(data);
-          if (resp is Map && resp['status'] == 'ok') {
-            final list = resp['data'];
-            if (list is List) {
-              setState(() {
-                _entries = list.map((e) => Map<String, dynamic>.from(e is Map ? e : {})).toList();
-                _loading = false;
-              });
-            }
+          final d = jsonDecode(data);
+          if (d is Map) resp = Map<String, dynamic>.from(d);
+        } else if (data is Map) {
+          resp = Map<String, dynamic>.from(data);
+        }
+        if (resp == null || resp['status'] != 'ok') return;
+        // 【0.1.9】文件查看响应（含 content）——弹窗显示
+        if (_pendingViewPath != null) {
+          final content = resp['data'] is Map
+              ? (resp['data'] as Map)['content']?.toString()
+              : resp['content']?.toString();
+          if (content != null) {
+            final path = _pendingViewPath!;
+            _pendingViewPath = null;
+            if (mounted) _showContent(path, content);
           }
+          return;
+        }
+        final list = resp['data'];
+        if (list is List) {
+          setState(() {
+            _entries = list.map((e) => Map<String, dynamic>.from(e is Map ? e : {})).toList();
+            _loading = false;
+          });
         }
       }
     } catch (_) {}
+  }
+
+  /// 【0.1.9】文本内容查看弹窗
+  void _showContent(String path, String content) {
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        title: Text(path, style: const TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+        content: ConstrainedBox(
+          constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(ctx).size.height * 0.6),
+          child: SingleChildScrollView(
+            child: SelectableText(content,
+                style: const TextStyle(
+                    fontSize: 12, color: AppColors.textPrimary, height: 1.5, fontFamily: 'monospace')),
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('关闭')),
+        ],
+      ),
+    );
   }
 
   void _list(String path) {
@@ -91,6 +130,35 @@ class _FilesScreenState extends ConsumerState<FilesScreen> {
     );
     if (ok == true) {
       ref.read(connectionProvider).sendCommand({'cmd': 'file_delete', 'path': path});
+      _list(_path);
+    }
+  }
+
+  /// 【0.1.9】查看文本文件内容（command_response 含 content）
+  void _view(String name) {
+    final path = _path == '/' ? '/$name' : '$_path/$name';
+    ref.read(connectionProvider).sendCommand({'cmd': 'file_read', 'path': path});
+    _pendingViewPath = path;
+  }
+
+  /// 【0.1.9】重命名（file_move 命令）
+  void _rename(String name) async {
+    final ctrl = TextEditingController(text: name);
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('重命名'),
+        content: TextField(controller: ctrl, decoration: const InputDecoration(hintText: '新文件名')),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('取消')),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('保存')),
+        ],
+      ),
+    );
+    if (ok == true && ctrl.text.trim().isNotEmpty && ctrl.text.trim() != name) {
+      final src = _path == '/' ? '/$name' : '$_path/$name';
+      final dst = _path == '/' ? '/${ctrl.text.trim()}' : '$_path/${ctrl.text.trim()}';
+      ref.read(connectionProvider).sendCommand({'cmd': 'file_move', 'src': src, 'dst': dst});
       _list(_path);
     }
   }
@@ -150,11 +218,21 @@ class _FilesScreenState extends ConsumerState<FilesScreen> {
                       style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
                   trailing: isDir
                       ? null
-                      : IconButton(
-                          icon: const Icon(Icons.delete_outline, size: 18),
-                          onPressed: () => _delete(name),
+                      : Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                                icon: const Icon(Icons.visibility_outlined, size: 16),
+                                onPressed: () => _view(name)),
+                            IconButton(
+                                icon: const Icon(Icons.drive_file_rename_outline, size: 16),
+                                onPressed: () => _rename(name)),
+                            IconButton(
+                                icon: const Icon(Icons.delete_outline, size: 18),
+                                onPressed: () => _delete(name)),
+                          ],
                         ),
-                  onTap: isDir ? () => _enter(name) : null,
+                  onTap: isDir ? () => _enter(name) : () => _view(name),
                 );
               },
             ),

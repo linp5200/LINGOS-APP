@@ -218,6 +218,48 @@ class AppStore {
     return sp.getBool(_kAutoMemoryWrite) ?? false;
   }
 
+  // ---------- 【0.1.9】通用偏好（通知/后台等） ----------
+  Future<bool> getPrefBool(String key, bool def) async {
+    final sp = await SharedPreferences.getInstance();
+    return sp.getBool('pref_$key') ?? def;
+  }
+
+  Future<void> savePrefBool(String key, bool v) async {
+    final sp = await SharedPreferences.getInstance();
+    await sp.setBool('pref_$key', v);
+  }
+
+  Future<String> getPrefString(String key, String def) async {
+    final sp = await SharedPreferences.getInstance();
+    return sp.getString('pref_$key') ?? def;
+  }
+
+  Future<void> savePrefString(String key, String v) async {
+    final sp = await SharedPreferences.getInstance();
+    await sp.setString('pref_$key', v);
+  }
+
+  // ---------- 【0.1.9】挂载配置（持久化） ----------
+  static const _kMounts = 'sandbox_mounts_json';
+
+  Future<void> saveMounts(List<Map<String, dynamic>> mounts) async {
+    final sp = await SharedPreferences.getInstance();
+    await sp.setString(_kMounts, jsonEncode(mounts));
+  }
+
+  Future<List<Map<String, dynamic>>> getMounts() async {
+    final sp = await SharedPreferences.getInstance();
+    final raw = sp.getString(_kMounts);
+    if (raw == null || raw.isEmpty) return [];
+    try {
+      final list = jsonDecode(raw);
+      if (list is! List) return [];
+      return list.map((e) => Map<String, dynamic>.from(e as Map)).toList();
+    } catch (_) {
+      return [];
+    }
+  }
+
   // ---------- 设备绑定（UUID 持久） ----------
   Future<String> getDeviceId() async {
     final sp = await SharedPreferences.getInstance();

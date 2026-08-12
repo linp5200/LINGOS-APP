@@ -33,7 +33,16 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     final chat = ref.watch(chatControllerProvider);
     _scrollToBottom();
     return Scaffold(
-      appBar: AppBar(title: const Text('Nook'), actions: [
+      appBar: AppBar(
+        // 【0.1.9】左上角三横——打开 Drawer
+        leading: Builder(
+          builder: (ctx) => IconButton(
+            icon: const Icon(Icons.menu, size: 22),
+            onPressed: () => Scaffold.of(ctx).openDrawer(),
+          ),
+        ),
+        title: const Text('Nook'),
+        actions: [
         IconButton(icon: const Icon(Icons.delete_outline, size: 20), onPressed: () => ref.read(chatControllerProvider.notifier).clear()),
       ]),
       body: Column(

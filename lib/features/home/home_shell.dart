@@ -126,8 +126,8 @@ class _HomeShellState extends ConsumerState<HomeShell> {
               ],
             ),
           ),
-          // 【0.1.9】AI 配置统一入口（设置/记忆/会话/文件已迁入）
-          _item(context, Icons.tune, 'AI 配置', const AiConfigScreen()),
+          // 【0.1.9】设置统一入口（原 AI 配置改名——内部区块不变）
+          _item(context, Icons.tune, '设置', const AiConfigScreen()),
           _item(context, Icons.home_work_outlined, 'HA 面板', const HaScreen()),
           _item(context, Icons.notifications_outlined, '预警中心', const AlertsScreen()),
           const Divider(color: AppColors.divider),

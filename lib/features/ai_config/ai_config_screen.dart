@@ -8,7 +8,6 @@ import '../../core/theme/app_theme.dart';
 import '../memory/memory_screen.dart';
 import '../sessions/sessions_screen.dart';
 import '../files/files_screen.dart';
-import '../logs/logs_screen.dart';
 import 'screens/providers_screen.dart';
 import 'screens/token_usage_screen.dart';
 import 'screens/permission_screen.dart';
@@ -32,7 +31,7 @@ class AiConfigScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('AI 配置')),
+      appBar: AppBar(title: const Text('设置')),
       body: ListView(
         padding: const EdgeInsets.symmetric(vertical: 8),
         children: [
@@ -73,8 +72,6 @@ class AiConfigScreen extends StatelessWidget {
           _section(context, '连接与设置'),
           _tile(context, Icons.dns_outlined, '主机', '主机IP / 连接密钥 / 连接状态 / 连接方式 / 加密',
               () => _push(context, const ConnSettingsScreen())),
-          _tile(context, Icons.article_outlined, '应用日志', '连接/WS/命令全链路日志',
-              () => _push(context, const LogsScreen())),
 
           _section(context, '外观与偏好'),
           _tile(context, Icons.palette_outlined, '外观与偏好', '主题 / 强调色 / 语言 / 消息偏好 / 隐私',
