@@ -12,7 +12,6 @@ import '../../../core/storage/app_store.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/connection/connection_mode.dart';
 import '../../connect/connect_screen.dart';
-import '../../logs/logs_screen.dart';
 
 class ConnSettingsScreen extends ConsumerStatefulWidget {
   const ConnSettingsScreen({super.key});
@@ -148,16 +147,6 @@ class _ConnSettingsScreenState extends ConsumerState<ConnSettingsScreen> {
                     '加密模式默认（wss://）——本地服务端无 TLS 时需开启明文（ws://）',
                     style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
                   ),
-                ),
-                const Divider(),
-                _section('应用日志'),
-                ListTile(
-                  leading: const Icon(Icons.article_outlined, size: 20),
-                  title: const Text('日志'),
-                  subtitle: const Text('连接/WS/命令全链路日志——查看与导出',
-                      style: TextStyle(color: AppColors.textSecondary)),
-                  onTap: () => Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => const LogsScreen())),
                 ),
                 const Divider(),
                 const SizedBox(height: 8),

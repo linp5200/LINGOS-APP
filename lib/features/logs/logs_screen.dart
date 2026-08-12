@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../core/logging/app_logger.dart';
+import '../../core/storage/app_store.dart';
 import '../../core/theme/app_theme.dart';
 
 class LogsScreen extends StatefulWidget {
@@ -16,6 +17,32 @@ class LogsScreen extends StatefulWidget {
 
 class _LogsScreenState extends State<LogsScreen> {
   final _logger = AppLogger.instance;
+  bool _enabled = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    final store = AppStore();
+    final v = await store.getLoggingEnabled();
+    if (!mounted) return;
+    setState(() {
+      _enabled = v;
+      _logger.enabled = v;
+    });
+  }
+
+  Future<void> _toggle(bool v) async {
+    final store = AppStore();
+    setState(() {
+      _enabled = v;
+      _logger.enabled = v;
+    });
+    await store.saveLoggingEnabled(v);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,6 +67,15 @@ class _LogsScreenState extends State<LogsScreen> {
       ),
       body: Column(
         children: [
+          // 【A2修复】日志记录开关
+          SwitchListTile(
+            dense: true,
+            value: _enabled,
+            onChanged: _toggle,
+            title: const Text('记录日志', style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+            subtitle: const Text('关闭后不再记录新日志（连接/WS/命令）',
+                style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+          ),
           Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),

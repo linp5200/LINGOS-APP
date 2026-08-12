@@ -13,6 +13,7 @@ class AppLogger {
   final List<String> _logs = [];
   final int maxLines = 500;
   File? _logFile;
+  bool enabled = true; // 【A2修复】日志记录开关
 
   /// 当前 App 版本（发版同步）
   static const appVersion = '0.1.9';
@@ -27,6 +28,8 @@ class AppLogger {
   }
 
   void log(String tag, String message) {
+    // 【A2修复】日志开关——关闭时不记录
+    if (!enabled) return;
     final ts = DateTime.now().toString().substring(0, 19);
     final line = '[$ts][$tag] $message';
     _logs.add(line);

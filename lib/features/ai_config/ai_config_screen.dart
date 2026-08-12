@@ -8,6 +8,7 @@ import '../../core/theme/app_theme.dart';
 import '../memory/memory_screen.dart';
 import '../sessions/sessions_screen.dart';
 import '../files/files_screen.dart';
+import '../logs/logs_screen.dart';
 import 'screens/providers_screen.dart';
 import 'screens/token_usage_screen.dart';
 import 'screens/permission_screen.dart';
@@ -20,6 +21,7 @@ import 'screens/server_files_screen.dart';
 import 'screens/notif_screen.dart';
 import 'screens/conn_settings_screen.dart';
 import 'screens/appearance_screen.dart';
+import 'screens/privilege_screen.dart';
 
 class AiConfigScreen extends StatelessWidget {
   const AiConfigScreen({super.key});
@@ -68,10 +70,15 @@ class AiConfigScreen extends StatelessWidget {
           _section(context, '通知与后台'),
           _tile(context, Icons.notifications_active_outlined, '通知与后台', '通知渠道 / 保活 / 电池优化',
               () => _push(context, const NotifScreen())),
+          // 【A5】特权——Shizuku/adb
+          _tile(context, Icons.security_outlined, '特权', 'Shizuku 授权 + AI adb 通道',
+              () => _push(context, const PrivilegeScreen())),
 
           _section(context, '连接与设置'),
           _tile(context, Icons.dns_outlined, '主机', '主机IP / 连接密钥 / 连接状态 / 连接方式 / 加密',
               () => _push(context, const ConnSettingsScreen())),
+          _tile(context, Icons.article_outlined, '日志', '连接/WS/命令全链路日志——查看与导出',
+              () => _push(context, const LogsScreen())),
 
           _section(context, '外观与偏好'),
           _tile(context, Icons.palette_outlined, '外观与偏好', '主题 / 强调色 / 语言 / 消息偏好 / 隐私',

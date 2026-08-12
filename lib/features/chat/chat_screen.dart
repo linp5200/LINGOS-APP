@@ -9,7 +9,9 @@ import '../../core/theme/app_theme.dart';
 import 'chat_controller.dart';
 
 class ChatScreen extends ConsumerStatefulWidget {
-  const ChatScreen({super.key});
+  // 【A1修复】三横按钮回调（HomeShell 打开 Drawer）
+  final VoidCallback? onOpenDrawer;
+  const ChatScreen({super.key, this.onOpenDrawer});
 
   @override
   ConsumerState<ChatScreen> createState() => _ChatScreenState();
@@ -34,12 +36,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     _scrollToBottom();
     return Scaffold(
       appBar: AppBar(
-        // 【0.1.9】左上角三横——打开 Drawer
-        leading: Builder(
-          builder: (ctx) => IconButton(
-            icon: const Icon(Icons.menu, size: 22),
-            onPressed: () => Scaffold.of(ctx).openDrawer(),
-          ),
+        // 【0.1.9】左上角三横——打开 Drawer（经回调——修复 Scaffold.of 跨层失效）
+        leading: IconButton(
+          icon: const Icon(Icons.menu, size: 22),
+          onPressed: widget.onOpenDrawer,
         ),
         title: const Text('Nook'),
         actions: [

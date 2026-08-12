@@ -18,6 +18,8 @@ dependencies:
   shared_preferences: ^2.2.3
   flutter_local_notifications: ^17.2.2
   flutter_secure_storage: ^9.2.2
+  permission_handler: ^11.3.1 # 【A4修复】真实 Android 授权
+  shizuku_api: ^0.2.0 # 【A5】Shizuku 特权——AI 经 adb 执行命令
 
 dev_dependencies:
   flutter_test:

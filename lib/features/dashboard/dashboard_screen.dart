@@ -11,7 +11,9 @@ import '../../core/providers.dart';
 import '../../core/theme/app_theme.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
-  const DashboardScreen({super.key});
+  // 【A1修复】三横按钮回调（HomeShell 打开 Drawer）
+  final VoidCallback? onOpenDrawer;
+  const DashboardScreen({super.key, this.onOpenDrawer});
 
   @override
   ConsumerState<DashboardScreen> createState() => _DashboardScreenState();
@@ -92,12 +94,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        // 【0.1.9】左上角三横——打开 Drawer
-        leading: Builder(
-          builder: (ctx) => IconButton(
-            icon: const Icon(Icons.menu, size: 22),
-            onPressed: () => Scaffold.of(ctx).openDrawer(),
-          ),
+        // 【0.1.9】左上角三横——打开 Drawer（经回调——修复 Scaffold.of 跨层失效）
+        leading: IconButton(
+          icon: const Icon(Icons.menu, size: 22),
+          onPressed: widget.onOpenDrawer,
         ),
         title: const Text('仪表盘'),
         actions: [

@@ -24,9 +24,18 @@ class HomeShell extends ConsumerStatefulWidget {
 class _HomeShellState extends ConsumerState<HomeShell> {
   int _index = 0;
   bool _tokenListenerAttached = false;
+  // 【A1修复】GlobalKey——子页三横按钮经回调打开 HomeShell 的 Drawer
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
 
   // 【0.1.9】底部导航：对话 / 仪表盘（设置已迁入 AI 配置）
-  static const _pages = [ChatScreen(), DashboardScreen()];
+  late final List<Widget> _pages = [
+    ChatScreen(onOpenDrawer: _openDrawer),
+    DashboardScreen(onOpenDrawer: _openDrawer),
+  ];
+
+  void _openDrawer() {
+    _scaffoldKey.currentState?.openDrawer();
+  }
 
   @override
   void didChangeDependencies() {
@@ -158,6 +167,7 @@ class _HomeShellState extends ConsumerState<HomeShell> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       drawer: _buildDrawer(context),
       body: _pages[_index],
       bottomNavigationBar: NavigationBar(

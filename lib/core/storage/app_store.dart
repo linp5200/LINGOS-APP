@@ -284,6 +284,19 @@ class AppStore {
     }
   }
 
+  // ---------- 【0.1.9】日志开关 ----------
+  static const _kLogging = 'logging_enabled';
+
+  Future<void> saveLoggingEnabled(bool v) async {
+    final sp = await SharedPreferences.getInstance();
+    await sp.setBool(_kLogging, v);
+  }
+
+  Future<bool> getLoggingEnabled() async {
+    final sp = await SharedPreferences.getInstance();
+    return sp.getBool(_kLogging) ?? true; // 默认开启
+  }
+
   // ---------- 设备绑定（UUID 持久） ----------
   Future<String> getDeviceId() async {
     final sp = await SharedPreferences.getInstance();
