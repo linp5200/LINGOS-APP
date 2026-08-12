@@ -42,6 +42,12 @@ class EvtType {
   static const String done = 'done'; // 结束
   static const String authRequest = 'auth_request'; // 授权请求
   static const String authRespOk = 'auth_resp_ok';
+  // 【0.1.9】chat 包装层与中断
+  static const String chatEvent = 'chat_event'; // 服务端 AI 事件包装（data 内再解析）
+  static const String chatDone = 'chat_done'; // 转发结束
+  static const String chatInterrupted = 'chat_interrupted'; // 已被中断
+  static const String chatError = 'chat_error'; // 转发错误
+  static const String interruptAck = 'interrupt_ack'; // 中断已确认
   // 连接层事件（ConnectionManager 发出）
   static const String connectionOk = 'connection_ok';
   static const String connError = 'conn_error';

@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/providers.dart';
+import '../../core/storage/app_store.dart';
 import '../../core/theme/app_theme.dart';
 
 class MemoryScreen extends ConsumerStatefulWidget {
@@ -19,6 +20,8 @@ class MemoryScreen extends ConsumerStatefulWidget {
 
 class _MemoryScreenState extends ConsumerState<MemoryScreen> {
   final _searchCtrl = TextEditingController();
+  final _store = AppStore();
+  bool _autoWrite = false;
   List<Map<String, dynamic>> _items = [];
   bool _loading = false;
   StreamSubscription? _sub;
@@ -27,7 +30,14 @@ class _MemoryScreenState extends ConsumerState<MemoryScreen> {
   void initState() {
     super.initState();
     _sub = ref.read(connectionProvider).events.listen(_onEvent);
+    _loadAutoWrite();
     _search('');
+  }
+
+  Future<void> _loadAutoWrite() async {
+    final v = await _store.getAutoMemoryWrite();
+    if (!mounted) return;
+    setState(() => _autoWrite = v);
   }
 
   @override
@@ -98,6 +108,35 @@ class _MemoryScreenState extends ConsumerState<MemoryScreen> {
     _search(_searchCtrl.text.trim());
   }
 
+  /// 【0.1.9】点击记忆——展开全文详情
+  void _showDetail(String content, String type, String time) {
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        title: Text([if (type.isNotEmpty) type, if (time.isNotEmpty) time].join(' · '),
+            style: const TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+        content: SingleChildScrollView(
+          child: SelectableText(content,
+              style: const TextStyle(fontSize: 14, color: AppColors.textPrimary, height: 1.6)),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('关闭')),
+        ],
+      ),
+    );
+  }
+
+  String _fmtMemTime(String t) {
+    // 兼容数字时间戳（秒）与已格式化字符串
+    final ts = int.tryParse(t);
+    if (ts != null && ts > 1000000000) {
+      final d = DateTime.fromMillisecondsSinceEpoch(ts * 1000);
+      return '${d.month}-${d.day} ${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}';
+    }
+    return t;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -106,6 +145,19 @@ class _MemoryScreenState extends ConsumerState<MemoryScreen> {
       ]),
       body: Column(
         children: [
+          // 【0.1.9】AI 记忆自动写入开关（先生定案：显示状态）
+          SwitchListTile(
+            dense: true,
+            value: _autoWrite,
+            onChanged: (v) async {
+              setState(() => _autoWrite = v);
+              await _store.saveAutoMemoryWrite(v);
+            },
+            title: const Text('AI 记忆自动写入',
+                style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+            subtitle: const Text('允许 AI 自主调用 memory_write 记录重要信息',
+                style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+          ),
           Padding(
             padding: const EdgeInsets.all(16),
             child: Row(
@@ -136,14 +188,20 @@ class _MemoryScreenState extends ConsumerState<MemoryScreen> {
                         itemBuilder: (ctx, i) {
                           final m = _items[i];
                           final id = m['id']?.toString() ?? '';
+                          final content = m['content']?.toString() ?? '';
+                          final type = m['type']?.toString() ?? '';
+                          final time = m['time']?.toString() ?? m['timestamp']?.toString() ?? '';
                           return Card(
                             margin: const EdgeInsets.only(bottom: 8),
                             child: ListTile(
                               leading: const Icon(Icons.psychology_outlined, size: 20, color: AppColors.brandCyan),
-                              title: Text(m['content']?.toString() ?? '',
-                                  style: const TextStyle(fontSize: 13), maxLines: 3, overflow: TextOverflow.ellipsis),
-                              subtitle: Text('${m['type']?.toString() ?? ''}  ${m['time']?.toString() ?? ''}',
+                              // 【0.1.9】列表显示摘要——点击展开全文
+                              title: Text(content.length > 60 ? '${content.substring(0, 60)}...' : content,
+                                  style: const TextStyle(fontSize: 13), maxLines: 2, overflow: TextOverflow.ellipsis),
+                              subtitle: Text(
+                                  [if (type.isNotEmpty) type, if (time.isNotEmpty) _fmtMemTime(time)].join(' · '),
                                   style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                              onTap: () => _showDetail(content, type, time),
                               trailing: id.isEmpty
                                   ? null
                                   : IconButton(

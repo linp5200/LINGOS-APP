@@ -11,11 +11,8 @@ import '../alerts/alerts_screen.dart';
 import '../chat/chat_screen.dart';
 import '../connect/connect_screen.dart';
 import '../dashboard/dashboard_screen.dart';
-import '../files/files_screen.dart';
 import '../ha/ha_screen.dart';
-import '../memory/memory_screen.dart';
-import '../sessions/sessions_screen.dart';
-import '../settings/settings_screen.dart';
+import '../ai_config/ai_config_screen.dart';
 
 class HomeShell extends ConsumerStatefulWidget {
   const HomeShell({super.key});
@@ -28,7 +25,8 @@ class _HomeShellState extends ConsumerState<HomeShell> {
   int _index = 0;
   bool _tokenListenerAttached = false;
 
-  static const _pages = [ChatScreen(), DashboardScreen(), SettingsScreen()];
+  // 【0.1.9】底部导航：对话 / 仪表盘（设置已迁入 AI 配置）
+  static const _pages = [ChatScreen(), DashboardScreen()];
 
   @override
   void didChangeDependencies() {
@@ -124,15 +122,14 @@ class _HomeShellState extends ConsumerState<HomeShell> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 Text('LING OS', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
-                Text('v0.1.8', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                Text('v0.1.9', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
               ],
             ),
           ),
+          // 【0.1.9】AI 配置统一入口（设置/记忆/会话/文件已迁入）
+          _item(context, Icons.tune, 'AI 配置', const AiConfigScreen()),
           _item(context, Icons.home_work_outlined, 'HA 面板', const HaScreen()),
           _item(context, Icons.notifications_outlined, '预警中心', const AlertsScreen()),
-          _item(context, Icons.folder_outlined, '文件浏览器', const FilesScreen()),
-          _item(context, Icons.psychology_outlined, '记忆管理', const MemoryScreen()),
-          _item(context, Icons.forum_outlined, '会话管理', const SessionsScreen()),
           const Divider(color: AppColors.divider),
           ListTile(
             leading: const Icon(Icons.logout, size: 20, color: AppColors.brandRed),
@@ -169,7 +166,6 @@ class _HomeShellState extends ConsumerState<HomeShell> {
         destinations: const [
           NavigationDestination(icon: Icon(Icons.chat_bubble_outline), selectedIcon: Icon(Icons.chat_bubble), label: '对话'),
           NavigationDestination(icon: Icon(Icons.dashboard_outlined), selectedIcon: Icon(Icons.dashboard), label: '仪表盘'),
-          NavigationDestination(icon: Icon(Icons.settings_outlined), selectedIcon: Icon(Icons.settings), label: '设置'),
         ],
       ),
     );

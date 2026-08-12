@@ -5,6 +5,7 @@
 library;
 
 import 'dart:math';
+import 'dart:convert';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -86,6 +87,135 @@ class AppStore {
   Future<String> getConnectionModeId() async {
     final sp = await SharedPreferences.getInstance();
     return sp.getString(_kConnectionMode) ?? 'native'; // 默认原生
+  }
+
+  // ---------- 【0.1.9】AI 提供商配置（本地加密存储） ----------
+  static const _kProviders = 'ai_providers_json';
+  static const _kProviderKeys = 'ai_provider_keys_json'; // 密钥单独存（展示不泄露）
+
+  Future<void> saveProviders(List<Map<String, dynamic>> providers) async {
+    final sp = await SharedPreferences.getInstance();
+    final public = providers.map((p) {
+      final m = Map<String, dynamic>.from(p);
+      m.remove('apiKey'); // 密钥不落公开 JSON
+      return m;
+    }).toList();
+    await sp.setString(_kProviders, jsonEncode(public));
+    final keys = <String, String>{};
+    for (final p in providers) {
+      if (p['apiKey'] != null && p['id'] != null) {
+        keys[p['id'].toString()] = p['apiKey'].toString();
+      }
+    }
+    await sp.setString(_kProviderKeys, jsonEncode(keys));
+  }
+
+  Future<List<Map<String, dynamic>>> getProviders() async {
+    final sp = await SharedPreferences.getInstance();
+    final raw = sp.getString(_kProviders);
+    if (raw == null || raw.isEmpty) return [];
+    try {
+      final list = jsonDecode(raw);
+      if (list is! List) return [];
+      return list.map((e) => Map<String, dynamic>.from(e as Map)).toList();
+    } catch (_) {
+      return [];
+    }
+  }
+
+  Future<String?> getProviderKey(String id) async {
+    final sp = await SharedPreferences.getInstance();
+    final raw = sp.getString(_kProviderKeys);
+    if (raw == null || raw.isEmpty) return null;
+    try {
+      final map = jsonDecode(raw);
+      return map is Map ? map[id]?.toString() : null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  // ---------- 【0.1.9】外观与偏好 ----------
+  static const _kThemeMode = 'ui_theme_mode'; // system/light/dark
+  static const _kAccentDynamic = 'ui_accent_dynamic'; // bool
+  static const _kLanguage = 'ui_language'; // system/zh/en
+  static const _kMsgPrefs = 'ui_msg_prefs_json';
+  static const _kAnalytics = 'privacy_analytics';
+
+  Future<void> saveThemeMode(String mode) async {
+    final sp = await SharedPreferences.getInstance();
+    await sp.setString(_kThemeMode, mode);
+  }
+
+  Future<String> getThemeMode() async {
+    final sp = await SharedPreferences.getInstance();
+    return sp.getString(_kThemeMode) ?? 'system';
+  }
+
+  Future<void> saveAccentDynamic(bool v) async {
+    final sp = await SharedPreferences.getInstance();
+    await sp.setBool(_kAccentDynamic, v);
+  }
+
+  Future<bool> getAccentDynamic() async {
+    final sp = await SharedPreferences.getInstance();
+    return sp.getBool(_kAccentDynamic) ?? true; // 默认动态取色
+  }
+
+  Future<void> saveLanguage(String lang) async {
+    final sp = await SharedPreferences.getInstance();
+    await sp.setString(_kLanguage, lang);
+  }
+
+  Future<String> getLanguage() async {
+    final sp = await SharedPreferences.getInstance();
+    return sp.getString(_kLanguage) ?? 'system';
+  }
+
+  Future<void> saveMsgPrefs(Map<String, bool> prefs) async {
+    final sp = await SharedPreferences.getInstance();
+    await sp.setString(_kMsgPrefs, jsonEncode(prefs));
+  }
+
+  Future<Map<String, bool>> getMsgPrefs() async {
+    final sp = await SharedPreferences.getInstance();
+    final raw = sp.getString(_kMsgPrefs);
+    const defaults = {
+      'thinking': true, 'tool': true, 'streaming': true, 'codeHighlight': true,
+    };
+    if (raw == null || raw.isEmpty) return defaults;
+    try {
+      final map = jsonDecode(raw);
+      if (map is! Map) return defaults;
+      return {
+        for (final k in defaults.keys) k: map[k] as bool? ?? defaults[k]!,
+      };
+    } catch (_) {
+      return defaults;
+    }
+  }
+
+  Future<void> saveAnalytics(bool v) async {
+    final sp = await SharedPreferences.getInstance();
+    await sp.setBool(_kAnalytics, v);
+  }
+
+  Future<bool> getAnalytics() async {
+    final sp = await SharedPreferences.getInstance();
+    return sp.getBool(_kAnalytics) ?? false; // 默认关（隐私第一）
+  }
+
+  // ---------- 【0.1.9】记忆自动写入开关 ----------
+  static const _kAutoMemoryWrite = 'ai_auto_memory_write';
+
+  Future<void> saveAutoMemoryWrite(bool v) async {
+    final sp = await SharedPreferences.getInstance();
+    await sp.setBool(_kAutoMemoryWrite, v);
+  }
+
+  Future<bool> getAutoMemoryWrite() async {
+    final sp = await SharedPreferences.getInstance();
+    return sp.getBool(_kAutoMemoryWrite) ?? false;
   }
 
   // ---------- 设备绑定（UUID 持久） ----------

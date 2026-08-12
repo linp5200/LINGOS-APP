@@ -1,7 +1,7 @@
 name: lingos_app
 description: "LING OS App - Flutter 重写版（协议 v3）"
 publish_to: 'none'
-version: 0.1.8+9  # App 0.1.8（token 重验证弹窗——验证码/登出）
+version: 0.1.9+10  # App 0.1.9（chat prompt 适配 + 中断继续 + AI 配置 + 预警适配）
 
 environment:
   sdk: '>=3.4.0 <4.0.0'

@@ -31,17 +31,44 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         final evt = jsonDecode(line);
         if (evt is Map && evt['type'] == 'command_response') {
           final data = evt['data'];
+          Map<String, dynamic>? resp;
+          // 【0.1.9】兼容 String（再解析）与 Map（直接）
           if (data is String) {
-            final resp = jsonDecode(data);
-            if (resp is Map && resp['status'] == 'ok') {
-              final info = resp['data'];
-              if (info is Map) {
-                setState(() {
-                  _info = Map<String, dynamic>.from(info);
-                  _loading = false;
-                });
-              }
-            }
+            final decoded = jsonDecode(data);
+            if (decoded is Map) resp = Map<String, dynamic>.from(decoded);
+          } else if (data is Map) {
+            resp = Map<String, dynamic>.from(data);
+          }
+          if (resp == null) {
+            setState(() {
+              _loading = false;
+              _info = null;
+              _error = '核心数据无有效响应（格式异常）';
+            });
+            return;
+          }
+          final r = resp; // final 提升——闭包内可用（修复 nullable 闭包报错）
+          if (r['status'] != 'ok') {
+            setState(() {
+              _loading = false;
+              _info = null;
+              _error = '获取失败：${r['msg'] ?? r['message'] ?? '未知错误'}';
+            });
+            return;
+          }
+          final info = resp['data'];
+          if (info is Map && info.isNotEmpty) {
+            setState(() {
+              _info = Map<String, dynamic>.from(info);
+              _loading = false;
+              _error = null;
+            });
+          } else {
+            setState(() {
+              _loading = false;
+              _info = null;
+              _error = '核心数据为空（服务端无有效数据）';
+            });
           }
         }
       } catch (_) {}

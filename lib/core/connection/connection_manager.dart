@@ -137,16 +137,26 @@ class ConnectionManager implements ChannelListener {
   }
 
   /// 发送对话（WS 通道——chat 事件）
+  /// 【0.1.9】字段适配：content → prompt（服务端 websocket_server.c 以 prompt 解析）
   Future<void> sendChat(String content, {String sessionId = 'default'}) async {
     if (ws != null && ws!.isConnected) {
       await ws!.send(jsonEncode({
         'type': 'chat',
-        'content': content,
+        'prompt': content,
         'session_id': sessionId,
       }));
     } else if (tcp != null && tcp!.isConnected) {
       await sendCommand({'cmd': 'nook_ask', 'prompt': content, 'session_id': sessionId});
     }
+  }
+
+  /// 【0.1.9】发送中断帧（终止当前 AI 回复）
+  Future<bool> sendInterrupt() async {
+    if (ws != null && ws!.isConnected) {
+      await ws!.send(jsonEncode({'type': 'interrupt'}));
+      return true;
+    }
+    return false;
   }
 
   void startHeartbeat() {

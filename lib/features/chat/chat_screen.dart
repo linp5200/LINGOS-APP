@@ -1,4 +1,5 @@
 /// Chat 页面（协议 v3——流式对话渲染）
+/// 【0.1.9】发送键↔中断键 + 已终止（继续）交互
 library;
 
 import 'package:flutter/material.dart';
@@ -67,18 +68,48 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           ),
         );
       case ChatMsgType.ai:
-        return Align(
-          alignment: Alignment.centerLeft,
-          child: Container(
-            margin: const EdgeInsets.only(bottom: 10),
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.circular(14),
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Container(
+                margin: const EdgeInsets.only(bottom: 6),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Text(msg.content + (msg.streaming ? '▍' : ''),
+                    style: const TextStyle(color: AppColors.textPrimary, fontSize: 14, height: 1.5)),
+              ),
             ),
-            child: Text(msg.content + (msg.streaming ? '▍' : ''),
-                style: const TextStyle(color: AppColors.textPrimary, fontSize: 14, height: 1.5)),
-          ),
+            // 【0.1.9】已终止（继续）——点击重发原文续接
+            if (msg.interrupted)
+              Padding(
+                padding: const EdgeInsets.only(left: 6, bottom: 10),
+                child: GestureDetector(
+                  onTap: () => ref.read(chatControllerProvider.notifier).resume(),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: AppColors.surface.withValues(alpha: 0.5),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: AppColors.divider),
+                    ),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.refresh, size: 14, color: AppColors.textSecondary),
+                        SizedBox(width: 4),
+                        Text('已终止（继续）',
+                            style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+          ],
         );
       case ChatMsgType.thinking:
         return Container(
@@ -135,10 +166,21 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             ),
           ),
           const SizedBox(width: 8),
-          IconButton.filled(
-            onPressed: busy ? null : _send,
-            icon: const Icon(Icons.send_rounded, size: 20),
-          ),
+          // 【0.1.9】busy 时发送键 → 中断键
+          busy
+              ? IconButton.filled(
+                  style: IconButton.styleFrom(
+                    backgroundColor: AppColors.brandRed,
+                    disabledBackgroundColor: AppColors.brandRed,
+                  ),
+                  onPressed: () => ref.read(chatControllerProvider.notifier).interrupt(),
+                  icon: const Icon(Icons.stop_rounded, size: 22, color: Colors.white),
+                  tooltip: '中断',
+                )
+              : IconButton.filled(
+                  onPressed: _send,
+                  icon: const Icon(Icons.send_rounded, size: 20),
+                ),
         ],
       ),
     );

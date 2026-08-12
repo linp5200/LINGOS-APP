@@ -30,17 +30,30 @@ class _AlertsScreenState extends ConsumerState<AlertsScreen> {
         final evt = jsonDecode(line);
         if (evt is Map && evt['type'] == 'command_response') {
           final data = evt['data'];
+          Map<String, dynamic>? resp;
+          // 【0.1.9】兼容 String（再解析）与 Map（直接）
           if (data is String) {
-            final resp = jsonDecode(data);
-            if (resp is Map && resp['status'] == 'ok') {
-              final list = resp['data'];
-              if (list is List) {
-                setState(() {
-                  _alerts = list.map((e) => Map<String, dynamic>.from(e is Map ? e : {})).toList();
-                  _loading = false;
-                });
-              }
-            }
+            final decoded = jsonDecode(data);
+            if (decoded is Map) resp = Map<String, dynamic>.from(decoded);
+          } else if (data is Map) {
+            resp = Map<String, dynamic>.from(data);
+          }
+          if (resp == null || resp['status'] != 'ok') {
+            setState(() => _loading = false);
+            return;
+          }
+          // 【0.1.9】alert_query 返回 {status,count,events:[...]}——从 events 取
+          final events = resp['events'] ?? resp['data'];
+          if (events is List) {
+            setState(() {
+              _alerts = events.map((e) => Map<String, dynamic>.from(e is Map ? e : {})).toList();
+              _loading = false;
+            });
+          } else {
+            setState(() {
+              _alerts = [];
+              _loading = false;
+            });
           }
         }
       } catch (_) {}
@@ -94,10 +107,19 @@ class _AlertsScreenState extends ConsumerState<AlertsScreen> {
                       margin: const EdgeInsets.only(bottom: 8),
                       child: ListTile(
                         leading: Icon(Icons.warning_amber_rounded, color: color, size: 22),
-                        title: Text(a['title']?.toString() ?? '预警',
+                        title: Text(
+                            a['title']?.toString() ??
+                                a['description']?.toString() ??
+                                '预警',
                             style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-                        subtitle: Text(a['message']?.toString() ?? a['content']?.toString() ?? ''),
-                        trailing: Text(a['time']?.toString() ?? '',
+                        subtitle: Text([
+                          if (a['location']?.toString().isNotEmpty ?? false) a['location'].toString(),
+                          if (a['source']?.toString().isNotEmpty ?? false) '来源: ${a['source']}',
+                          if (a['type']?.toString().isNotEmpty ?? false) '类型: ${a['type']}',
+                        ].join(' · ')),
+                        trailing: Text(
+                            a['time']?.toString() ??
+                                (a['timestamp'] != null ? DateTime.fromMillisecondsSinceEpoch((a['timestamp'] as num).toInt() * 1000).toString().substring(5, 16) : ''),
                             style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
                       ),
                     );
