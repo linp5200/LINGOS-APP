@@ -163,10 +163,12 @@ class _PermissionScreenState extends ConsumerState<PermissionScreen> {
                           trailing: DropdownButton<String>(
                             value: _current[perm]?.toString() ?? 'deny',
                             underline: const SizedBox.shrink(),
-                            items: _modes.map((m) => DropdownMenuItem(
-                                value: m,
-                                child: Text(kModeLabels[m] ?? m,
-                                    style: const TextStyle(fontSize: 13)))),
+                            items: _modes
+                                .map((m) => DropdownMenuItem(
+                                    value: m,
+                                    child: Text(kModeLabels[m] ?? m,
+                                        style: const TextStyle(fontSize: 13))))
+                                .toList(),
                             onChanged: (v) {
                               if (v != null) _setMode(perm, v);
                             },

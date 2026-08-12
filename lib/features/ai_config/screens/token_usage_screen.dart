@@ -42,14 +42,15 @@ class _TokenUsageScreenState extends ConsumerState<TokenUsageScreen> {
             resp = Map<String, dynamic>.from(data);
           }
           if (resp == null) return;
-          if (resp['status'] != 'ok') {
+          final r = resp; // 提升（修复 nullable 闭包）
+          if (r['status'] != 'ok') {
             setState(() {
               _loading = false;
-              _error = '查询失败：${resp['msg'] ?? '未知错误'}';
+              _error = '查询失败：${r['msg'] ?? '未知错误'}';
             });
             return;
           }
-          final info = resp['data'];
+          final info = r['data'];
           if (info is Map) {
             setState(() {
               _data = Map<String, dynamic>.from(info);
@@ -219,8 +220,8 @@ class _TokenUsageScreenState extends ConsumerState<TokenUsageScreen> {
           ),
         const SizedBox(height: 12),
         // 明细（可展开）
-        const Text('明细（最近 ${records.length} 条）',
-            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
+        Text('明细（最近 ${records.length} 条）',
+            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
         const SizedBox(height: 8),
         for (final r in records)
           _recordTile(r),

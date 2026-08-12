@@ -91,9 +91,10 @@ class _ProvidersScreenState extends State<ProvidersScreen> {
       if (p.id == existing['id']) { preset = p; break; }
     }
     if (preset == null) return;
+    final pr = preset; // 提升（修复 nullable）
     final result = await Navigator.of(context).push<Map<String, dynamic>>(
       MaterialPageRoute(
-          builder: (_) => _ProviderConfigScreen(preset: preset, existing: existing)),
+          builder: (_) => _ProviderConfigScreen(preset: pr, existing: existing)),
     );
     if (result != null) {
       final list = [..._providers];
