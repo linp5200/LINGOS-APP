@@ -1,5 +1,5 @@
 /// 特权（0.1.9 A5——Shizuku 授权 + AI 经 adb 执行命令）
-/// 需系统已安装 Shizuku（com.moe.shizuku.xyz）+ 已激活
+/// shizuku_api 1.2.2：ShizukuApi().requestPermission/pingBinder/checkPermission/runCommand
 library;
 
 import 'package:flutter/material.dart';
@@ -17,8 +17,8 @@ class PrivilegeScreen extends StatefulWidget {
 
 class _PrivilegeScreenState extends State<PrivilegeScreen> {
   final _store = AppStore();
-  bool _shizukuInstalled = false;
-  bool _shizukuGranted = false;
+  final _api = ShizukuApi();
+  bool? _granted; // null=未检测
   bool _checking = true;
   bool _adbEnabled = false;
   String _lastOutput = '';
@@ -38,19 +38,16 @@ class _PrivilegeScreenState extends State<PrivilegeScreen> {
 
   Future<void> _check() async {
     try {
-      final installed = await Shizuku.isShizukuAvailable();
-      final granted = installed ? await Shizuku.isBinderReceived() : false;
+      final granted = await _api.checkPermission() ?? false;
       if (!mounted) return;
       setState(() {
-        _shizukuInstalled = installed;
-        _shizukuGranted = granted;
+        _granted = granted;
         _checking = false;
       });
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _shizukuInstalled = false;
-        _shizukuGranted = false;
+        _granted = false;
         _checking = false;
       });
     }
@@ -58,28 +55,32 @@ class _PrivilegeScreenState extends State<PrivilegeScreen> {
 
   Future<void> _requestShizuku() async {
     try {
-      await Shizuku.requestPermission();
+      final ok = await _api.requestPermission() ?? false;
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(ok ? 'Shizuku 授权成功' : '授权被取消/失败')),
+      );
       _check();
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('请求失败：$e')),
+        SnackBar(content: Text('请求失败：$e——请确认已安装并激活 Shizuku')),
       );
     }
   }
 
-  /// 测试 adb 通道（Shizuku 执行 pm list 前几行）
+  /// 测试 Shizuku 命令通道
   Future<void> _testAdb() async {
     try {
-      if (!_shizukuGranted) {
+      if (!(_granted ?? false)) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('请先授权 Shizuku')),
         );
         return;
       }
-      final result = await Shizuku.exec('pm list packages -3 | head -5');
+      final out = await _api.runCommand('pm list packages -3 | head -5');
       if (!mounted) return;
-      setState(() => _lastOutput = result ?? '（无输出）');
+      setState(() => _lastOutput = (out == null || out.isEmpty) ? '（无输出——确认 Shizuku 已激活）' : out);
     } catch (e) {
       if (!mounted) return;
       setState(() => _lastOutput = '执行失败：$e');
@@ -97,6 +98,7 @@ class _PrivilegeScreenState extends State<PrivilegeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final granted = _granted ?? false;
     return Scaffold(
       appBar: AppBar(title: const Text('特权')),
       body: _checking
@@ -104,7 +106,6 @@ class _PrivilegeScreenState extends State<PrivilegeScreen> {
           : ListView(
               padding: const EdgeInsets.all(16),
               children: [
-                // Shizuku 状态
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
@@ -117,40 +118,34 @@ class _PrivilegeScreenState extends State<PrivilegeScreen> {
                     children: [
                       Row(
                         children: [
-                          Icon(_shizukuGranted
-                              ? Icons.verified
-                              : Icons.gpp_maybe,
-                              size: 20,
-                              color: _shizukuGranted ? Colors.green : AppColors.brandRed),
+                          Icon(granted ? Icons.verified : Icons.gpp_maybe,
+                              size: 20, color: granted ? Colors.green : AppColors.brandRed),
                           const SizedBox(width: 8),
-                          Text('Shizuku',
-                              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                          const Text('Shizuku',
+                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
                         ],
                       ),
                       const SizedBox(height: 8),
-                      Text('已安装：${_shizukuInstalled ? '是' : '否'}',
-                          style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
-                      Text('已授权：${_shizukuGranted ? '是' : '否'}',
+                      Text('授权状态：${granted ? '已授权' : '未授权'}',
                           style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
                       const SizedBox(height: 12),
-                      if (!_shizukuInstalled)
-                        const Text(
-                            '未检测到 Shizuku——请安装并激活 Shizuku（com.moe.shizuku.xyz）\n无线调试或 root 均可',
-                            style: TextStyle(fontSize: 11, color: AppColors.textSecondary, height: 1.5))
-                      else if (!_shizukuGranted)
+                      if (!granted) ...[
+                        const Text('需要 Shizuku 应用（com.moe.shizuku.xyz）已安装并激活（无线调试或 root）',
+                            style: TextStyle(fontSize: 11, color: AppColors.textSecondary, height: 1.5)),
+                        const SizedBox(height: 8),
                         FilledButton.icon(
                           onPressed: _requestShizuku,
                           icon: const Icon(Icons.gpp_good, size: 18),
                           label: const Text('授权 Shizuku'),
-                        )
-                      else ...[
+                        ),
+                      ] else ...[
                         Row(
                           children: [
                             Expanded(
                               child: FilledButton.icon(
                                 onPressed: _testAdb,
                                 icon: const Icon(Icons.terminal, size: 18),
-                                label: const Text('测试 adb'),
+                                label: const Text('测试命令通道'),
                               ),
                             ),
                           ],
@@ -173,12 +168,11 @@ class _PrivilegeScreenState extends State<PrivilegeScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                // AI adb 通道开关
                 SwitchListTile(
                   value: _adbEnabled,
                   onChanged: _toggleAdb,
-                  title: const Text('AI 可经 adb 执行命令', style: TextStyle(fontSize: 14)),
-                  subtitle: const Text('授权后 AI（Nook）可通过 Shizuku 执行 adb 命令（高危命令仍需确认）',
+                  title: const Text('AI 可经 Shizuku 执行命令', style: TextStyle(fontSize: 14)),
+                  subtitle: const Text('授权后 AI（Nook）可通过 Shizuku 执行 adb 级命令（高危命令仍需确认）',
                       style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
                   activeColor: AppColors.brandCyan,
                 ),

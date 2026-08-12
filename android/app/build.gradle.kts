@@ -21,7 +21,7 @@ android {
         applicationId = "com.ling.lingos.app"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
+        minSdk = maxOf(flutter.minSdkVersion, 24) // 【A5】Shizuku 要求 minSdk>=24
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName // 【0.1.9修复】动态取 pubspec 版本（曾硬编码 0.1.8 覆盖导致版本不更新）
