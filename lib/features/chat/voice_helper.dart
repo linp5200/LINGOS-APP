@@ -41,7 +41,7 @@ class VoiceHelper {
     try {
       final dir = await getTemporaryDirectory();
       final path = '${dir.path}/lingos_rec_${DateTime.now().millisecondsSinceEpoch}.m4a';
-      final cfg = const RecordConfig(
+      const cfg = RecordConfig(
         encoder: AudioEncoder.aacLc,
         sampleRate: 44100,
         numChannels: 1,
