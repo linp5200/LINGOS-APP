@@ -260,6 +260,30 @@ class AppStore {
     }
   }
 
+  // ---------- 【0.1.9】Rootfs 沙箱配置 ----------
+  static const _kRootfs = 'sandbox_rootfs_json';
+
+  Future<void> saveRootfs(Map<String, dynamic>? rootfs) async {
+    final sp = await SharedPreferences.getInstance();
+    if (rootfs == null) {
+      await sp.remove(_kRootfs);
+    } else {
+      await sp.setString(_kRootfs, jsonEncode(rootfs));
+    }
+  }
+
+  Future<Map<String, dynamic>?> getRootfs() async {
+    final sp = await SharedPreferences.getInstance();
+    final raw = sp.getString(_kRootfs);
+    if (raw == null || raw.isEmpty) return null;
+    try {
+      final m = jsonDecode(raw);
+      return m is Map ? Map<String, dynamic>.from(m) : null;
+    } catch (_) {
+      return null;
+    }
+  }
+
   // ---------- 设备绑定（UUID 持久） ----------
   Future<String> getDeviceId() async {
     final sp = await SharedPreferences.getInstance();
