@@ -63,13 +63,13 @@ class _MountScreenState extends State<MountScreen> {
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : _mounts.isEmpty
-              ? Center(
+              ? const Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.link_off, size: 48, color: AppColors.textSecondary),
-                      const SizedBox(height: 12),
-                      const Text('暂无挂载——点击 + 添加',
+                      Icon(Icons.link_off, size: 48, color: AppColors.textSecondary),
+                      SizedBox(height: 12),
+                      Text('暂无挂载——点击 + 添加',
                           style: TextStyle(color: AppColors.textSecondary)),
                     ],
                   ),
