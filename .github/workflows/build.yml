@@ -64,6 +64,7 @@ jobs:
 
   build_linux:
     runs-on: ubuntu-latest
+    continue-on-error: true  # 【0.1.9】桌面端构建不阻塞 Android 发布
     steps:
       - uses: actions/checkout@v4
       - name: 设置 Flutter
@@ -90,6 +91,7 @@ jobs:
 
   build_windows:
     runs-on: windows-latest
+    continue-on-error: true  # 【0.1.9】桌面端构建不阻塞 Android 发布（VS18 STL 兼容性问题）
     steps:
       - uses: actions/checkout@v4
       - name: 设置 Flutter

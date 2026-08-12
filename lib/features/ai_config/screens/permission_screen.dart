@@ -235,10 +235,14 @@ class _PermissionScreenState extends ConsumerState<PermissionScreen> {
         childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
         children: [
           // 类级统一授权
+          const Row(
+            children: [
+              Text('统一授权：', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+              SizedBox(width: 4),
+            ],
+          ),
           Row(
             children: [
-              Text('统一授权：', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
-              const SizedBox(width: 4),
               _groupAction('全部允许', 'allow_always', perms, AppColors.brandCyan),
               const SizedBox(width: 8),
               _groupAction('全部拒绝', 'deny', perms, AppColors.brandRed),
