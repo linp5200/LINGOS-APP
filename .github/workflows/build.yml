@@ -56,6 +56,9 @@ jobs:
           name: LING OS App ${{ env.VERSION }}
           tag_name: v${{ env.VERSION }}
           generate_release_notes: false
+          # 【0.2.1 修复】versionCode 修正后重新构建——更新已有 v0.2.1 release 资产
+          update_release: true
+          overwrite_files: true
 
       - uses: actions/upload-artifact@v4
         with:
