@@ -136,7 +136,6 @@ class VoiceHelper {
           if (r.finalResult) completer.complete(r.recognizedWords);
         },
         listenFor: const Duration(seconds: 10),
-        localeId: _localStt.localeId(),
       );
       final text = await completer.future.timeout(const Duration(seconds: 12));
       return text?.trim().isEmpty == true ? null : text;

@@ -71,7 +71,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       final sd = sl['data'];
       if (sd is List) {
         for (final s in sd.whereType<Map<String, dynamic>>()) {
-          if (s['id'] == chatControllerProvider.notifier.state.sessionId) {
+          if (s['id'] == ref.read(chatControllerProvider).sessionId) {
             setState(() => _sessionName = s['title']?.toString());
             break;
           }

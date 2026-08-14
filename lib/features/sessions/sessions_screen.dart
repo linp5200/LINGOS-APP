@@ -209,14 +209,7 @@ class _SessionsScreenState extends ConsumerState<SessionsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        // 【0.2.1 #7】三横按钮（tab 模式打开 Drawer）
-        leading: widget.onOpenDrawer != null
-            ? IconButton(
-                icon: const Icon(Icons.menu, size: 22),
-                onPressed: widget.onOpenDrawer,
-              )
-            : null,
-        title: Text(_selectMode ? '已选 ${_selected.length}' : '会话管理'),
+        // 【0.2.1 #7】三横按钮（tab 模式打开 Drawer）；选择模式显示关闭
         leading: _selectMode
             ? IconButton(
                 icon: const Icon(Icons.close, size: 20),
@@ -224,7 +217,13 @@ class _SessionsScreenState extends ConsumerState<SessionsScreen> {
                   _selectMode = false;
                   _selected.clear();
                 }))
-            : null,
+            : (widget.onOpenDrawer != null
+                ? IconButton(
+                    icon: const Icon(Icons.menu, size: 22),
+                    onPressed: widget.onOpenDrawer,
+                  )
+                : null),
+        title: Text(_selectMode ? '已选 ${_selected.length}' : '会话管理'),
         actions: [
           if (_selectMode)
             IconButton(
@@ -314,8 +313,7 @@ class _SessionsScreenState extends ConsumerState<SessionsScreen> {
                       ),
                     );
                   },
-                ),
-    );
+                );
   }
 
   String _fmtTime(dynamic ts) {

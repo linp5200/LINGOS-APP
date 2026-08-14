@@ -21,7 +21,6 @@ class OfflineCache {
     aOptions: AndroidOptions(encryptedSharedPreferences: true),
   );
   static const _keyName = 'lingos_db_key';
-  static const _ivKeyName = 'lingos_db_iv';
 
   /// 打开加密数据库（密钥 Keystore 生成/复用——sqlcipher 派生密钥）
   Future<Database> _openDb() async {

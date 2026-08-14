@@ -34,7 +34,7 @@ class _HomeShellState extends ConsumerState<HomeShell> {
   // 【0.2.1 #7】+ 会话列表 tab（开局显示三选项：上一次的会话/会话列表/仪表盘）
   late final List<Widget> _pages = [
     ChatScreen(onOpenDrawer: _openDrawer),
-    const SessionsScreen(onOpenDrawer: _openDrawer),
+    SessionsScreen(onOpenDrawer: _openDrawer),
     DashboardScreen(onOpenDrawer: _openDrawer),
   ];
 
@@ -162,7 +162,7 @@ class _HomeShellState extends ConsumerState<HomeShell> {
           // 【0.2.1 B1 改名】Help AI（帮助档案——原 HA 面板）
           _item(context, Icons.home_work_outlined, 'Help AI', const HaScreen()),
           // 【0.2.1 #11 C2】Home Assistant 独立入口（智能家居——不藏 AI 配置里）
-          _item(context, Icons.smart_home_outlined, 'Home Assistant', const HaControlScreen()),
+          _item(context, Icons.home_outlined, 'Home Assistant', const HaControlScreen()),
           _item(context, Icons.notifications_outlined, '预警中心', const AlertsScreen()),
           const Divider(color: AppColors.divider),
           ListTile(
