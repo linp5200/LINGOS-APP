@@ -154,7 +154,7 @@ class _HomeShellState extends ConsumerState<HomeShell> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 Text('LING OS', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
-                Text('v0.2.1', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                Text('v0.2.2', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
               ],
             ),
           ),
