@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'channel.dart';
 import 'tcp_channel.dart';
 import '../storage/app_store.dart';
+import '../storage/offline_cache.dart';
 import 'ws_channel.dart';
 import 'connection_mode.dart';
 import '../logging/app_logger.dart';
@@ -77,7 +78,34 @@ class ConnectionManager implements ChannelListener {
       appLog('ConnectionManager', '自动同步核心数据（system_info + session_list）');
       await sendCommand({'cmd': 'system_info'});
       await sendCommand({'cmd': 'session_list'});
+      // 【0.2.1 #1】快照落库（离线缓存——断连只读显示）
+      _cacheSnapshot();
     });
+  }
+
+  /// 【0.2.1 #1】拉全量快照落库（session_list → 各会话消息 → 记忆摘要）
+  Future<void> _cacheSnapshot() async {
+    try {
+      final sl = await requestJson({'cmd': 'session_list'});
+      final list = sl?['data'];
+      if (list is! List) return;
+      // 逐会话拉消息（前 5 个会话——全量缓存策略下按需扩展）
+      final msgs = <String, List<Map<String, dynamic>>>{};
+      for (final s in list.whereType<Map<String, dynamic>>().take(10)) {
+        final id = s['id']?.toString() ?? '';
+        if (id.isEmpty) continue;
+        final sh = await requestJson({'cmd': 'session_history', 'id': id, 'limit': 50});
+        final md = sh?['data'];
+        if (md is List) msgs[id] = md.whereType<Map<String, dynamic>>().toList();
+      }
+      await OfflineCache.instance.saveSnapshot(
+        sessions: list.whereType<Map<String, dynamic>>().toList(),
+        sessionMessages: msgs,
+      );
+      appLog('ConnectionManager', '离线快照已缓存（${list.length} 会话）');
+    } catch (e) {
+      appLog('ConnectionManager', '快照缓存失败: $e');
+    }
   }
 
   Future<bool> sendCommand(Map<String, dynamic> cmd) async {
@@ -93,17 +121,25 @@ class ConnectionManager implements ChannelListener {
     return false;
   }
 
-  /// 【0.2.0】请求-响应配对：发送命令并等待 command_response
-  /// （WS 单会话串行——发送后第一个 command_response 即本命令响应）
+  /// 【0.2.1 9.4 修复】请求-响应配对：按 cmd 匹配响应（不再"先到先得"）
+  /// 服务端命令响应已带 cmd 字段（_reply 统一出口）——requestJson 只认对应 cmd 的响应，
+  /// 与自动同步（system_info/session_list 广播）不再冲突
   Future<Map<String, dynamic>?> requestJson(
       Map<String, dynamic> cmd, {Duration timeout = const Duration(seconds: 8)}) async {
+    final cmdName = cmd['cmd']?.toString() ?? '';
     final comp = Completer<Map<String, dynamic>>();
     late StreamSubscription sub;
     sub = _eventController.stream.listen((line) {
       try {
         final m = jsonDecode(line);
-        if (m is Map && m['type'] == 'command_response' && !comp.isCompleted) {
-          comp.complete(m.cast<String, dynamic>());
+        if (m is Map && !comp.isCompleted) {
+          if (m['type'] == 'command_response') {
+            final data = m['data'];
+            // 服务端已注入 cmd 标识：优先按 data.cmd 匹配
+            if (data is Map && data['cmd'] == cmdName) {
+              comp.complete(m.cast<String, dynamic>());
+            }
+          }
         }
       } catch (_) {}
     });
@@ -247,7 +283,9 @@ class ConnectionManager implements ChannelListener {
   void onDisconnected(String reason) {
     lastError = reason;
     state = ConnState.disconnected;
+    // 【0.2.1 #1】断连 → 离线只读事件（UI 切缓存显示 + 操作拦截）
     _eventController.add('{"type":"disconnected","reason":"$reason"}');
+    _eventController.add('{"type":"offline","reason":"$reason"}');
   }
 
   @override

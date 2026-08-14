@@ -12,6 +12,8 @@ import '../chat/chat_screen.dart';
 import '../connect/connect_screen.dart';
 import '../dashboard/dashboard_screen.dart';
 import '../ha/ha_screen.dart';
+import '../ha/ha_control_screen.dart';
+import '../sessions/sessions_screen.dart';
 import '../ai_config/ai_config_screen.dart';
 
 class HomeShell extends ConsumerStatefulWidget {
@@ -24,12 +26,15 @@ class HomeShell extends ConsumerStatefulWidget {
 class _HomeShellState extends ConsumerState<HomeShell> {
   int _index = 0;
   bool _tokenListenerAttached = false;
+  bool _startupNavApplied = false;
   // 【A1修复】GlobalKey——子页三横按钮经回调打开 HomeShell 的 Drawer
   final _scaffoldKey = GlobalKey<ScaffoldState>();
 
   // 【0.1.9】底部导航：对话 / 仪表盘（设置已迁入 AI 配置）
+  // 【0.2.1 #7】+ 会话列表 tab（开局显示三选项：上一次的会话/会话列表/仪表盘）
   late final List<Widget> _pages = [
     ChatScreen(onOpenDrawer: _openDrawer),
+    const SessionsScreen(onOpenDrawer: _openDrawer),
     DashboardScreen(onOpenDrawer: _openDrawer),
   ];
 
@@ -48,7 +53,24 @@ class _HomeShellState extends ConsumerState<HomeShell> {
           _showTokenInvalidDialog();
         }
       });
+      // 【0.2.1 #7】开局显示设置（上一次的会话/会话列表/仪表盘——默认会话列表 9.2）
+      _applyStartupScreen();
     }
+  }
+
+  Future<void> _applyStartupScreen() async {
+    if (_startupNavApplied) return;
+    _startupNavApplied = true;
+    final start = await AppStore().getStartScreen();
+    if (!mounted) return;
+    setState(() {
+      switch (start) {
+        case 'last':   _index = 0; break; // 上一次的会话（默认聊天页）
+        case 'sessions': _index = 1; break; // 会话列表
+        case 'dashboard': _index = 2; break; // 仪表盘
+        default:       _index = 1; break;
+      }
+    });
   }
 
   /// 【先生设计】令牌无效弹窗（手动重新验证——验证码/登出）
@@ -137,7 +159,10 @@ class _HomeShellState extends ConsumerState<HomeShell> {
           ),
           // 【0.1.9】设置统一入口（原 AI 配置改名——内部区块不变）
           _item(context, Icons.tune, '设置', const AiConfigScreen()),
-          _item(context, Icons.home_work_outlined, 'HA 面板', const HaScreen()),
+          // 【0.2.1 B1 改名】Help AI（帮助档案——原 HA 面板）
+          _item(context, Icons.home_work_outlined, 'Help AI', const HaScreen()),
+          // 【0.2.1 #11 C2】Home Assistant 独立入口（智能家居——不藏 AI 配置里）
+          _item(context, Icons.smart_home_outlined, 'Home Assistant', const HaControlScreen()),
           _item(context, Icons.notifications_outlined, '预警中心', const AlertsScreen()),
           const Divider(color: AppColors.divider),
           ListTile(
@@ -175,6 +200,7 @@ class _HomeShellState extends ConsumerState<HomeShell> {
         onDestinationSelected: (i) => setState(() => _index = i),
         destinations: const [
           NavigationDestination(icon: Icon(Icons.chat_bubble_outline), selectedIcon: Icon(Icons.chat_bubble), label: '对话'),
+          NavigationDestination(icon: Icon(Icons.forum_outlined), selectedIcon: Icon(Icons.forum), label: '会话'),
           NavigationDestination(icon: Icon(Icons.dashboard_outlined), selectedIcon: Icon(Icons.dashboard), label: '仪表盘'),
         ],
       ),

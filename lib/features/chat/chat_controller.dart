@@ -22,17 +22,22 @@ class ChatMsg {
   // 【0.2.0】工具错误卡片
   final String? errorType;
   final String? errorAction;
+  // 【0.2.1 #4】工具结果（tool_result 事件——点击展开查看）
+  final String? toolResult;
+  final bool? toolSuccess;
 
   const ChatMsg(this.type, this.content,
       {this.toolName, this.streaming = false, this.interrupted = false,
-      this.errorType, this.errorAction});
+      this.errorType, this.errorAction, this.toolResult, this.toolSuccess});
 
-  ChatMsg copyWith({String? content, bool? streaming, bool? interrupted}) =>
+  ChatMsg copyWith({String? content, bool? streaming, bool? interrupted, String? toolResult, bool? toolSuccess}) =>
       ChatMsg(type, content ?? this.content,
           toolName: toolName,
           streaming: streaming ?? this.streaming,
           interrupted: interrupted ?? this.interrupted,
-          errorType: errorType, errorAction: errorAction);
+          errorType: errorType, errorAction: errorAction,
+          toolResult: toolResult ?? this.toolResult,
+          toolSuccess: toolSuccess ?? this.toolSuccess);
 }
 
 class ChatState {
@@ -112,8 +117,15 @@ class ChatController extends StateNotifier<ChatState> {
         _endThinking();
       case EvtType.toolCall:
         _appendTool(evt.data['name']?.toString() ?? '工具', evt.data['args']?.toString() ?? '');
+      case EvtType.toolResult:
+        _appendToolResult(
+          evt.data['name']?.toString() ?? '',
+          evt.data['content']?.toString() ?? '',
+          (evt.data['success'] as num?)?.toInt() == 1,
+        );
       case EvtType.done:
-        _endAi(false);
+        // 【0.2.1 #3】强制收尾（防工具轮后残留流式标记）
+        _finalizeAll(false);
         // 【0.2.0】状态行数据（真实 token 用量 + 模型）
         final u = evt.data['usage'];
         if (u is Map) {
@@ -167,7 +179,7 @@ class ChatController extends StateNotifier<ChatState> {
           _onEvent(jsonEncode(inner));
         }
       case EvtType.chatDone:
-        _endAi(false);
+        _finalizeAll(false);
       case EvtType.chatInterrupted:
         _endAi(true);
       case EvtType.chatError:
@@ -233,12 +245,55 @@ class ChatController extends StateNotifier<ChatState> {
     }
   }
 
+  /// 【0.2.1 #3 防御】done 到达时：强制收尾所有残留流式消息
+  /// 工具调用轮后若模型直接 done（无 content 事件），残留的 thinking/ai 流式标记
+  /// 会导致界面停在"流式中"——强制全部收尾 + aiBusy 复位
+  void _finalizeAll(bool interrupted) {
+    if (_aiMsgIdx >= 0 || _thinkMsgIdx >= 0) {
+      final msgs = [...state.messages];
+      if (_aiMsgIdx >= 0 && _aiMsgIdx < msgs.length) {
+        msgs[_aiMsgIdx] = msgs[_aiMsgIdx].copyWith(streaming: false, interrupted: interrupted);
+      }
+      if (_thinkMsgIdx >= 0 && _thinkMsgIdx < msgs.length) {
+        msgs[_thinkMsgIdx] = msgs[_thinkMsgIdx].copyWith(streaming: false);
+      }
+      _aiMsgIdx = -1;
+      _thinkMsgIdx = -1;
+      state = state.copyWith(messages: msgs, aiBusy: false, interrupted: interrupted);
+    } else {
+      state = state.copyWith(aiBusy: false, interrupted: interrupted);
+    }
+  }
+
   void _appendTool(String name, String args) {
-    final short = args.length > 60 ? '${args.substring(0, 60)}...' : args;
+    // 【0.2.1 #4】保留完整 args（渲染层负责截断/折叠——点击展开看全文）
     state = state.copyWith(messages: [
       ...state.messages,
-      ChatMsg(ChatMsgType.tool, short, toolName: name)
+      ChatMsg(ChatMsgType.tool, args, toolName: name)
     ]);
+  }
+
+  /// 【0.2.1 #4】工具结果（tool_result 事件——挂到最近一条 tool 消息，可展开查看）
+  void _appendToolResult(String name, String content, bool success) {
+    final msgs = [...state.messages];
+    // 找最近的 tool 消息（同名优先）
+    int idx = -1;
+    for (int i = msgs.length - 1; i >= 0; i--) {
+      if (msgs[i].type == ChatMsgType.tool && (name.isEmpty || msgs[i].toolName == name)) {
+        idx = i;
+        break;
+      }
+    }
+    if (idx >= 0) {
+      msgs[idx] = msgs[idx].copyWith(toolResult: content, toolSuccess: success);
+      state = state.copyWith(messages: msgs);
+    } else {
+      // 无对应 tool 消息——独立展示
+      state = state.copyWith(messages: [
+        ...msgs,
+        ChatMsg(ChatMsgType.tool, '', toolName: name, toolResult: content, toolSuccess: success),
+      ]);
+    }
   }
 
   /// 【0.2.0】工具错误卡片（错误类型 + 建议动作）

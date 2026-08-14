@@ -8,12 +8,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/providers.dart';
+import '../../core/storage/offline_cache.dart';
 import '../../core/theme/app_theme.dart';
 import '../chat/chat_controller.dart';
 import '../chat/chat_screen.dart';
 
 class SessionsScreen extends ConsumerStatefulWidget {
-  const SessionsScreen({super.key});
+  // 【0.2.1 #7】三横按钮回调（作为底部导航 tab 时打开 Drawer）
+  final VoidCallback? onOpenDrawer;
+  const SessionsScreen({super.key, this.onOpenDrawer});
 
   @override
   ConsumerState<SessionsScreen> createState() => _SessionsScreenState();
@@ -23,6 +26,8 @@ class _SessionsScreenState extends ConsumerState<SessionsScreen> {
   List<Map<String, dynamic>> _sessions = [];
   bool _loading = false;
   bool _selectMode = false;
+  // 【0.2.1 #1】离线只读模式（断连时显示缓存 + 操作拦截）
+  bool _offline = false;
   final Set<String> _selected = {};
   StreamSubscription? _sub;
 
@@ -42,6 +47,17 @@ class _SessionsScreenState extends ConsumerState<SessionsScreen> {
   void _onEvent(String line) {
     try {
       final evt = jsonDecode(line);
+      if (evt is Map && evt['type'] == 'offline') {
+        // 【0.2.1 #1】断连 → 切离线只读 + 载入缓存
+        setState(() => _offline = true);
+        _loadCached();
+        return;
+      }
+      if (evt is Map && evt['type'] == 'connection_ok') {
+        setState(() => _offline = false);
+        _refresh();
+        return;
+      }
       if (evt is Map && evt['type'] == 'command_response') {
         final data = evt['data'];
         Map<String, dynamic>? resp;
@@ -64,17 +80,54 @@ class _SessionsScreenState extends ConsumerState<SessionsScreen> {
   }
 
   void _refresh() {
+    if (_offline) return; // 离线只读——不请求
     setState(() => _loading = true);
     ref.read(connectionProvider).sendCommand({'cmd': 'session_list'});
   }
 
+  /// 【0.2.1 #1】断连：载入本地缓存（只读显示）
+  Future<void> _loadCached() async {
+    final cached = await OfflineCache.instance.getCachedSessions();
+    if (!mounted) return;
+    setState(() {
+      _sessions = cached;
+      _loading = false;
+    });
+  }
+
+  /// 【0.2.1 #1】操作拦截：离线时任何修改提示"当前尚未连接主机，无法修改"
+  bool _guardOffline() {
+    if (!_offline) return false;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('当前尚未连接主机，无法修改')),
+    );
+    return true;
+  }
+
   void _create() async {
+    if (_guardOffline()) return; // 【0.2.1 #1】离线拦截
     final ctrl = TextEditingController();
+    // 【0.2.1 9.3】会话创建完善：默认名 + 描述字段
+    final descCtrl = TextEditingController();
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('新建会话'),
-        content: TextField(controller: ctrl, decoration: const InputDecoration(hintText: '会话标题')),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: ctrl,
+              decoration: const InputDecoration(hintText: '会话标题（留空=自动命名）'),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: descCtrl,
+              maxLines: 2,
+              decoration: const InputDecoration(hintText: '会话描述（可选）'),
+            ),
+          ],
+        ),
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('取消')),
           FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('创建')),
@@ -82,8 +135,17 @@ class _SessionsScreenState extends ConsumerState<SessionsScreen> {
       ),
     );
     if (ok == true) {
-      ref.read(connectionProvider).sendCommand({'cmd': 'session_create', 'title': ctrl.text.trim()});
+      final title = ctrl.text.trim().isEmpty ? '新会话' : ctrl.text.trim();
+      final cm = ref.read(connectionProvider);
+      final resp = await cm.requestJson({'cmd': 'session_create', 'title': title});
       _refresh();
+      // 【0.2.1 9.3】创建后自动进入新会话
+      final data = resp?['data'];
+      final newId = data is Map ? data['id']?.toString() : null;
+      if (newId != null && newId.isNotEmpty && mounted) {
+        ref.read(chatControllerProvider.notifier).setSession(newId);
+        Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ChatScreen()));
+      }
     }
   }
 
@@ -94,6 +156,7 @@ class _SessionsScreenState extends ConsumerState<SessionsScreen> {
   }
 
   void _rename(String id) async {
+    if (_guardOffline()) return; // 【0.2.1 #1】离线拦截
     final ctrl = TextEditingController();
     final ok = await showDialog<bool>(
       context: context,
@@ -113,12 +176,14 @@ class _SessionsScreenState extends ConsumerState<SessionsScreen> {
   }
 
   void _delete(String id) {
+    if (_guardOffline()) return; // 【0.2.1 #1】离线拦截
     ref.read(connectionProvider).sendCommand({'cmd': 'session_delete', 'id': id});
     _refresh();
   }
 
   /// 【0.1.9】多选批量删除
   void _batchDelete() {
+    if (_guardOffline()) return; // 【0.2.1 #1】离线拦截
     if (_selected.isEmpty) return;
     for (final id in _selected) {
       ref.read(connectionProvider).sendCommand({'cmd': 'session_delete', 'id': id});
@@ -144,6 +209,13 @@ class _SessionsScreenState extends ConsumerState<SessionsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        // 【0.2.1 #7】三横按钮（tab 模式打开 Drawer）
+        leading: widget.onOpenDrawer != null
+            ? IconButton(
+                icon: const Icon(Icons.menu, size: 22),
+                onPressed: widget.onOpenDrawer,
+              )
+            : null,
         title: Text(_selectMode ? '已选 ${_selected.length}' : '会话管理'),
         leading: _selectMode
             ? IconButton(
@@ -165,7 +237,32 @@ class _SessionsScreenState extends ConsumerState<SessionsScreen> {
           ],
         ],
       ),
-      body: _loading
+      body: _offline
+          ? Column(
+              children: [
+                // 【0.2.1 #1】离线只读横幅
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  color: AppColors.brandCyan.withValues(alpha: 0.15),
+                  child: const Row(
+                    children: [
+                      Icon(Icons.cloud_off, size: 16, color: AppColors.brandCyan),
+                      SizedBox(width: 8),
+                      Text('离线只读模式——显示缓存内容，修改需重连主机',
+                          style: TextStyle(fontSize: 12, color: AppColors.brandCyan)),
+                    ],
+                  ),
+                ),
+                Expanded(child: _buildList()),
+              ],
+            )
+          : _buildList(),
+    );
+  }
+
+  Widget _buildList() {
+    return _loading
           ? const Center(child: CircularProgressIndicator())
           : _sessions.isEmpty
               ? const Center(child: Text('暂无会话', style: TextStyle(color: AppColors.textSecondary)))
@@ -191,8 +288,9 @@ class _SessionsScreenState extends ConsumerState<SessionsScreen> {
                         ),
                         title: Text(s['title']?.toString() ?? '未命名',
                             style: const TextStyle(fontSize: 14)),
+                        // 【0.2.1 9.1】会话占用显示（token 占用/消息数——服务端 session_list 已带 token_total）
                         subtitle: Text(
-                            '${s['message_count']?.toString() ?? '0'} 条消息 · ${s['updated'] != null ? _fmtTime(s['updated']) : ''}',
+                            '${s['message_count']?.toString() ?? '0'} 条消息 · ${_fmtTokens(s['token_total'])} · ${s['updated'] != null ? _fmtTime(s['updated']) : ''}',
                             style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
                         trailing: _selectMode
                             ? null
@@ -231,3 +329,11 @@ class _SessionsScreenState extends ConsumerState<SessionsScreen> {
     return '${t.month}-${t.day} ${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}';
   }
 }
+
+  /// 【0.2.1 9.1】token 占用格式化（K/M 单位）
+  String _fmtTokens(dynamic v) {
+    if (v is! num || v <= 0) return '0 token';
+    if (v >= 1000000) return '${(v / 1000000).toStringAsFixed(1)}M token';
+    if (v >= 1000) return '${(v / 1000).toStringAsFixed(1)}K token';
+    return '${v.toInt()} token';
+  }

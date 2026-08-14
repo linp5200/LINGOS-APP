@@ -26,6 +26,7 @@ class _AppearanceScreenState extends State<AppearanceScreen> {
   Map<String, bool> _msgPrefs = const {};
   bool _analytics = false;
   bool _loading = true;
+  String _startScreen = 'sessions'; // 【0.2.1 #7】开局显示（默认会话列表——9.2 裁决）
 
   @override
   void initState() {
@@ -39,6 +40,7 @@ class _AppearanceScreenState extends State<AppearanceScreen> {
     final lang = await _store.getLanguage();
     final prefs = await _store.getMsgPrefs();
     final analytics = await _store.getAnalytics();
+    final start = await _store.getStartScreen();
     if (!mounted) return;
     setState(() {
       _themeMode = theme;
@@ -46,6 +48,7 @@ class _AppearanceScreenState extends State<AppearanceScreen> {
       _language = lang;
       _msgPrefs = prefs;
       _analytics = analytics;
+      _startScreen = start;
       _loading = false;
     });
   }
@@ -96,6 +99,24 @@ class _AppearanceScreenState extends State<AppearanceScreen> {
                 _prefSwitch('工具调用显示', 'tool', '工具调用与结果展示'),
                 _prefSwitch('流式打字动画', 'streaming', '逐字渲染回复'),
                 _prefSwitch('代码高亮', 'codeHighlight', 'Markdown 代码块着色'),
+                // 【0.2.1 #5】流式思考展开思考链——控制思考链默认展开/收缩
+                _prefSwitch('流式思考展开思考链', 'thinkExpand', '思考块默认展开（关=默认收缩，点击展开）'),
+                // 【0.2.1 #4】工具块默认展开
+                _prefSwitch('工具块默认展开', 'toolExpand', '工具块默认展开（关=默认收缩，点击展开查看参数/结果）'),
+                const Divider(),
+                // 【0.2.1 #7】开局显示设置——三选项平铺
+                _section('启动显示'),
+                const Text('启动应用后首先显示',
+                    style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  children: [
+                    _startScreenChip('last', '上一次的会话', Icons.history),
+                    _startScreenChip('sessions', '会话列表', Icons.forum_outlined),
+                    _startScreenChip('dashboard', '仪表盘', Icons.dashboard_outlined),
+                  ],
+                ),
                 const Divider(),
                 _section('语言'),
                 ListTile(
@@ -147,6 +168,38 @@ class _AppearanceScreenState extends State<AppearanceScreen> {
       },
       title: Text(title, style: const TextStyle(fontSize: 14)),
       subtitle: Text(subtitle, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+    );
+  }
+
+  /// 【0.2.1 #7】开局显示选项 chip（平铺选择）
+  Widget _startScreenChip(String value, String label, IconData icon) {
+    final selected = _startScreen == value;
+    return GestureDetector(
+      onTap: () async {
+        setState(() => _startScreen = value);
+        await _store.saveStartScreen(value);
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: selected ? AppColors.brandRed.withValues(alpha: 0.15) : AppColors.surface,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+              color: selected ? AppColors.brandRed : AppColors.divider, width: 1.2),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 16, color: selected ? AppColors.brandRed : AppColors.textSecondary),
+            const SizedBox(width: 6),
+            Text(label,
+                style: TextStyle(
+                    fontSize: 13,
+                    color: selected ? AppColors.brandRed : AppColors.textPrimary,
+                    fontWeight: selected ? FontWeight.w600 : FontWeight.normal)),
+          ],
+        ),
+      ),
     );
   }
 

@@ -216,8 +216,10 @@ class AppStore {
   Future<Map<String, bool>> getMsgPrefs() async {
     final sp = await SharedPreferences.getInstance();
     final raw = sp.getString(_kMsgPrefs);
+    // 【0.2.1 #5】流式思考展开思考链 + 工具块展开（默认：思考收缩、工具收缩——防长内容占屏）
     const defaults = {
       'thinking': true, 'tool': true, 'streaming': true, 'codeHighlight': true,
+      'thinkExpand': false, 'toolExpand': false,
     };
     if (raw == null || raw.isEmpty) return defaults;
     try {
@@ -229,6 +231,19 @@ class AppStore {
     } catch (_) {
       return defaults;
     }
+  }
+
+  // ---------- 【0.2.1 #7】开局显示设置（上一次的会话 / 会话列表 / 仪表盘） ----------
+  static const _kStartScreen = 'ui_start_screen';
+
+  Future<void> saveStartScreen(String v) async {
+    final sp = await SharedPreferences.getInstance();
+    await sp.setString(_kStartScreen, v);
+  }
+
+  Future<String> getStartScreen() async {
+    final sp = await SharedPreferences.getInstance();
+    return sp.getString(_kStartScreen) ?? 'sessions'; // 默认会话列表（9.2 裁决）
   }
 
   Future<void> saveAnalytics(bool v) async {

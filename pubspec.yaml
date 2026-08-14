@@ -22,6 +22,10 @@ dependencies:
   shizuku_api: ^1.2.2 # 【A5】Shizuku 特权——AI 经 adb 执行命令
   record: ^6.1.1 # 【0.2.0】语音——录音（STT 输入）——兼容 Flutter ≥3.24
   audioplayers: ^6.1.0 # 【0.2.0】语音——播放（TTS 输出）——兼容 Flutter ≥3.13
+  flutter_tts: ^4.2.5 # 【0.2.1 #10】设备本地 TTS（降级链末端——服务端无提供商/espeak 时兜底）
+  speech_to_text: ^7.4.0 # 【0.2.1 #10】设备本地 STT（降级链末端——服务端无提供商时兜底）
+  sqflite_sqlcipher: ^3.4.1 # 【0.2.1 #1/#Q3】离线缓存主存储（sqlcipher 加密——密钥 Android Keystore）
+  path: ^1.9.0 # 【0.2.1 #1】路径拼接（离线缓存模块）
 
 dev_dependencies:
   flutter_test:

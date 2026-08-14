@@ -1,4 +1,5 @@
-/// HA 面板（协议 v3——ha_search 查询 HA 事件）
+/// Help AI 面板（协议 v3——ha_search 查询 Help AI Data 帮助档案）
+/// 【0.2.1 B1 改名】原"HA 面板"→"Help AI"（仅显示名；技能 ha_*/协议名不改）
 library;
 
 import 'dart:async';
@@ -62,7 +63,7 @@ class _HaScreenState extends ConsumerState<HaScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('HA 面板')),
+      appBar: AppBar(title: const Text('Help AI')),
       body: Column(
         children: [
           Padding(

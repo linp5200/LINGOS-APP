@@ -55,6 +55,8 @@ const kPermGroups = [
   {'name': '网络', 'icon': Icons.wifi_outlined, 'perms': ['network_control', 'bluetooth_control', 'scan_bluetooth']},
   {'name': '后台', 'icon': Icons.hourglass_bottom, 'perms': ['background_data', 'background_task', 'auto_start']},
   {'name': '应用', 'icon': Icons.apps_outlined, 'perms': ['phone_state', 'installed_apps', 'launch_app', 'install_app', 'jump_app']},
+  // 【0.2.1 #8-1】智能家居组（ha_control——AI-AGENT#10 权限：默认直接执行，高风险强制确认）
+  {'name': '智能家居', 'icon': Icons.home_outlined, 'perms': ['ha_control']},
 ];
 
 class PermissionScreen extends ConsumerStatefulWidget {
@@ -130,6 +132,7 @@ class _PermissionScreenState extends ConsumerState<PermissionScreen> {
   }
 
   /// 【A4修复】映射到 Android 权限并真实请求
+  /// 【0.2.1 #8-3】授权失败 → 跳系统设置引导（openAppSettings——引导链完整）
   Future<void> _requestSystem(String perm) async {
     final p = _androidPerm(perm);
     if (p == null) return; // 无系统映射（影子/配置类）
@@ -137,15 +140,27 @@ class _PermissionScreenState extends ConsumerState<PermissionScreen> {
     if (!status.isGranted) {
       final result = await p.request();
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            '$perm：${result.isGranted ? '系统授权成功' : '系统授权被拒绝'}\n'
-            '（应用内模式已设置——系统授权在设置→应用→权限可改）',
-          ),
-          duration: const Duration(seconds: 3),
+      if (result.isGranted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('系统授权成功'), duration: Duration(seconds: 2)),
+        );
+        return;
+      }
+      // 【0.2.1 #8-3】授权失败——跳系统设置引导（openAppSettings）
+      final goSettings = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text('需要系统授权'),
+          content: Text('「$perm」系统授权被拒绝，可前往系统设置手动开启（设置 → 应用 → 权限）'),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('暂不')),
+            FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('去设置')),
+          ],
         ),
       );
+      if (goSettings == true && mounted) {
+        await openAppSettings();
+      }
     }
   }
 
