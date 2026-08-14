@@ -1,7 +1,7 @@
 name: lingos_app
 description: "LING OS App - Flutter 重写版（协议 v3）"
 publish_to: 'none'
-version: 0.2.0+11  # App 0.2.0（统一 LLM 调用层 + 上下文压缩 + 工具错误 17 类 + 语音系统 + 模型切换）
+version: 0.2.1+1  # App 0.2.1（离线模式/工具块折叠/会话内模型切换/HA 控制/语音降级链等 11 项）
 
 environment:
   sdk: '>=3.4.0 <4.0.0'

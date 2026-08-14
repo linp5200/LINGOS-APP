@@ -4,6 +4,27 @@
 
 ---
 
+## [0.2.1] - 2026-08-14（已实施——一批次全做，先生裁决）
+
+### 修复（Bug Fixes）
+- **#3 聊天故障（工具调用后对话中断）**：根因双修——服务端 ws_chat_thread 行缓冲 4096→64KB（超长事件行截断损坏 JSON 致 App 丢事件）+ 超长行丢弃保护；App done/chatDone 强制收尾（_finalizeAll 防工具轮后残留流式标记）
+- **9.4 主机端模型不同步 App**：服务端命令响应统一注入 cmd 标识（_reply 出口 32 处）；App requestJson 改为按 cmd 匹配（不再"先到先得"与自动同步冲突）
+- **#10 语音降级链 Bug**：服务端 STT/TTS 失败时落到设备本地（flutter_tts + speech_to_text——降级链末端完整）
+- **#8 权限授予优化**：授权失败跳系统设置引导（openAppSettings）；新增智能家居权限组（ha_control）
+
+### 新增（Features）
+- **#1 离线模式**：sqflite_sqlcipher 加密缓存（sessions/messages/memory_summary 三表 + Android Keystore 密钥）；首连全量快照落库 → 断连只读显示（离线横幅）+ 修改操作拦截提示"当前尚未连接主机，无法修改"
+- **#4 工具块/思考块折叠**：可展开收缩（默认收缩——点击看 args/result 全文）
+- **#5 外观新增"流式思考展开思考链"+"工具块默认展开"开关**
+- **#6 会话内模型切换**：会话名 + 模型下拉（provider_list 同步）+ 切换确认（缓存重置提示）
+- **#7 开局显示三选项**：上一次的会话/会话列表/仪表盘（默认会话列表——9.2 裁决）；会话列表升为底部导航 tab
+- **9.1 会话占用显示**：token 占用（K/M 格式化）+ 消息数（服务端 session_list 聚合 token_usage.jsonl）
+- **9.3 会话创建完善**：默认名/描述字段/创建后自动进入
+- **#11 Home Assistant 集成（AI-AGENT#10）**：HaScreen 改名"Help AI"；新增 HaControlScreen（配置/实体列表/一键控制/高风险强制确认/state_changed 实时事件流）——独立入口
+- **版本号**：0.2.1+1
+
+---
+
 ## [0.2.0] - 2026-08-12（已实施——一批次完）
 
 ### 修复（Bug Fixes）
