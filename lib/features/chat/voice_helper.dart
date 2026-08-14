@@ -135,7 +135,7 @@ class VoiceHelper {
         onResult: (r) {
           if (r.finalResult) completer.complete(r.recognizedWords);
         },
-        listenFor: const Duration(seconds: 10),
+        listenOptions: SpeechListenOptions(listenFor: const Duration(seconds: 10)),
       );
       final text = await completer.future.timeout(const Duration(seconds: 12));
       return text?.trim().isEmpty == true ? null : text;

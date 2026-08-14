@@ -25,7 +25,7 @@ class _HaControlScreenState extends ConsumerState<HaControlScreen> {
   bool _configured = false;
   String _statusText = '';
   List<Map<String, dynamic>> _entities = [];
-  List<Map<String, dynamic>> _events = [];
+  final List<Map<String, dynamic>> _events = [];
   StreamSubscription? _sub;
   bool _loading = false;
 
