@@ -27,7 +27,6 @@ class _VisionScreenState extends ConsumerState<VisionScreen> {
   String _source = 'v4l2';
   String _rtspUrl = '';
   int _httpPort = 8891;
-  bool _streamReady = false;
   // 检测事件（visiond → ai_server → WS ha_event 同级扩展）
   final List<Map<String, dynamic>> _detections = [];
   final List<Map<String, dynamic>> _ocrs = [];
@@ -159,7 +158,7 @@ class _VisionScreenState extends ConsumerState<VisionScreen> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
-                    '${d['label'] ?? '?'} (${((d['confidence'] as num?)?.toDouble() ?? 0.0) * 100:.0f}%)'
+                    '${d['label'] ?? '?'} (${((d['confidence'] as num?)?.toDouble() ?? 0.0) * 100.0}.toStringAsFixed(0)}%)'
                     '${d['world_x'] != null ? '  @x=${(d['world_x'] as num).toInt()}cm y=${(d['world_y'] as num).toInt()}cm' : ''}',
                     style: const TextStyle(fontSize: 12, color: AppColors.textPrimary),
                   ),
@@ -177,7 +176,7 @@ class _VisionScreenState extends ConsumerState<VisionScreen> {
                     color: AppColors.brandCyan.withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Text('“${o['text'] ?? ''}” (${((o['confidence'] as num?)?.toDouble() ?? 0.0) * 100:.0f}%)',
+                  child: Text('“${o['text'] ?? ''}” (${((o['confidence'] as num?)?.toDouble() ?? 0.0) * 100.0}.toStringAsFixed(0)}%)',
                       style: const TextStyle(fontSize: 12, color: AppColors.textPrimary)),
                 )),
             const SizedBox(height: 8),
