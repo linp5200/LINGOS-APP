@@ -66,9 +66,9 @@ class _SyncSettingsScreenState extends ConsumerState<SyncSettingsScreen> {
       _syncing = false;
       _lastSync = last;
     });
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
       content: Text('同步完成'),
-      duration: const Duration(seconds: 2),
+      duration: Duration(seconds: 2),
     ));
   }
 

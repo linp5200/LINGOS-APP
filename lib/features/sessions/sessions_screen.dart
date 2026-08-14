@@ -198,7 +198,7 @@ class _SessionsScreenState extends ConsumerState<SessionsScreen> {
       final code = resp?['code']?.toString();
       if (code == 'readonly') {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('该会话为只读（其他设备创建）——可在高级设置开启"允许其他设备修改"')),
+          const SnackBar(content: Text('该会话为只读（其他设备创建）——可在高级设置开启"允许其他设备修改"')),
         );
       } else if (code == 'conflict') {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -221,7 +221,7 @@ class _SessionsScreenState extends ConsumerState<SessionsScreen> {
     final code = resp?['code']?.toString();
     if (code == 'readonly') {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('该会话为只读（其他设备创建）——无法删除')),
+        const SnackBar(content: Text('该会话为只读（其他设备创建）——无法删除')),
       );
     }
   }
