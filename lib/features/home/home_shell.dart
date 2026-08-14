@@ -13,6 +13,7 @@ import '../connect/connect_screen.dart';
 import '../dashboard/dashboard_screen.dart';
 import '../ha/ha_screen.dart';
 import '../ha/ha_control_screen.dart';
+import '../vision/vision_screen.dart';
 import '../sessions/sessions_screen.dart';
 import '../ai_config/ai_config_screen.dart';
 
@@ -163,6 +164,8 @@ class _HomeShellState extends ConsumerState<HomeShell> {
           _item(context, Icons.home_work_outlined, 'Help AI', const HaScreen()),
           // 【0.2.1 #11 C2】Home Assistant 独立入口（智能家居——不藏 AI 配置里）
           _item(context, Icons.home_outlined, 'Home Assistant', const HaControlScreen()),
+          // 【0.2.2 vision】摄像头独立入口（预览/检测/OCR）
+          _item(context, Icons.videocam_outlined, '摄像头', const VisionScreen()),
           _item(context, Icons.notifications_outlined, '预警中心', const AlertsScreen()),
           const Divider(color: AppColors.divider),
           ListTile(

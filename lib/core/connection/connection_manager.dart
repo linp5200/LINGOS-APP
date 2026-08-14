@@ -72,41 +72,74 @@ class ConnectionManager implements ChannelListener {
   }
 
   /// 发送命令（先生决策：走 WS 命令事件 → Python 直通——Web/App 统一）
-  /// 【先生要求】连接成功自动同步核心数据（system_info + session_list——仪表盘/会话页）
+  /// 【0.2.2 同步协议】连接成功自动同步（sync_full 首次 / sync_delta 增量——先生裁决 B：自动+手动）
   void _autoSync() {
     Future.delayed(const Duration(milliseconds: 500), () async {
-      appLog('ConnectionManager', '自动同步核心数据（system_info + session_list）');
-      await sendCommand({'cmd': 'system_info'});
-      await sendCommand({'cmd': 'session_list'});
-      // 【0.2.1 #1】快照落库（离线缓存——断连只读显示）
-      _cacheSnapshot();
+      appLog('ConnectionManager', '自动同步核心数据（同步协议——sync_full/sync_delta）');
+      await _syncAll();
     });
   }
 
-  /// 【0.2.1 #1】拉全量快照落库（session_list → 各会话消息 → 记忆摘要）
-  Future<void> _cacheSnapshot() async {
+  /// 【0.2.2】同步入口：首次（last_sync=0）全量 sync_full；之后 sync_delta 增量
+  Future<void> _syncAll() async {
     try {
-      final sl = await requestJson({'cmd': 'session_list'});
-      final list = sl?['data'];
-      if (list is! List) return;
-      // 逐会话拉消息（前 5 个会话——全量缓存策略下按需扩展）
-      final msgs = <String, List<Map<String, dynamic>>>{};
-      for (final s in list.whereType<Map<String, dynamic>>().take(10)) {
-        final id = s['id']?.toString() ?? '';
-        if (id.isEmpty) continue;
-        final sh = await requestJson({'cmd': 'session_history', 'id': id, 'limit': 50});
-        final md = sh?['data'];
-        if (md is List) msgs[id] = md.whereType<Map<String, dynamic>>().toList();
+      final store = AppStore();
+      final lastSync = await store.getLastSync();
+      final deviceId = await store.getDeviceId();
+      if (lastSync <= 0) {
+        // 首次连接：完整同步包（全量快照）
+        final resp = await requestJson({
+          'cmd': 'sync_full',
+          'device_id': deviceId,
+        }, timeout: const Duration(seconds: 30));
+        if (resp == null) return;
+        final data = resp['data'];
+        if (data is Map && data['sessions'] is List) {
+          final sessions = (data['sessions'] as List).whereType<Map<String, dynamic>>().toList();
+          await OfflineCache.instance.saveSnapshot(sessions: sessions);
+          await store.saveLastSync(DateTime.now().millisecondsSinceEpoch / 1000);
+          appLog('ConnectionManager', '首次全量同步完成（${sessions.length} 会话）');
+        }
+      } else {
+        // 非首次：增量（A 时间戳消息 + B 哈希列表）
+        final resp = await requestJson({
+          'cmd': 'sync_delta',
+          'last_sync': lastSync,
+          'device_id': deviceId,
+        }, timeout: const Duration(seconds: 30));
+        if (resp == null) return;
+        final data = resp['data'];
+        if (data is Map) {
+          if (data['sessions'] is List) {
+            final sessions = (data['sessions'] as List).whereType<Map<String, dynamic>>().toList();
+            // 合并增量消息
+            final dm = data['delta_messages'];
+            final msgsBySession = <String, List<Map<String, dynamic>>>{};
+            if (dm is Map) {
+              for (final e in dm.entries) {
+                final sid = e.key.toString();
+                final list = e.value;
+                if (list is List) {
+                  msgsBySession[sid] = list.whereType<Map<String, dynamic>>().toList();
+                }
+              }
+            }
+            await OfflineCache.instance.saveSnapshot(
+              sessions: sessions,
+              sessionMessages: msgsBySession,
+            );
+            await store.saveLastSync(DateTime.now().millisecondsSinceEpoch / 1000);
+            appLog('ConnectionManager', '增量同步完成（${sessions.length} 会话, ${msgsBySession.length} 个增量）');
+          }
+        }
       }
-      await OfflineCache.instance.saveSnapshot(
-        sessions: list.whereType<Map<String, dynamic>>().toList(),
-        sessionMessages: msgs,
-      );
-      appLog('ConnectionManager', '离线快照已缓存（${list.length} 会话）');
     } catch (e) {
-      appLog('ConnectionManager', '快照缓存失败: $e');
+      appLog('ConnectionManager', '同步失败: $e');
     }
   }
+
+  /// 【0.2.2】手动刷新（先生裁决 B：连接成功自动 + 手动刷新按钮）
+  Future<void> refreshSync() => _syncAll();
 
   Future<bool> sendCommand(Map<String, dynamic> cmd) async {
     // WS 优先（认证后 App 连 WS——token 直连——命令走 WS）
@@ -199,14 +232,18 @@ class ConnectionManager implements ChannelListener {
   /// 发送对话（WS 通道——chat 事件）
   /// 【0.1.9】字段适配：content → prompt（服务端 websocket_server.c 以 prompt 解析）
   Future<void> sendChat(String content, {String sessionId = 'default'}) async {
+    // 【0.2.2】带上 device_id——服务端归属校验（_session_append_msg 强制）
+    final store = AppStore();
+    final deviceId = await store.getDeviceId();
     if (ws != null && ws!.isConnected) {
       await ws!.send(jsonEncode({
         'type': 'chat',
         'prompt': content,
         'session_id': sessionId,
+        'device_id': deviceId,
       }));
     } else if (tcp != null && tcp!.isConnected) {
-      await sendCommand({'cmd': 'nook_ask', 'prompt': content, 'session_id': sessionId});
+      await sendCommand({'cmd': 'nook_ask', 'prompt': content, 'session_id': sessionId, 'device_id': deviceId});
     }
   }
 

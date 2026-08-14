@@ -246,6 +246,19 @@ class AppStore {
     return sp.getString(_kStartScreen) ?? 'sessions'; // 默认会话列表（9.2 裁决）
   }
 
+  // ---------- 【0.2.2 同步】last_sync 时间戳（增量同步基线） ----------
+  static const _kLastSync = 'sync_last_sync_ts';
+
+  Future<void> saveLastSync(double ts) async {
+    final sp = await SharedPreferences.getInstance();
+    await sp.setDouble(_kLastSync, ts);
+  }
+
+  Future<double> getLastSync() async {
+    final sp = await SharedPreferences.getInstance();
+    return sp.getDouble(_kLastSync) ?? 0;
+  }
+
   Future<void> saveAnalytics(bool v) async {
     final sp = await SharedPreferences.getInstance();
     await sp.setBool(_kAnalytics, v);

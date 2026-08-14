@@ -10,6 +10,7 @@ import '../sessions/sessions_screen.dart';
 import '../files/files_screen.dart';
 import '../logs/logs_screen.dart';
 import 'screens/providers_screen.dart';
+import 'screens/sync_settings_screen.dart';
 import 'screens/token_usage_screen.dart';
 import 'screens/permission_screen.dart';
 import 'screens/personality_screen.dart';
@@ -77,6 +78,9 @@ class AiConfigScreen extends StatelessWidget {
           _section(context, '连接与设置'),
           _tile(context, Icons.dns_outlined, '主机', '主机IP / 连接密钥 / 连接状态 / 连接方式 / 加密',
               () => _push(context, const ConnSettingsScreen())),
+          // 【0.2.2 同步】同步设置（允许其他设备修改本设备会话——先生裁决）
+          _tile(context, Icons.sync_outlined, '同步设置', '多设备同步 / 允许其他设备修改',
+              () => _push(context, const SyncSettingsScreen())),
           _tile(context, Icons.article_outlined, '日志', '连接/WS/命令全链路日志——查看与导出',
               () => _push(context, const LogsScreen())),
 

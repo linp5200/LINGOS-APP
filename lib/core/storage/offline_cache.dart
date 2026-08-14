@@ -74,6 +74,7 @@ class OfflineCache {
   }
 
   /// 全量快照落库（连接建立后调用——先生裁决 Q2：全量无限缓存）
+  /// 【0.2.2】增量同步时 sessions 是全量列表（B 哈希对比基准）——upsert 而非删除重建
   Future<void> saveSnapshot({
     required List<Map<String, dynamic>> sessions,
     Map<String, List<Map<String, dynamic>>>? sessionMessages,
@@ -82,8 +83,7 @@ class OfflineCache {
     try {
       final db = await _openDb();
       await db.transaction((txn) async {
-        // 会话全量替换（幂等 upsert）
-        await txn.delete('sessions');
+        // 会话 upsert（保留本地已缓存但服务端未返回的——增量场景不删）
         for (final s in sessions) {
           await txn.insert('sessions', {
             'id': s['id']?.toString() ?? '',

@@ -82,7 +82,22 @@ class _SessionsScreenState extends ConsumerState<SessionsScreen> {
   void _refresh() {
     if (_offline) return; // 离线只读——不请求
     setState(() => _loading = true);
-    ref.read(connectionProvider).sendCommand({'cmd': 'session_list'});
+    // 【0.2.2】手动刷新走同步协议（先生裁决 B：自动 + 手动刷新）
+    ref.read(connectionProvider).refreshSync().then((_) {
+      if (mounted) setState(() => _loading = false);
+      // 刷新后从缓存读取最新列表
+      _reloadFromCache();
+    });
+  }
+
+  /// 【0.2.2】从本地缓存刷新列表（同步落库后展示）
+  Future<void> _reloadFromCache() async {
+    final cached = await OfflineCache.instance.getCachedSessions();
+    if (!mounted) return;
+    setState(() {
+      _sessions = cached;
+      _loading = false;
+    });
   }
 
   /// 【0.2.1 #1】断连：载入本地缓存（只读显示）
@@ -170,15 +185,44 @@ class _SessionsScreenState extends ConsumerState<SessionsScreen> {
       ),
     );
     if (ok == true && ctrl.text.isNotEmpty) {
-      ref.read(connectionProvider).sendCommand({'cmd': 'session_rename', 'id': id, 'title': ctrl.text});
+      final cm = ref.read(connectionProvider);
+      final resp = await cm.requestJson({
+        'cmd': 'session_rename',
+        'id': id,
+        'title': ctrl.text,
+        'device_id': await AppStore().getDeviceId(),
+      });
       _refresh();
+      if (!mounted) return;
+      final code = resp?['code']?.toString();
+      if (code == 'readonly') {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('该会话为只读（其他设备创建）——可在高级设置开启"允许其他设备修改"')),
+        );
+      } else if (code == 'conflict') {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(resp?['msg']?.toString() ?? '修改占线——另一设备正在修改，请稍后重试')),
+        );
+      }
     }
   }
 
-  void _delete(String id) {
+  void _delete(String id) async {
     if (_guardOffline()) return; // 【0.2.1 #1】离线拦截
-    ref.read(connectionProvider).sendCommand({'cmd': 'session_delete', 'id': id});
+    final cm = ref.read(connectionProvider);
+    final resp = await cm.requestJson({
+      'cmd': 'session_delete',
+      'id': id,
+      'device_id': await AppStore().getDeviceId(),
+    });
     _refresh();
+    if (!mounted) return;
+    final code = resp?['code']?.toString();
+    if (code == 'readonly') {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('该会话为只读（其他设备创建）——无法删除')),
+      );
+    }
   }
 
   /// 【0.1.9】多选批量删除
