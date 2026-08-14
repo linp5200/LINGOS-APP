@@ -16,7 +16,7 @@ class AppLogger {
   bool enabled = true; // 【A2修复】日志记录开关
 
   /// 当前 App 版本（发版同步）
-  static const appVersion = '0.1.9';
+  static const appVersion = '0.2.1';
 
   Future<void> init() async {
     try {
