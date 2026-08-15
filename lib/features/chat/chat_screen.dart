@@ -36,6 +36,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     _loadBlockPrefs();
     // 【0.2.1 #10】初始化设备本地 TTS/STT 降级引擎（服务端不可用时兜底）
     _voice.ensureLocalFallback();
+    // 【0.2.2】余额显示（DeepSeek /user/balance——token 行）
+    _loadBalance();
   }
 
   Future<void> _loadBlockPrefs() async {
@@ -219,6 +221,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       chat.model ?? '未连接模型',
       '↑ ${chat.promptTokens}',
       '↓ ${chat.completionTokens}',
+      if (_balance != null) '💰$_balance',   // 【0.2.2】余额（DeepSeek /user/balance——先生指示）
       if (chat.cacheHit > 0) '缓存 ${chat.cacheHit}',
       if (aiOut > 0) '输出 $aiOut 字',
       if (chat.contextCompressed) '📋已压缩',
@@ -234,6 +237,27 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         overflow: TextOverflow.ellipsis,
       ),
     );
+  }
+
+  String? _balance;   // 【0.2.2】余额显示（token 上传/下行一行）
+
+  Future<void> _loadBalance() async {
+    final cm = ref.read(connectionProvider);
+    final resp = await cm.requestJson({'cmd': 'balance_query'});
+    if (!mounted || resp == null) return;
+    final d = resp['data'];
+    if (d is Map && resp['status']?.toString() == 'ok') {
+      final infos = d['balance_infos'];
+      if (infos is List && infos.isNotEmpty) {
+        final total = (infos.first as Map)['total_balance']?.toString() ?? '';
+        final cur = (infos.first as Map)['currency']?.toString() ?? '';
+        if (total.isNotEmpty) {
+          setState(() => _balance = '$total$cur');
+        }
+      } else if (d['is_available'] != null) {
+        setState(() => _balance = '可用');
+      }
+    }
   }
 
   Widget _buildMsg(ChatMsg msg) {

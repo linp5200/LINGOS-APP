@@ -123,8 +123,29 @@ class _ProvidersScreenState extends ConsumerState<ProvidersScreen> {
         list.add(result);
       }
       await _store.saveProviders(list);
+      // 【0.2.2 修复】保存后同步服务端 provider_add（原只存本地——主机端不同步的根源）
+      await _syncProviderToServer(result);
       _load();
     }
+  }
+
+  /// 【0.2.2】同步提供商到服务端（provider_add——含 thinking 开关/强度透传）
+  Future<void> _syncProviderToServer(Map<String, dynamic> p) async {
+    try {
+      final cm = ref.read(connectionProvider);
+      if (cm.ws == null || !cm.ws!.isConnected) return;
+      await cm.requestJson({
+        'cmd': 'provider_add',
+        'id': p['id'],
+        'name': p['name'],
+        'format': 'openai',
+        'base_url': p['baseUrl'] ?? '',
+        'api_key': p['apiKey'] ?? '',
+        'model': p['model'] ?? '',
+        'thinking_enabled': p['thinkingEnabled'] ?? true,
+        'reasoning_effort': p['reasoningEffort'] ?? 'high',
+      });
+    } catch (_) {}
   }
 
   Future<void> _edit(Map<String, dynamic> existing) async {
@@ -143,6 +164,8 @@ class _ProvidersScreenState extends ConsumerState<ProvidersScreen> {
       final idx = list.indexWhere((p) => p['id'] == result['id']);
       if (idx >= 0) list[idx] = result;
       await _store.saveProviders(list);
+      // 【0.2.2】编辑后同样同步服务端（思考开关/强度更新生效）
+      await _syncProviderToServer(result);
       _load();
     }
   }
@@ -344,10 +367,15 @@ class _ProviderConfigScreen extends StatefulWidget {
   State<_ProviderConfigScreen> createState() => _ProviderConfigScreenState();
 }
 
-class _ProviderConfigScreenState extends State<_ProviderConfigScreen> {
+class _ProviderConfigScreenState extends ConsumerState<_ProviderConfigScreen> {
   final _keyCtrl = TextEditingController();
   final _urlCtrl = TextEditingController();
   final _modelCtrl = TextEditingController();
+  // 【0.2.2】思考模式开关 + 强度（DeepSeek 官方文档——先生指示）
+  bool _thinkingEnabled = true;
+  String _reasoningEffort = 'high';
+  List<String> _remoteModels = [];
+  bool _loadingModels = false;
 
   @override
   void initState() {
@@ -356,6 +384,40 @@ class _ProviderConfigScreenState extends State<_ProviderConfigScreen> {
     _urlCtrl.text = e?['baseUrl']?.toString() ?? widget.preset.baseUrl;
     _modelCtrl.text = e?['model']?.toString() ?? '';
     _keyCtrl.text = e?['apiKey']?.toString() ?? '';
+    _thinkingEnabled = e?['thinkingEnabled'] as bool? ?? true;
+    _reasoningEffort = e?['reasoningEffort']?.toString() ?? 'high';
+  }
+
+  /// 【0.2.2】获取模型列表（GET /models——DeepSeek 官方 API，先生指示：添加提供商时直接列出）
+  Future<void> _fetchModels() async {
+    if (_keyCtrl.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('请先填写 API 密钥再获取模型列表')),
+      );
+      return;
+    }
+    setState(() => _loadingModels = true);
+    final cm = ref.read(connectionProvider);
+    // 用当前配置临时查询——provider_id 传空走活跃 provider；模型列表需 base_url+key
+    // 简化：直接请求服务端（服务端用当前活跃 provider 的 base_url+key）
+    final resp = await cm.requestJson({'cmd': 'model_list_query'});
+    if (!mounted) return;
+    setState(() => _loadingModels = false);
+    final d = resp?['data'];
+    if (resp?['status']?.toString() == 'ok' && d is Map && d['models'] is List) {
+      setState(() {
+        _remoteModels = (d['models'] as List).whereType<String>().toList();
+      });
+      if (_remoteModels.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('服务端返回空模型列表——请检查活跃提供商配置')),
+        );
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(resp?['msg']?.toString() ?? '获取模型列表失败（服务端需先配置 API Key）'),
+      ));
+    }
   }
 
   @override
@@ -388,17 +450,76 @@ class _ProviderConfigScreenState extends State<_ProviderConfigScreen> {
           ),
           const SizedBox(height: 12),
           // 模型（LLM 可选）
-          if (!isVoice)
+          if (!isVoice) ...[
             TextField(
               controller: _modelCtrl,
               style: const TextStyle(fontSize: 14),
               decoration: const InputDecoration(
-                labelText: '模型（可选，如 deepseek-chat）',
+                labelText: '模型（可选，如 deepseek-v4-flash）',
                 border: OutlineInputBorder(),
                 isDense: true,
               ),
             ),
-          if (!isVoice) const SizedBox(height: 12),
+            // 【0.2.2】获取模型列表（DeepSeek /models——先生指示：添加时直接列出）
+            const SizedBox(height: 6),
+            Row(
+              children: [
+                OutlinedButton.icon(
+                  onPressed: _loadingModels ? null : _fetchModels,
+                  icon: _loadingModels
+                      ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2))
+                      : const Icon(Icons.list_alt, size: 16),
+                  label: const Text('获取模型列表', style: TextStyle(fontSize: 12)),
+                ),
+                if (_remoteModels.isNotEmpty) ...[
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: DropdownButtonFormField<String>(
+                      value: _remoteModels.contains(_modelCtrl.text) ? _modelCtrl.text : null,
+                      isDense: true,
+                      decoration: const InputDecoration(
+                        labelText: '选择模型',
+                        border: OutlineInputBorder(),
+                        isDense: true,
+                      ),
+                      items: _remoteModels
+                          .map((m) => DropdownMenuItem(value: m, child: Text(m, style: const TextStyle(fontSize: 12))))
+                          .toList(),
+                      onChanged: (v) => setState(() => _modelCtrl.text = v ?? ''),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+            // 【0.2.2】思考模式开关 + 强度（DeepSeek 官方文档：thinking 开关 + reasoning_effort 映射）
+            const SizedBox(height: 12),
+            SwitchListTile(
+              value: _thinkingEnabled,
+              onChanged: (v) => setState(() => _thinkingEnabled = v),
+              title: const Text('思考模式', style: TextStyle(fontSize: 14)),
+              subtitle: const Text('开启：模型先输出思维链再回答（更准但更慢）',
+                  style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+              contentPadding: EdgeInsets.zero,
+            ),
+            Row(
+              children: [
+                const Text('思考强度', style: TextStyle(fontSize: 14)),
+                const Spacer(),
+                DropdownButton<String>(
+                  value: _reasoningEffort,
+                  underline: const SizedBox.shrink(),
+                  items: const [
+                    DropdownMenuItem(value: 'low', child: Text('低')),
+                    DropdownMenuItem(value: 'medium', child: Text('中')),
+                    DropdownMenuItem(value: 'high', child: Text('高')),
+                    DropdownMenuItem(value: 'max', child: Text('最大')),
+                  ],
+                  onChanged: (v) => setState(() => _reasoningEffort = v ?? 'high'),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+          ],
           // API 密钥
           TextField(
             controller: _keyCtrl,
@@ -441,6 +562,9 @@ class _ProviderConfigScreenState extends State<_ProviderConfigScreen> {
       'model': _modelCtrl.text.trim(),
       'apiKey': _keyCtrl.text.trim(),
       'configuredAt': DateTime.now().millisecondsSinceEpoch,
+      // 【0.2.2】思考模式开关 + 强度（服务端 provider_add 透传）
+      'thinkingEnabled': _thinkingEnabled,
+      'reasoningEffort': _reasoningEffort,
     };
     Navigator.of(context).pop(result);
   }
