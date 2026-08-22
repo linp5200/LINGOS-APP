@@ -358,7 +358,7 @@ class _ProviderSelectScreen extends StatelessWidget {
 }
 
 /// 第三段：密钥配置页
-class _ProviderConfigScreen extends StatefulWidget {
+class _ProviderConfigScreen extends ConsumerStatefulWidget {
   final ProviderPreset preset;
   final Map<String, dynamic>? existing;
   const _ProviderConfigScreen({required this.preset, this.existing});
@@ -475,7 +475,7 @@ class _ProviderConfigScreenState extends ConsumerState<_ProviderConfigScreen> {
                   const SizedBox(width: 8),
                   Expanded(
                     child: DropdownButtonFormField<String>(
-                      value: _remoteModels.contains(_modelCtrl.text) ? _modelCtrl.text : null,
+                      initialValue: _remoteModels.contains(_modelCtrl.text) ? _modelCtrl.text : null,
                       isDense: true,
                       decoration: const InputDecoration(
                         labelText: '选择模型',

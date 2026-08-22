@@ -1,7 +1,7 @@
 name: lingos_app
 description: "LING OS App - Flutter 重写版（协议 v3）"
 publish_to: 'none'
-version: 0.2.3+14  # App 0.2.3（DeepSeek 思考开关/强度 + 余额显示 + 模型列表——先生规则：每次推送必升版本）
+version: 0.2.4+15  # App 0.2.4（CI 修复：providers_screen 泛型+弃用——先生规则：每次推送必升版本）
 
 environment:
   sdk: '>=3.4.0 <4.0.0'

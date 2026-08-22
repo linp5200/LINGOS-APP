@@ -4,6 +4,16 @@
 
 ---
 
+## [0.2.4] - 2026-08-23（CI 修复——先生全权执行批次）
+
+### 修复（Bug Fixes）
+- **App CI 静态分析失败修复**（0.2.3 遗留——三 job 全挂导致无安装包）：
+  - `providers_screen.dart:370` 泛型 bound 错误：`_ProviderConfigScreen` 改继承 `ConsumerStatefulWidget`（匹配 `ConsumerState<T>` 的 bound 约束）
+  - `providers_screen.dart:478` 弃用：`DropdownButtonFormField` 的 `value:` → `initialValue:`（v3.33+ 弃用）
+- 版本号 0.2.3+14 → **0.2.4+15**（先生规则：每次推送必升版本）+ CHANGELOG + app_logger/抽屉显示同步
+
+---
+
 ## [0.2.3] - 2026-08-15（DeepSeek 官方 API 扩展——先生规则：每次推送必升版本）
 
 ### 新增（Features）
