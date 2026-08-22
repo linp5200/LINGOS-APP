@@ -364,7 +364,7 @@ class _ProviderConfigScreen extends ConsumerStatefulWidget {
   const _ProviderConfigScreen({required this.preset, this.existing});
 
   @override
-  State<_ProviderConfigScreen> createState() => _ProviderConfigScreenState();
+  ConsumerState<_ProviderConfigScreen> createState() => _ProviderConfigScreenState();
 }
 
 class _ProviderConfigScreenState extends ConsumerState<_ProviderConfigScreen> {
