@@ -13,6 +13,7 @@ import 'screens/mount_screen.dart';
 import 'screens/notif_screen.dart';
 import 'screens/permission_screen.dart';
 import 'screens/personality_screen.dart';
+import 'screens/plan_page.dart';
 import 'screens/privilege_screen.dart';
 import 'screens/providers_screen.dart';
 import 'screens/rootfs_screen.dart';

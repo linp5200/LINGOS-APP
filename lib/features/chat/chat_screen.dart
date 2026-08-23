@@ -595,7 +595,7 @@ class _CollapsibleBlockState extends State<_CollapsibleBlock> {
                     padding: const EdgeInsets.only(left: 10),
                     child: Text(
                       _open ? 'v' : '>',
-                      style: TextStyle(
+                      style: const TextStyle(
                           fontFamily: fuiMono,
                           fontSize: 10,
                           color: AppColors.dim,

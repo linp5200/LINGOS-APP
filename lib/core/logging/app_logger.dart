@@ -90,9 +90,9 @@ class AppLogger {
     final header = '=== LING OS App 日志 ===\n版本: $appVersion\n时间: ${DateTime.now()}\n';
     final body = logText;
     try {
-      _logFile?.writeAsStringSync(header + '\n' + body + '\n', flush: true);
+      _logFile?.writeAsStringSync('$header\n$body\n', flush: true);
     } catch (_) {}
-    return header + '\n' + body;
+    return '$header\n$body';
   }
 
   Future<String?> logFilePath() async {
