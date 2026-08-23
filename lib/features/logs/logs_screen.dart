@@ -1,4 +1,4 @@
-/// 日志页（先生要求：查看 + 导出日志——连接/WS/命令全链路）
+/// 日志页（2026-08-22 定稿：显示最近 100 行 + 默认不保存 + 导出落盘）
 library;
 
 import 'package:flutter/material.dart';
@@ -18,6 +18,7 @@ class LogsScreen extends StatefulWidget {
 class _LogsScreenState extends State<LogsScreen> {
   final _logger = AppLogger.instance;
   bool _enabled = true;
+  bool _saveToFile = false;
 
   @override
   void initState() {
@@ -28,20 +29,28 @@ class _LogsScreenState extends State<LogsScreen> {
   Future<void> _load() async {
     final store = AppStore();
     final v = await store.getLoggingEnabled();
+    final s = await store.getLogSaveToFile();
     if (!mounted) return;
     setState(() {
       _enabled = v;
+      _saveToFile = s;
       _logger.enabled = v;
+      _logger.setSaveToFile(s);
     });
   }
 
   Future<void> _toggle(bool v) async {
     final store = AppStore();
-    setState(() {
-      _enabled = v;
-      _logger.enabled = v;
-    });
+    setState(() => _enabled = v);
+    _logger.enabled = v;
     await store.saveLoggingEnabled(v);
+  }
+
+  Future<void> _toggleSave(bool v) async {
+    final store = AppStore();
+    setState(() => _saveToFile = v);
+    _logger.setSaveToFile(v);
+    await store.saveLogSaveToFile(v);
   }
 
   @override
@@ -52,7 +61,7 @@ class _LogsScreenState extends State<LogsScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.copy, size: 20),
-            tooltip: '复制日志',
+            tooltip: '导出日志',
             onPressed: _copyLogs,
           ),
           IconButton(
@@ -67,7 +76,6 @@ class _LogsScreenState extends State<LogsScreen> {
       ),
       body: Column(
         children: [
-          // 【A2修复】日志记录开关
           SwitchListTile(
             dense: true,
             value: _enabled,
@@ -76,35 +84,45 @@ class _LogsScreenState extends State<LogsScreen> {
             subtitle: const Text('关闭后不再记录新日志（连接/WS/命令）',
                 style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
           ),
+          SwitchListTile(
+            dense: true,
+            value: _saveToFile,
+            onChanged: _toggleSave,
+            title: const Text('保存到文件', style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+            subtitle: const Text('默认关=仅导出落盘；开=保留全部日志到文件',
+                style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+          ),
           Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             color: AppColors.surface,
             child: const Text(
-              '日志已记录（内存 500 行 + 文件）——点击右上角复制导出',
+              '显示最近 100 行——导出时落盘',
               style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
             ),
           ),
           Expanded(
-            child: _logger.logs.isEmpty
+            child: _logger.recentLogs.isEmpty
                 ? const Center(
                     child: Text('暂无日志——连接后自动记录', style: TextStyle(color: AppColors.textSecondary)),
                   )
                 : ListView.builder(
                     padding: const EdgeInsets.all(12),
-                    itemCount: _logger.logs.length,
+                    itemCount: _logger.recentLogs.length,
                     itemBuilder: (ctx, i) {
-                      final line = _logger.logs[i];
-                      final color = line.contains('失败') || line.contains('错误') || line.contains('【空')
+                      final entry = _logger.recentLogs[i];
+                      final txt = entry['txt'] as String;
+                      final lvl = entry['level'] as String;
+                      final color = lvl == 'ERROR' || txt.contains('失败') || txt.contains('错误')
                           ? AppColors.brandRed
-                          : line.contains('✅') || line.contains('成功')
-                              ? AppColors.brandCyan
+                          : lvl == 'WARN'
+                              ? AppColors.yellow
                               : AppColors.textSecondary;
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 4),
                         child: Text(
-                          line,
-                          style: TextStyle(fontSize: 11, color: color, fontFamily: 'monospace', height: 1.3),
+                          txt,
+                          style: TextStyle(fontSize: 11, color: color, fontFamily: fuiMono, height: 1.3),
                         ),
                       );
                     },
@@ -118,6 +136,6 @@ class _LogsScreenState extends State<LogsScreen> {
   Future<void> _copyLogs() async {
     await Clipboard.setData(ClipboardData(text: _logger.exportText()));
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('日志已复制——可粘贴分享')));
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('日志已导出——可粘贴分享')));
   }
 }

@@ -4,6 +4,28 @@
 
 ---
 
+## [0.2.5] - 2026-08-23（FUI 风格批次——先生 2026-08-22 定稿）
+
+### 新增（Features）
+- **FUI / Tactical HUD 风格**（先生定稿：黑白灰+鲜红、极细线框、等宽字体、锐角、括号分隔）：
+  - 主题重构：app_theme.dart 全 FUI 色板（纯黑底/冷灰/鲜红唯一强调色，原青色→灰）
+  - 新建 fui_widgets.dart 组件库：FuiDataRow（等宽数据行）/ FuiPanel（线框面板）/ FuiCrosshair（自绘十字准星）/ FuiGridBackground（经纬网格）/ FuiRadarSweep（雷达扫描动效）/ FuiHeader（括号大标题）
+  - 主界面纳入 FUI（先生裁决：主界面也纳入；自绘+Lottie 双方式——本批自绘组件，Lottie 后续）
+- **思考链/工具块折叠 FUI 化**（先生定稿：v 在方框右侧带间距、思考中... 标题、锐角等宽）：
+  - _CollapsibleBlock 重构：v/> 切换符右侧、等宽字体、锐角边框
+  - 工具块颜色：成功=灰（原青），错误=红
+- **App 配置树状分类**（先生定稿：9 大类+子菜单导航，替代杂乱平铺）：
+  - ai_config_screen 重构：连接/对话AI/语音/通知/外观/同步/隐私/系统日志 8 大类 ExpansionTile 子菜单
+- **App 日志定稿化**（同服务端格式 time/id/level/txt）：
+  - AppLogger 重构：默认不保存文件、导出才落盘、显示最近 100 行、保存开关
+  - logs_screen：保存到文件开关 + 最近 100 行显示 + WARN/ERROR 分级着色
+- 版本 0.2.4+15 → **0.2.5+16**（先生规则：每次推送必升）
+
+### 修复（Bug Fixes）
+- app_logger 格式统一 JSON 四字段（原文本 [ts][tag]）
+
+---
+
 ## [0.2.4] - 2026-08-23（CI 修复——先生全权执行批次）
 
 ### 修复（Bug Fixes）

@@ -350,6 +350,7 @@ class AppStore {
 
   // ---------- 【0.1.9】日志开关 ----------
   static const _kLogging = 'logging_enabled';
+  static const _kLogSave = 'log_save_to_file'; // 【2026-08-22】保存到文件开关
 
   Future<void> saveLoggingEnabled(bool v) async {
     final sp = await SharedPreferences.getInstance();
@@ -359,6 +360,16 @@ class AppStore {
   Future<bool> getLoggingEnabled() async {
     final sp = await SharedPreferences.getInstance();
     return sp.getBool(_kLogging) ?? true; // 默认开启
+  }
+
+  Future<void> saveLogSaveToFile(bool v) async {
+    final sp = await SharedPreferences.getInstance();
+    await sp.setBool(_kLogSave, v);
+  }
+
+  Future<bool> getLogSaveToFile() async {
+    final sp = await SharedPreferences.getInstance();
+    return sp.getBool(_kLogSave) ?? false; // 定稿：默认不保存文件
   }
 
   // ---------- 设备绑定（UUID 持久） ----------

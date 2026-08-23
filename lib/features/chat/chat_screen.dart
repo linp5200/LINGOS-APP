@@ -345,7 +345,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         );
       case ChatMsgType.thinking:
         return _CollapsibleBlock(
-          title: '思考',
+          title: '思考中...',
           content: msg.content,
           collapsed: !_thinkingExpanded,
           icon: Icons.psychology_outlined,
@@ -363,7 +363,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           ].join('\n\n'),
           collapsed: !_toolExpanded,
           icon: Icons.build_outlined,
-          color: ok ? AppColors.brandCyan : AppColors.brandRed,
+          color: ok ? AppColors.textSecondary : AppColors.brandRed,
         );
       // 【0.2.0】工具错误卡片（红色——17 类详细说明 + 建议）
       case ChatMsgType.toolError:
@@ -567,41 +567,51 @@ class _CollapsibleBlockState extends State<_CollapsibleBlock> {
 
   @override
   Widget build(BuildContext context) {
+    // 【2026-08-22 定稿】FUI 风格折叠块：锐角 + 细线框 + v 在右侧（与方框保持间距）
     return Container(
       margin: const EdgeInsets.only(bottom: 6),
       decoration: BoxDecoration(
         color: AppColors.surface.withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: AppColors.divider),
+        borderRadius: BorderRadius.circular(2),   // FUI 锐角
+        border: Border.all(color: AppColors.line),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           InkWell(
             onTap: () => setState(() => _open = !_open),
-            borderRadius: BorderRadius.circular(10),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
               child: Row(
                 children: [
-                  Icon(widget.icon, size: 14, color: widget.color),
+                  Icon(widget.icon, size: 13, color: widget.color),
                   const SizedBox(width: 6),
                   Expanded(
                     child: Text(widget.title,
-                        style: TextStyle(color: widget.color, fontSize: 12, fontFamily: 'monospace')),
+                        style: TextStyle(color: widget.color, fontSize: 11, fontFamily: fuiMono, letterSpacing: 0.5)),
                   ),
-                  Icon(_open ? Icons.expand_less : Icons.expand_more,
-                      size: 16, color: AppColors.textSecondary),
+                  // v 在方框右侧、保持间距（定稿：思考中... (x.x)s v）
+                  Padding(
+                    padding: const EdgeInsets.only(left: 10),
+                    child: Text(
+                      _open ? 'v' : '>',
+                      style: TextStyle(
+                          fontFamily: fuiMono,
+                          fontSize: 10,
+                          color: AppColors.dim,
+                          fontWeight: FontWeight.w700),
+                    ),
+                  ),
                 ],
               ),
             ),
           ),
           if (_open && widget.content.isNotEmpty)
-            Padding(
+            Container(
+              width: double.infinity,
               padding: const EdgeInsets.fromLTRB(10, 0, 10, 8),
-              // 【0.2.1 #4】展开显示全文（不截断——args/result 完整可读）
               child: SelectableText(widget.content,
-                  style: const TextStyle(color: AppColors.textSecondary, fontSize: 12, height: 1.4)),
+                  style: const TextStyle(color: AppColors.textSecondary, fontSize: 11, height: 1.4, fontFamily: fuiMono)),
             ),
         ],
       ),
