@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 
 import '../../core/theme/app_theme.dart';
 import '../connect/connect_screen.dart';
+import '../memory/memory_screen.dart';
+import '../sessions/sessions_screen.dart';
 import 'screens/appearance_screen.dart';
 import 'screens/conn_settings_screen.dart';
 import 'screens/mcp_screen.dart';
@@ -13,7 +15,6 @@ import 'screens/mount_screen.dart';
 import 'screens/notif_screen.dart';
 import 'screens/permission_screen.dart';
 import 'screens/personality_screen.dart';
-import 'screens/plan_page.dart';
 import 'screens/privilege_screen.dart';
 import 'screens/providers_screen.dart';
 import 'screens/rootfs_screen.dart';
@@ -47,7 +48,7 @@ class AiConfigScreen extends StatelessWidget {
           ('Token 用量', Icons.data_usage_outlined, const TokenUsageScreen()),
           ('人格', Icons.person_outline, const PersonalityScreen()),
           ('技能', Icons.extension_outlined, const SkillsScreen()),
-          ('记忆管理', Icons.psychology_outlined, const PlanPage()),
+          ('记忆管理', Icons.psychology_outlined, const MemoryScreen()),
         ],
       ),
       (
@@ -77,7 +78,7 @@ class AiConfigScreen extends StatelessWidget {
         Icons.sync_outlined,
         [
           ('同步设置', Icons.sync_outlined, const SyncSettingsScreen()),
-          ('会话管理', Icons.forum_outlined, const PlanPage()),
+          ('会话管理', Icons.forum_outlined, const SessionsScreen()),
         ],
       ),
       (
