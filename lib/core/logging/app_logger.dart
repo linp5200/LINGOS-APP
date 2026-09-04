@@ -21,7 +21,7 @@ class AppLogger {
   int maxLines = 500; // 内存缓冲上限（显示取最近 100）
 
   /// 当前 App 版本（发版同步）
-  static const appVersion = '0.2.5';
+  static const appVersion = '0.4.3';
 
   Future<void> init() async {
     try {
