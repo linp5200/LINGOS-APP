@@ -35,17 +35,17 @@ jobs:
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "版本: $VERSION"
 
-      - name: 编译 Release APK（ABI 拆分——先生格式：LINGOS_<架构>_android_beta_<版本>.apk）
+      - name: 编译 Release APK（ABI 拆分——0.4.3 规范：LINGOS_app_android_v<版本>_<架构>.apk，无包型后缀）
         run: |
           flutter build apk --release --split-per-abi
           flutter build apk --release
           mkdir -p /tmp/release
           V=$(grep -oP '^version:\s*\K[^+\s]+' pubspec.yaml)
           cd build/app/outputs/flutter-apk
-          [ -f app-arm64-v8a-release.apk ] && cp app-arm64-v8a-release.apk "/tmp/release/LINGOS_arm64-v8a_android_beta_${V}.apk"
-          [ -f app-armeabi-v7a-release.apk ] && cp app-armeabi-v7a-release.apk "/tmp/release/LINGOS_armeabi-v7a_android_beta_${V}.apk"
-          [ -f app-x86_64-release.apk ] && cp app-x86_64-release.apk "/tmp/release/LINGOS_x86_64_android_beta_${V}.apk"
-          cp app-release.apk "/tmp/release/LINGOS_all_android_beta_${V}.apk"
+          [ -f app-arm64-v8a-release.apk ] && cp app-arm64-v8a-release.apk "/tmp/release/LINGOS_app_android_v${V}_arm64-v8a.apk"
+          [ -f app-armeabi-v7a-release.apk ] && cp app-armeabi-v7a-release.apk "/tmp/release/LINGOS_app_android_v${V}_armeabi-v7a.apk"
+          [ -f app-x86_64-release.apk ] && cp app-x86_64-release.apk "/tmp/release/LINGOS_app_android_v${V}_x86_64.apk"
+          cp app-release.apk "/tmp/release/LINGOS_app_android_v${V}_all.apk"
           cp app-release.apk /tmp/release/app-release-safe.apk
 
       - name: 发布到 GitHub Release
