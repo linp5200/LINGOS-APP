@@ -114,7 +114,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 : _error != null
                     ? Center(child: Text(_error!, style: const TextStyle(color: AppColors.brandRed)))
                     : _info == null
-                        ? Center(child: Text('点击刷新获取系统状态', style: TextStyle(color: AppColors.textSecondary)))
+                        ? const Center(child: Text('点击刷新获取系统状态', style: TextStyle(color: AppColors.textSecondary)))
                         : _buildGrid(),
           ),
         ],
