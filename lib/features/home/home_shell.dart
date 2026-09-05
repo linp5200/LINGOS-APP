@@ -8,7 +8,6 @@ import '../../core/providers.dart';
 import '../../core/logging/app_logger.dart';
 import '../../core/storage/app_store.dart';
 import '../../core/theme/app_theme.dart';
-import '../../core/theme/fui_widgets.dart';
 import '../alerts/alerts_screen.dart';
 import '../chat/chat_screen.dart';
 import '../connect/connect_screen.dart';
