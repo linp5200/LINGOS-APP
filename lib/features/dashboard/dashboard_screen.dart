@@ -9,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/providers.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/theme/fui_widgets.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
   // 【A1修复】三横按钮回调（HomeShell 打开 Drawer）
@@ -103,22 +104,39 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         actions: [
         IconButton(icon: const Icon(Icons.refresh, size: 20), onPressed: _loading ? null : _load),
       ]),
-      body: _loading
-          ? const Center(child: CircularProgressIndicator())
-          : _error != null
-              ? Center(child: Text(_error!, style: const TextStyle(color: AppColors.brandRed)))
-              : _info == null
-                  ? const Center(child: Text('点击刷新获取系统状态', style: TextStyle(color: AppColors.textSecondary)))
-                  : _buildGrid(),
+      body: Stack(
+        children: [
+          // 【0.4.3】仪表盘地形背景（先生预览：数据卡浮于灰白地形）
+          const Positioned.fill(child: FuiTerrainBackground(opacity: 0.10)),
+          Positioned.fill(
+            child: _loading
+                ? const Center(child: CircularProgressIndicator())
+                : _error != null
+                    ? Center(child: Text(_error!, style: const TextStyle(color: AppColors.brandRed)))
+                    : _info == null
+                        ? Center(child: Text('点击刷新获取系统状态', style: TextStyle(color: AppColors.textSecondary)))
+                        : _buildGrid(),
+          ),
+        ],
+      ),
     );
   }
 
   Widget _buildGrid() {
-    final cpu = _info?['cpu_usage']?.toString() ?? '--';
-    final mem = _info?['memory_usage']?.toString() ?? '--';
-    final disk = _info?['disk_usage']?.toString() ?? '--';
-    final net = _info?['network_rx']?.toString() ?? '--';
-    final uptime = _info?['uptime']?.toString() ?? '--';
+    // 【0.4.3 修正】真实字段映射（server system_info: cpu_usage/total_ram/free_ram/disk_usage/uptime）
+    final cpu = (_info?['cpu_usage'] is num) ? (_info!['cpu_usage'] as num).toStringAsFixed(0) : '--';
+    double? totalRam = _info?['total_ram'] is num ? (_info!['total_ram'] as num).toDouble() : null;
+    double? freeRam = _info?['free_ram'] is num ? (_info!['free_ram'] as num).toDouble() : null;
+    final memPct = (totalRam != null && freeRam != null && totalRam > 0)
+        ? ((totalRam - freeRam) / totalRam * 100).toStringAsFixed(0)
+        : '--';
+    final disk = (_info?['disk_usage'] is num)
+        ? (_info!['disk_usage'] as num).toStringAsFixed(0)
+        : '--';
+    final uptimeS = _info?['uptime'] is num ? (_info!['uptime'] as num).toInt() : -1;
+    final upStr = uptimeS >= 0
+        ? '${uptimeS ~/ 3600}h${(uptimeS % 3600) ~/ 60}m'
+        : '--';
     return GridView.count(
       crossAxisCount: 2,
       padding: const EdgeInsets.all(16),
@@ -126,30 +144,34 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       crossAxisSpacing: 12,
       childAspectRatio: 1.4,
       children: [
-        _card(Icons.memory, 'CPU', '$cpu%', AppColors.brandCyan),
-        _card(Icons.storage, '内存', '$mem%', AppColors.brandRed),
-        _card(Icons.storage_rounded, '磁盘', '$disk%', Colors.orange),
-        _card(Icons.network_check, '网络', net, Colors.green),
-        _card(Icons.timer_outlined, '运行时长', '$uptime s', AppColors.textSecondary),
-        _card(Icons.info_outline, '状态', _info?['status']?.toString() ?? '--', AppColors.brandCyan),
+        _card(Icons.memory, 'CPU', '$cpu%', AppColors.green),
+        _card(Icons.storage, '内存', '$memPct%', AppColors.green),
+        _card(Icons.storage_rounded, '磁盘', '$disk%', AppColors.amber),
+        _card(Icons.timer_outlined, '运行时长', upStr, AppColors.textSecondary),
+        _card(Icons.network_check, '网络', '--', AppColors.textSecondary),
+        _card(Icons.info_outline, '状态', 'LINGOS', AppColors.brandCyan),
       ],
     );
   }
 
   Widget _card(IconData icon, String label, String value, Color color) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, color: color, size: 22),
-            const SizedBox(height: 8),
-            Text(value, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
-            Text(label, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
-          ],
-        ),
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surface.withValues(alpha: 0.72),
+        border: Border.all(color: AppColors.line, width: 1),
+        borderRadius: BorderRadius.circular(2),
+      ),
+      padding: const EdgeInsets.all(14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, color: color, size: 22),
+          const SizedBox(height: 8),
+          Text(value,
+              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.textPrimary, fontFamily: fuiMono)),
+          Text(label, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+        ],
       ),
     );
   }

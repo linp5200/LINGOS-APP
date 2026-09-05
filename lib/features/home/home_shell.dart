@@ -235,15 +235,8 @@ class _HomeShellState extends ConsumerState<HomeShell> {
     return Scaffold(
       key: _scaffoldKey,
       drawer: _buildDrawer(context),
-      // 【0.4.3 FUI v2】灰白地形背景（先生定稿语言）——内容叠于其上
-      body: Stack(
-        children: [
-          const Positioned.fill(
-            child: FuiTerrainBackground(opacity: 0.09),
-          ),
-          Positioned.fill(child: _pages[_index]),
-        ],
-      ),
+      // 【0.4.3】聊天/会话纯净平面（先生 FUI 定稿：地形只进仪表盘/开屏——由各页自决背景）
+      body: _pages[_index],
       bottomNavigationBar: NavigationBar(
         selectedIndex: _index,
         onDestinationSelected: (i) => setState(() => _index = i),
