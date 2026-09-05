@@ -8,7 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/logging/app_logger.dart';
 import 'core/services/notification_service.dart';
 import 'core/theme/app_theme.dart';
-import 'features/home/home_shell.dart';
+import 'features/home/boot_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,9 +26,9 @@ class LingOsApp extends StatelessWidget {
       title: 'LING OS',
       debugShowCheckedModeBanner: false,
       theme: buildAppTheme(),
-      // 【0.4.3】本地模式启动：主框架直接可用（浏览/设置/本地功能）；
-      // 需要主机数据的功能（对话/同步/远端摄像头）在相应页引导去"设置→连接"
-      home: const HomeShell(),
+      // 【0.4.3】Boot 启动屏（本地模式——先生预览落地）：
+      // 不强制连接；有已存 token 自动恢复；需用时"连接主机"按钮
+      home: const BootScreen(),
     );
   }
 }
