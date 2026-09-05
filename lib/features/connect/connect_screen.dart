@@ -68,11 +68,21 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
       setState(() => _status = '认证成功——正在连接...');
       await Future.delayed(const Duration(milliseconds: 1500));
       if (!mounted) return;
+      _enterHome();
+    } else {
+      setState(() => _status = '连接码发送失败');
+    }
+  }
+
+  /// 【0.4.3】进入主框架：从 HomeShell 进入则 pop 回；独立(失效重登)则 pushReplacement
+  void _enterHome() {
+    if (!mounted) return;
+    if (Navigator.of(context).canPop()) {
+      Navigator.of(context).pop();
+    } else {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (_) => const HomeShell()),
       );
-    } else {
-      setState(() => _status = '连接码发送失败');
     }
   }
 
@@ -100,7 +110,7 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
       setState(() => _status = '✅ 会话已恢复（WS token 直连）');
       await Future.delayed(const Duration(milliseconds: 400));
       if (!mounted) return;
-      Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const HomeShell()));
+      _enterHome();
     } else {
       setState(() => _status = 'token 失效——请重新认证');
       await _mgr.disconnect();

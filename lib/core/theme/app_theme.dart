@@ -1,24 +1,33 @@
-/// 全局主题（FUI / Tactical HUD——先生 2026-08-22 定稿）
-/// 纯黑白灰高对比 + 少量鲜红点缀；极细线框；等宽字体用于数据
+/// 全局主题（FUI v2 / Tactical HUD——先生 2026-09-04 定稿）
+/// 灰白地形图语言：中深灰渐变底（少纯黑）/ 白线框架 / 色彩功能化
+/// 绿=在线/数据 · 琥珀=未连/警告 · 红=录影/警报（唯一警报色）
 library;
 
 import 'package:flutter/material.dart';
 
 class AppColors {
-  // FUI 主色板：纯黑/白/冷灰 + 鲜红（警报/强调）
-  static const bg = Color(0xFF050505);          // 纯黑底
-  static const surface = Color(0xFF0A0A0A);      // 面板
-  static const surfaceHigh = Color(0xFF111111);  // 高亮面板
-  static const line = Color(0xFF262626);         // 极细线框
-  static const lineDim = Color(0xFF1A1A1A);
-  static const white = Color(0xFFF0F0F0);        // 主文字
-  static const gray = Color(0xFF8A8A8A);         // 次级
-  static const dim = Color(0xFF4A4A4A);          // 弱化
-  static const red = Color(0xFFFF2A2A);          // 鲜红——唯一强调色
-  static const yellow = Color(0xFFFFD24A);       // 警告（仅日志/预警）
-  // 兼容旧引用（brand 前缀）
+  // FUI v2 色板：中深灰（非纯黑）为底，白线低透明做框架
+  static const bg = Color(0xFF1E2126);          // 中深灰底（替代纯黑）
+  static const bgAlt = Color(0xFF16191D);        // 更深一档（局部）
+  static const surface = Color(0xFF2B3038);      // 面板（半透明灰感）
+  static const surfaceHigh = Color(0xFF333942);  // 高亮面板
+  static const line = Color(0x47FFFFFF);         // 白线框 rgba(255,.28)
+  static const lineDim = Color(0x24FFFFFF);      // 白线框 rgba(255,.14)
+  static const white = Color(0xFFF4F6F8);        // 主文字
+  static const gray = Color(0xFFA9B1BC);         // 次级文字
+  static const dim = Color(0xFF6B7480);          // 弱化
+  static const dd = Color(0xFF3E454F);           // 更弱（标签）
+  // 功能色（先生定：色彩功能化，不作装饰）
+  static const green = Color(0xFF6CF59A);        // 在线/检测/数据
+  static const amber = Color(0xFFFFBE4D);        // 未连/警告
+  static const yellow = amber;                    // 兼容旧引用（日志 WARN）
+  static const red = Color(0xFFFF4D4D);          // 录影/警报（仅警报）
+  static const blue = Color(0xFF5AB0FF);         // 信息（可选）
+  // 兼容旧引用（brand 前缀 + text 前缀——全局不破坏）
   static const brandRed = red;
-  static const brandCyan = gray;                 // 原青→灰（FUI 去彩色）
+  static const brandCyan = gray;                 // 原青→灰
+  static const brandGreen = green;
+  static const brandAmber = amber;
   static const textPrimary = white;
   static const textSecondary = gray;
   static const divider = line;
@@ -29,7 +38,7 @@ const String fuiMono = 'monospace';
 
 ThemeData buildAppTheme() {
   const scheme = ColorScheme.dark(
-    primary: AppColors.red,
+    primary: AppColors.green,          // FUI v2：主强调=绿（在线/数据）
     secondary: AppColors.gray,
     surface: AppColors.surface,
     onSurface: AppColors.white,
@@ -56,12 +65,12 @@ ThemeData buildAppTheme() {
     ),
     navigationBarTheme: NavigationBarThemeData(
       backgroundColor: AppColors.surface,
-      indicatorColor: AppColors.red.withValues(alpha: 0.15),
+      indicatorColor: AppColors.green.withValues(alpha: 0.15),
       labelTextStyle: const WidgetStatePropertyAll(
         TextStyle(fontSize: 10, color: AppColors.gray, letterSpacing: 1),
       ),
     ),
-    drawerTheme: const DrawerThemeData(backgroundColor: AppColors.surface),
+    drawerTheme: const DrawerThemeData(backgroundColor: AppColors.bg),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
       fillColor: AppColors.surface,
@@ -75,7 +84,7 @@ ThemeData buildAppTheme() {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(2),
-        borderSide: const BorderSide(color: AppColors.red),
+        borderSide: const BorderSide(color: AppColors.green),
       ),
       hintStyle: const TextStyle(color: AppColors.dim, fontSize: 12),
     ),

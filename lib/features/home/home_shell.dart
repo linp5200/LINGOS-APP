@@ -5,8 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/providers.dart';
+import '../../core/logging/app_logger.dart';
 import '../../core/storage/app_store.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/theme/fui_widgets.dart';
 import '../alerts/alerts_screen.dart';
 import '../chat/chat_screen.dart';
 import '../connect/connect_screen.dart';
@@ -28,16 +30,43 @@ class _HomeShellState extends ConsumerState<HomeShell> {
   int _index = 0;
   bool _tokenListenerAttached = false;
   bool _startupNavApplied = false;
+  bool _autoConnectDone = false;
   // 【A1修复】GlobalKey——子页三横按钮经回调打开 HomeShell 的 Drawer
   final _scaffoldKey = GlobalKey<ScaffoldState>();
 
   // 【0.1.9】底部导航：对话 / 仪表盘（设置已迁入 AI 配置）
   // 【0.2.1 #7】+ 会话列表 tab（开局显示三选项：上一次的会话/会话列表/仪表盘）
+  // 【0.4.3 先生裁决】本地模式启动——有已存会话则自动恢复，无则停留本地
   late final List<Widget> _pages = [
     ChatScreen(onOpenDrawer: _openDrawer),
     SessionsScreen(onOpenDrawer: _openDrawer),
     DashboardScreen(onOpenDrawer: _openDrawer),
   ];
+
+  /// 【0.4.3】自动恢复连接（本地模式启动——有 token 静默重连，无则本地）
+  Future<void> _autoRestoreConnection() async {
+    if (_autoConnectDone) return;
+    _autoConnectDone = true;
+    try {
+      final store = AppStore();
+      final token = await store.getToken();
+      if (token == null || token.isEmpty) return; // 无会话——本地模式
+      final host = await store.getHost();
+      final port = await store.getPort();
+      if (host == null || host.isEmpty) return;
+      final cm = ref.read(connectionProvider);
+      if (cm.state == ConnState.authenticated) return;
+      final ok = await cm.connectWsAndSave(host, port, token);
+      appLog('HomeShell', '自动恢复连接: ${ok ? "成功" : "失败(本地模式)"}');
+    } catch (e) {
+      appLog('HomeShell', '自动恢复连接异常: $e');
+    }
+  }
+
+  /// 【0.4.3】去连接页（本地模式引导——设置入口保留在 AI 配置树）
+  void _goConnect() {
+    Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ConnectScreen()));
+  }
 
   void _openDrawer() {
     _scaffoldKey.currentState?.openDrawer();
@@ -56,6 +85,8 @@ class _HomeShellState extends ConsumerState<HomeShell> {
       });
       // 【0.2.1 #7】开局显示设置（上一次的会话/会话列表/仪表盘——默认会话列表 9.2）
       _applyStartupScreen();
+      // 【0.4.3 先生裁决】本地模式——有 token 自动恢复连接，无则停留本地
+      _autoRestoreConnection();
     }
   }
 
@@ -160,6 +191,13 @@ class _HomeShellState extends ConsumerState<HomeShell> {
           ),
           // 【0.1.9】设置统一入口（原 AI 配置改名——内部区块不变）
           _item(context, Icons.tune, '设置', const AiConfigScreen()),
+          // 【0.4.3】主机连接（本地模式——需连主机时主动进入）
+          ListTile(
+            leading: const Icon(Icons.link, size: 20, color: AppColors.brandGreen),
+            title: const Text('连接主机', style: TextStyle(color: AppColors.brandGreen)),
+            subtitle: const Text('对话/同步/远端摄像头需连接', style: TextStyle(fontSize: 10, color: AppColors.dim)),
+            onTap: _goConnect,
+          ),
           // 【0.2.1 B1 改名】Help AI（帮助档案——原 HA 面板）
           _item(context, Icons.home_work_outlined, 'Help AI', const HaScreen()),
           // 【0.2.1 #11 C2】Home Assistant 独立入口（智能家居——不藏 AI 配置里）
@@ -197,7 +235,15 @@ class _HomeShellState extends ConsumerState<HomeShell> {
     return Scaffold(
       key: _scaffoldKey,
       drawer: _buildDrawer(context),
-      body: _pages[_index],
+      // 【0.4.3 FUI v2】灰白地形背景（先生定稿语言）——内容叠于其上
+      body: Stack(
+        children: [
+          const Positioned.fill(
+            child: FuiTerrainBackground(opacity: 0.09),
+          ),
+          Positioned.fill(child: _pages[_index]),
+        ],
+      ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _index,
         onDestinationSelected: (i) => setState(() => _index = i),

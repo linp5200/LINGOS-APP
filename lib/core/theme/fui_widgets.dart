@@ -6,6 +6,157 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'app_theme.dart';
 
+/// FUI 等高线地形背景（先生 2026-09-04 定稿——灰白地形图语言）
+/// 算法：高斯峰海拔场 + Marching Squares 提取等值线（链化连续）——与 HTML 原型一致
+/// 用法：作全屏背景层（低不透明度白线），内容叠其上
+class FuiTerrainBackground extends StatelessWidget {
+  final double opacity;
+  final int seed;
+  final Color lineColor;
+  const FuiTerrainBackground({
+    super.key,
+    this.opacity = 0.10,
+    this.seed = 20260904,
+    this.lineColor = Colors.white,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(
+      child: CustomPaint(
+        painter: _TerrainPainter(seed: seed, opacity: opacity, lineColor: lineColor),
+        child: const SizedBox.expand(),
+      ),
+    );
+  }
+}
+
+class _TerrainPainter extends CustomPainter {
+  final int seed;
+  final double opacity;
+  final Color lineColor;
+  _TerrainPainter({required this.seed, required this.opacity, required this.lineColor});
+
+  // 确定性伪随机（同 seed 同地形）
+  double _rnd(List<int> state) {
+    state[0] = (state[0] * 1103515245 + 12345) & 0x7fffffff;
+    return state[0] / 0x7fffffff;
+  }
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (size.width < 10 || size.height < 10) return;
+    final gw = (size.width / 12).round().clamp(20, 80);
+    final gh = (size.height / 12).round().clamp(16, 60);
+
+    // 1) 高斯峰海拔场（4-6 峰）
+    final st = [seed];
+    final peaks = <List<double>>[];
+    final nPeaks = 5;
+    for (var i = 0; i < nPeaks; i++) {
+      peaks.add([
+        _rnd(st), _rnd(st),                       // cx cy（相对）
+        0.09 + _rnd(st) * 0.20, 0.09 + _rnd(st) * 0.20, // rx ry
+        0.9 + _rnd(st) * 1.4,                     // 幅值
+        _rnd(st) * math.pi,                       // 旋转
+      ]);
+    }
+    final field = List<double>.filled(gw * gh, 0);
+    for (var y = 0; y < gh; y++) {
+      for (var x = 0; x < gw; x++) {
+        final nx = x / (gw - 1), ny = y / (gh - 1);
+        var v = 0.0;
+        for (final p in peaks) {
+          final dx = nx - p[0], dy = ny - p[1];
+          final ex = dx * math.cos(p[5]) + dy * math.sin(p[5]);
+          final ey = -dx * math.sin(p[5]) + dy * math.cos(p[5]);
+          final vv = (ex / p[2]) * (ex / p[2]) + (ey / p[3]) * (ey / p[3]);
+          v += p[4] * math.exp(-vv);
+        }
+        // 低频扰动（谷地自然）
+        v += 0.16 * (math.sin(nx * 7.1 + seed) + math.cos(ny * 5.7 + seed) +
+            0.5 * math.sin((nx + ny) * 11.9));
+        field[y * gw + x] = v;
+      }
+    }
+    var mn = double.infinity, mx = -double.infinity;
+    for (final f in field) {
+      if (f < mn) mn = f;
+      if (f > mx) mx = f;
+    }
+    final pLine = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round;
+
+    // 2) Marching Squares 提取等值线（9-10 层，每 4 层为计曲线加粗）
+    for (var lv = 0; lv < 10; lv++) {
+      final th = mn + (mx - mn) * (lv + 1) / 11;
+      final isIndex = (lv % 4 == 3);
+      pLine
+        ..strokeWidth = isIndex ? 1.1 : 0.55
+        ..color = lineColor.withValues(alpha: opacity * (isIndex ? 1.0 : 0.5));
+      final path = Path();
+      for (var y = 0; y < gh - 1; y++) {
+        for (var x = 0; x < gw - 1; x++) {
+          final i = y * gw + x;
+          final tl = field[i], tr = field[i + 1];
+          final br = field[i + gw + 1], bl = field[i + gw];
+          double lerp(double a, double b) {
+            final t = (th - a) / (b - a);
+            return t < 0 ? 0 : (t > 1 ? 1 : t);
+          }
+
+          final pts = <List<double>>[];
+          if ((tl > th) != (tr > th)) pts.add([x + lerp(tl, tr), y]);
+          if ((tr > th) != (br > th)) pts.add([x + 1, y + lerp(tr, br)]);
+          if ((bl > th) != (br > th)) pts.add([x + lerp(bl, br), y + 1]);
+          if ((tl > th) != (bl > th)) pts.add([x, y + lerp(tl, bl)]);
+          if (pts.length == 2) {
+            path.moveTo(pts[0][0] / (gw - 1) * size.width, pts[0][1] / (gh - 1) * size.height);
+            path.lineTo(pts[1][0] / (gw - 1) * size.width, pts[1][1] / (gh - 1) * size.height);
+          } else if (pts.length == 4) {
+            final c = (tl + tr + bl + br) * 0.25;
+            if (c > th) {
+              path.moveTo(pts[0][0] / (gw - 1) * size.width, pts[0][1] / (gh - 1) * size.height);
+              path.lineTo(pts[1][0] / (gw - 1) * size.width, pts[1][1] / (gh - 1) * size.height);
+              path.moveTo(pts[2][0] / (gw - 1) * size.width, pts[2][1] / (gh - 1) * size.height);
+              path.lineTo(pts[3][0] / (gw - 1) * size.width, pts[3][1] / (gh - 1) * size.height);
+            } else {
+              path.moveTo(pts[0][0] / (gw - 1) * size.width, pts[0][1] / (gh - 1) * size.height);
+              path.lineTo(pts[3][0] / (gw - 1) * size.width, pts[3][1] / (gh - 1) * size.height);
+              path.moveTo(pts[1][0] / (gw - 1) * size.width, pts[1][1] / (gh - 1) * size.height);
+              path.lineTo(pts[2][0] / (gw - 1) * size.width, pts[2][1] / (gh - 1) * size.height);
+            }
+          }
+        }
+      }
+      canvas.drawPath(path, pLine);
+    }
+
+    // 3) 淡坐标网格
+    final pGrid = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 0.4
+      ..color = Colors.white.withValues(alpha: opacity * 0.25);
+    final gridPath = Path();
+    for (var g = 1; g < 6; g++) {
+      final px = size.width * g / 6;
+      gridPath.moveTo(px, 0);
+      gridPath.lineTo(px, size.height);
+    }
+    for (var g = 1; g < 5; g++) {
+      final py = size.height * g / 5;
+      gridPath.moveTo(0, py);
+      gridPath.lineTo(size.width, py);
+    }
+    canvas.drawPath(gridPath, pGrid);
+  }
+
+  @override
+  bool shouldRepaint(covariant _TerrainPainter old) =>
+      old.seed != seed || old.opacity != opacity;
+}
+
 /// FUI 等宽数据行：`[ LABEL ] value`
 class FuiDataRow extends StatelessWidget {
   final String label;
