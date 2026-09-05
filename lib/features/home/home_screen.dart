@@ -3,13 +3,10 @@
 library;
 
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme/app_theme.dart';
-import '../../core/logging/app_logger.dart';
 import '../connect/connect_screen.dart';
 import '../alerts/alerts_screen.dart';
-import '../vision/vision_screen.dart';
 import '../sessions/sessions_screen.dart';
 
 class HomeScreen extends StatelessWidget {
