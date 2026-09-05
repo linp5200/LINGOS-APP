@@ -120,7 +120,7 @@ class AiConfigScreen extends StatelessWidget {
 /// 分类子菜单页（先生要的子菜单导航——进入该分类显示子项，可返回）
 class _SubMenuScreen extends StatelessWidget {
   final _Category category;
-  const _SubMenuScreen({super.key, required this.category});
+  const _SubMenuScreen({required this.category});
 
   @override
   Widget build(BuildContext context) {

@@ -132,7 +132,7 @@ class _BootScreenState extends ConsumerState<BootScreen>
                       ),
                       child: Row(
                         children: [
-                          Container(
+                          const Container(
                               width: 7,
                               height: 7,
                               decoration: BoxDecoration(
