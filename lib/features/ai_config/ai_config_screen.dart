@@ -109,7 +109,7 @@ class AiConfigScreen extends StatelessWidget {
                 style: const TextStyle(fontSize: 9, color: AppColors.dim)),
             trailing: const Icon(Icons.chevron_right, size: 18, color: AppColors.dim),
             onTap: () => Navigator.push(context,
-                MaterialPageRoute(builder: (_) => _const SubMenuScreen(category: c))),
+                MaterialPageRoute(builder: (_) => _SubMenuScreen(category: c))),
           );
         },
       ),
@@ -120,7 +120,7 @@ class AiConfigScreen extends StatelessWidget {
 /// 分类子菜单页（先生要的子菜单导航——进入该分类显示子项，可返回）
 class _SubMenuScreen extends StatelessWidget {
   final _Category category;
-  const _const SubMenuScreen({super.key, required this.category});
+  const _SubMenuScreen({super.key, required this.category});
 
   @override
   Widget build(BuildContext context) {
