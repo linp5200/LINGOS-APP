@@ -46,13 +46,13 @@ class _TerrainPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     if (size.width < 10 || size.height < 10) return;
-    final gw = (size.width / 12).round().clamp(20, 80);
-    final gh = (size.height / 12).round().clamp(16, 60);
+    final gw = (size.width / 12).round().clamp(20, 80).toInt();
+    final gh = (size.height / 12).round().clamp(16, 60).toInt();
 
     // 1) 高斯峰海拔场（4-6 峰）
     final st = [seed];
     final peaks = <List<double>>[];
-    final nPeaks = 5;
+    const nPeaks = 5;
     for (var i = 0; i < nPeaks; i++) {
       peaks.add([
         _rnd(st), _rnd(st),                       // cx cy（相对）
@@ -107,10 +107,10 @@ class _TerrainPainter extends CustomPainter {
           }
 
           final pts = <List<double>>[];
-          if ((tl > th) != (tr > th)) pts.add([x + lerp(tl, tr), y]);
-          if ((tr > th) != (br > th)) pts.add([x + 1, y + lerp(tr, br)]);
-          if ((bl > th) != (br > th)) pts.add([x + lerp(bl, br), y + 1]);
-          if ((tl > th) != (bl > th)) pts.add([x, y + lerp(tl, bl)]);
+          if ((tl > th) != (tr > th)) pts.add([x + lerp(tl, tr), y.toDouble()]);
+          if ((tr > th) != (br > th)) pts.add([(x + 1).toDouble(), y + lerp(tr, br)]);
+          if ((bl > th) != (br > th)) pts.add([x + lerp(bl, br), (y + 1).toDouble()]);
+          if ((tl > th) != (bl > th)) pts.add([x.toDouble(), y + lerp(tl, bl)]);
           if (pts.length == 2) {
             path.moveTo(pts[0][0] / (gw - 1) * size.width, pts[0][1] / (gh - 1) * size.height);
             path.lineTo(pts[1][0] / (gw - 1) * size.width, pts[1][1] / (gh - 1) * size.height);

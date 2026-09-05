@@ -56,7 +56,7 @@ class _HomeShellState extends ConsumerState<HomeShell> {
       if (host == null || host.isEmpty) return;
       final cm = ref.read(connectionProvider);
       if (cm.state == ConnState.authenticated) return;
-      final ok = await cm.connectWsAndSave(host, port, token);
+      final ok = await cm.connectWsAndSave(host, port ?? 2939, token);
       appLog('HomeShell', '自动恢复连接: ${ok ? "成功" : "失败(本地模式)"}');
     } catch (e) {
       appLog('HomeShell', '自动恢复连接异常: $e');
