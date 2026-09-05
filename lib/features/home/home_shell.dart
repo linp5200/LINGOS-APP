@@ -17,6 +17,7 @@ import '../ha/ha_control_screen.dart';
 import '../vision/vision_screen.dart';
 import '../sessions/sessions_screen.dart';
 import '../ai_config/ai_config_screen.dart';
+import 'home_screen.dart';
 
 class HomeShell extends ConsumerStatefulWidget {
   const HomeShell({super.key});
@@ -33,10 +34,9 @@ class _HomeShellState extends ConsumerState<HomeShell> {
   // 【A1修复】GlobalKey——子页三横按钮经回调打开 HomeShell 的 Drawer
   final _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  // 【0.1.9】底部导航：对话 / 仪表盘（设置已迁入 AI 配置）
-  // 【0.2.1 #7】+ 会话列表 tab（开局显示三选项：上一次的会话/会话列表/仪表盘）
-  // 【0.4.3 先生裁决】本地模式启动——有已存会话则自动恢复，无则停留本地
+  // 【0.4.3 先生预览对照】导航 = 主控台(本地态) / 对话 / 会话 / 仪表盘
   late final List<Widget> _pages = [
+    HomeScreen(onOpenDrawer: _openDrawer),
     ChatScreen(onOpenDrawer: _openDrawer),
     SessionsScreen(onOpenDrawer: _openDrawer),
     DashboardScreen(onOpenDrawer: _openDrawer),
@@ -96,10 +96,10 @@ class _HomeShellState extends ConsumerState<HomeShell> {
     if (!mounted) return;
     setState(() {
       switch (start) {
-        case 'last':   _index = 0; break; // 上一次的会话（默认聊天页）
-        case 'sessions': _index = 1; break; // 会话列表
-        case 'dashboard': _index = 2; break; // 仪表盘
-        default:       _index = 1; break;
+        case 'last':   _index = 1; break; // 上一次的会话（默认对话页）
+        case 'sessions': _index = 2; break; // 会话列表
+        case 'dashboard': _index = 3; break; // 仪表盘
+        default:       _index = 0; break;   // 默认主控台（本地态）
       }
     });
   }
@@ -240,6 +240,7 @@ class _HomeShellState extends ConsumerState<HomeShell> {
         selectedIndex: _index,
         onDestinationSelected: (i) => setState(() => _index = i),
         destinations: const [
+          NavigationDestination(icon: Icon(Icons.home_outlined), selectedIcon: Icon(Icons.home), label: '主控台'),
           NavigationDestination(icon: Icon(Icons.chat_bubble_outline), selectedIcon: Icon(Icons.chat_bubble), label: '对话'),
           NavigationDestination(icon: Icon(Icons.forum_outlined), selectedIcon: Icon(Icons.forum), label: '会话'),
           NavigationDestination(icon: Icon(Icons.dashboard_outlined), selectedIcon: Icon(Icons.dashboard), label: '仪表盘'),

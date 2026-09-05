@@ -1,7 +1,7 @@
 name: lingos_app
 description: "LING OS App - Flutter 重写版（协议 v3）"
 publish_to: 'none'
-version: 0.4.3+20  # App 0.4.3（Boot 启动屏落地——本地模式+自动恢复+两按钮）
+version: 0.4.3+21  # App 0.4.3（主控台首页 tab——先生预览对照）
 
 environment:
   sdk: '>=3.4.0 <4.0.0'
