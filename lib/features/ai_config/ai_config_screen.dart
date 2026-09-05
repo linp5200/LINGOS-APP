@@ -1,5 +1,6 @@
-/// AI 配置主页（2026-08-22 先生裁决：树状分类——9 大类子菜单导航）
-/// 分类：连接与服务器 / 对话与AI / 语音 / 通知与后台 / 外观与主题 / 会话与同步 / 隐私与安全 / 系统与日志 / 关于
+/// AI 配置主页（先生 2026-09-05 裁决修正：设置从"页内展开"改回"子菜单导航"）
+/// 点击分类 → 进入该分类子菜单页（AppBar 显示路径·可逐级返回）——系统设置式层级跳转
+/// 每项带图标 + chevron；深层入口（权限/FUI 页）标 [进入]
 library;
 
 import 'package:flutter/material.dart';
@@ -23,138 +24,127 @@ import 'screens/skills_screen.dart';
 import 'screens/sync_settings_screen.dart';
 import 'screens/token_usage_screen.dart';
 import '../logs/logs_screen.dart';
+import 'screens/about_screen.dart';
+
+/// 分类项
+class _CatItem {
+  final String label;
+  final IconData icon;
+  final Widget page;
+  const _CatItem(this.label, this.icon, this.page);
+}
+
+/// 分类定义
+class _Category {
+  final String title;
+  final IconData icon;
+  final List<_CatItem> items;
+  const _Category(this.title, this.icon, this.items);
+}
+
+const List<_Category> _categories = [
+  const _Category('连接与服务器', Icons.settings_ethernet_outlined, [
+    const _CatItem('连接设置', Icons.link_outlined, const ConnSettingsScreen()),
+    const _CatItem('主机（认证）', Icons.dns_outlined, const ConnectScreen()),
+    const _CatItem('Rootfs 本地沙箱', Icons.developer_board_outlined, const RootfsScreen()),
+  ]),
+  const _Category('对话与 AI', Icons.smart_toy_outlined, [
+    const _CatItem('模型提供商', Icons.add_circle_outline, const ProvidersScreen()),
+    const _CatItem('Token 用量', Icons.data_usage_outlined, const TokenUsageScreen()),
+    const _CatItem('人格', Icons.person_outline, const PersonalityScreen()),
+    const _CatItem('技能', Icons.extension_outlined, const SkillsScreen()),
+    const _CatItem('记忆管理', Icons.psychology_outlined, const MemoryScreen()),
+  ]),
+  const _Category('语音', Icons.record_voice_over_outlined, [
+    const _CatItem('语音提供商与测试', Icons.voice_over_off_outlined, const ProvidersScreen()),
+  ]),
+  const _Category('通知与后台', Icons.notifications_active_outlined, [
+    const _CatItem('通知与后台', Icons.notifications_active_outlined, const NotifScreen()),
+    const _CatItem('特权（Shizuku）', Icons.security_outlined, const PrivilegeScreen()),
+  ]),
+  const _Category('外观与主题', Icons.palette_outlined, [
+    const _CatItem('外观与偏好', Icons.palette_outlined, const AppearanceScreen()),
+  ]),
+  const _Category('会话与同步', Icons.sync_outlined, [
+    const _CatItem('同步设置', Icons.sync_outlined, const SyncSettingsScreen()),
+    const _CatItem('会话管理', Icons.forum_outlined, const SessionsScreen()),
+  ]),
+  const _Category('隐私与安全', Icons.lock_outline, [
+    const _CatItem('权限管理', Icons.admin_panel_settings_outlined, const PermissionScreen()),
+    const _CatItem('挂载外部文件', Icons.folder_special_outlined, const MountScreen()),
+  ]),
+  const _Category('系统与日志', Icons.settings_suggest_outlined, [
+    const _CatItem('日志', Icons.article_outlined, const LogsScreen()),
+    const _CatItem('管理服务端文件', Icons.folder_special_outlined, const ServerFilesScreen()),
+    const _CatItem('MCP', Icons.dns_outlined, const McpScreen()),
+  ]),
+  const _Category('关于', Icons.info_outline, [
+    const _CatItem('版本与信息', Icons.info_outline, const AboutScreen()),
+  ]),
+];
 
 class AiConfigScreen extends StatelessWidget {
   const AiConfigScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // 9 大类（先生定稿树状分类）——每类含子项
-    final categories = <(String, IconData, List<(String, IconData, Widget)>)>[
-      (
-        '连接与服务器',
-        Icons.settings_ethernet_outlined,
-        [
-          ('连接设置', Icons.link_outlined, const ConnSettingsScreen()),
-          ('主机', Icons.dns_outlined, const ConnectScreen()),
-          ('Rootfs 本地沙箱', Icons.developer_board_outlined, const RootfsScreen()),
-        ],
-      ),
-      (
-        '对话与 AI',
-        Icons.smart_toy_outlined,
-        [
-          ('添加提供商', Icons.add_circle_outline, const ProvidersScreen()),
-          ('Token 用量', Icons.data_usage_outlined, const TokenUsageScreen()),
-          ('人格', Icons.person_outline, const PersonalityScreen()),
-          ('技能', Icons.extension_outlined, const SkillsScreen()),
-          ('记忆管理', Icons.psychology_outlined, const MemoryScreen()),
-        ],
-      ),
-      (
-        '语音',
-        Icons.record_voice_over_outlined,
-        [
-          ('语音提供商', Icons.voice_over_off_outlined, const ProvidersScreen()),
-        ],
-      ),
-      (
-        '通知与后台',
-        Icons.notifications_active_outlined,
-        [
-          ('通知与后台', Icons.notifications_active_outlined, const NotifScreen()),
-          ('特权', Icons.security_outlined, const PrivilegeScreen()),
-        ],
-      ),
-      (
-        '外观与主题',
-        Icons.palette_outlined,
-        [
-          ('外观与偏好', Icons.palette_outlined, const AppearanceScreen()),
-        ],
-      ),
-      (
-        '会话与同步',
-        Icons.sync_outlined,
-        [
-          ('同步设置', Icons.sync_outlined, const SyncSettingsScreen()),
-          ('会话管理', Icons.forum_outlined, const SessionsScreen()),
-        ],
-      ),
-      (
-        '隐私与安全',
-        Icons.lock_outline,
-        [
-          ('权限管理', Icons.admin_panel_settings_outlined, const PermissionScreen()),
-          ('挂载外部文件', Icons.folder_special_outlined, const MountScreen()),
-        ],
-      ),
-      (
-        '系统与日志',
-        Icons.settings_suggest_outlined,
-        [
-          ('日志', Icons.article_outlined, const LogsScreen()),
-          ('管理服务端文件', Icons.folder_special_outlined, const ServerFilesScreen()),
-          ('MCP', Icons.dns_outlined, const McpScreen()),
-        ],
-      ),
-    ];
-
     return Scaffold(
       appBar: AppBar(title: const Text('设置')),
-      body: ListView(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        children: [
-          for (final (title, icon, items) in categories)
-            _CategorySection(title: title, icon: icon, items: items, context: context),
-        ],
+      body: ListView.separated(
+        padding: const EdgeInsets.symmetric(vertical: 6),
+        itemCount: _categories.length,
+        separatorBuilder: (_, __) => const Divider(height: 1, indent: 52),
+        itemBuilder: (context, i) {
+          final c = _categories[i];
+          return ListTile(
+            leading: Icon(c.icon, size: 22, color: AppColors.green),
+            title: Text(c.title,
+                style: const TextStyle(
+                    fontFamily: fuiMono,
+                    fontSize: 13,
+                    color: AppColors.white,
+                    letterSpacing: 1,
+                    fontWeight: FontWeight.w700)),
+            subtitle: Text('${c.items.length} 项',
+                style: const TextStyle(fontSize: 9, color: AppColors.dim)),
+            trailing: const Icon(Icons.chevron_right, size: 18, color: AppColors.dim),
+            onTap: () => Navigator.push(context,
+                MaterialPageRoute(builder: (_) => _const SubMenuScreen(category: c))),
+          );
+        },
       ),
     );
   }
 }
 
-/// 分类区块——点击展开子菜单（树状）
-class _CategorySection extends StatelessWidget {
-  final String title;
-  final IconData icon;
-  final List<(String, IconData, Widget)> items;
-  final BuildContext context;
-
-  const _CategorySection({
-    required this.title,
-    required this.icon,
-    required this.items,
-    required this.context,
-  });
+/// 分类子菜单页（先生要的子菜单导航——进入该分类显示子项，可返回）
+class _SubMenuScreen extends StatelessWidget {
+  final _Category category;
+  const _const SubMenuScreen({super.key, required this.category});
 
   @override
   Widget build(BuildContext context) {
-    return Theme(
-      data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-      child: ExpansionTile(
-        leading: Icon(icon, size: 20, color: AppColors.red),
-        title: Text('[ $title ]',
-            style: const TextStyle(
-                fontFamily: fuiMono,
-                fontSize: 13,
-                color: AppColors.white,
-                letterSpacing: 1,
-                fontWeight: FontWeight.w700)),
-        iconColor: AppColors.gray,
-        collapsedIconColor: AppColors.dim,
-        childrenPadding: const EdgeInsets.only(bottom: 4),
-        children: [
-          for (final (label, subIcon, page) in items)
-            ListTile(
-              dense: true,
-              leading: Icon(subIcon, size: 17, color: AppColors.gray),
-              title: Text(label,
-                  style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
-              trailing: const Icon(Icons.chevron_right, size: 16, color: AppColors.dim),
-              onTap: () => Navigator.push(context,
-                  MaterialPageRoute(builder: (_) => page)),
-            ),
-        ],
+    return Scaffold(
+      appBar: AppBar(
+        // 路径标题：设置 / 分类
+        title: Text('设置 / ${category.title}',
+            style: const TextStyle(fontSize: 15, letterSpacing: 1)),
+      ),
+      body: ListView.separated(
+        padding: const EdgeInsets.symmetric(vertical: 6),
+        itemCount: category.items.length,
+        separatorBuilder: (_, __) => const Divider(height: 1, indent: 52),
+        itemBuilder: (context, i) {
+          final it = category.items[i];
+          return ListTile(
+            leading: Icon(it.icon, size: 21, color: AppColors.gray),
+            title: Text(it.label,
+                style: const TextStyle(fontSize: 14, color: AppColors.textPrimary)),
+            trailing: const Icon(Icons.chevron_right, size: 18, color: AppColors.dim),
+            onTap: () => Navigator.push(context,
+                MaterialPageRoute(builder: (_) => it.page)),
+          );
+        },
       ),
     );
   }
