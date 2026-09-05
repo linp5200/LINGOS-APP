@@ -60,7 +60,7 @@ class _BootScreenState extends ConsumerState<BootScreen>
         _restoreStatus = '检测到已保存会话——自动恢复…';
       });
       final cm = ref.read(connectionProvider);
-      final ok = await cm.connectWsAndSave(host, port, token);
+      final ok = await cm.connectWsAndSave(host, port ?? 2939, token);
       appLog('Boot', '自动恢复: ${ok ? "成功" : "失败(本地模式)"}');
       if (!mounted) return;
       setState(() {
@@ -110,7 +110,7 @@ class _BootScreenState extends ConsumerState<BootScreen>
                           letterSpacing: 8,
                           color: AppColors.white)),
                   const SizedBox(height: 10),
-                  Text('SYSTEM INITIALIZE · LN-0.4.3',
+                  const Text('SYSTEM INITIALIZE · LN-0.4.3',
                       style: TextStyle(
                           fontFamily: fuiMono,
                           fontSize: 9,
@@ -132,7 +132,7 @@ class _BootScreenState extends ConsumerState<BootScreen>
                       ),
                       child: Row(
                         children: [
-                          Container(
+                          const Container(
                               width: 7,
                               height: 7,
                               decoration: BoxDecoration(

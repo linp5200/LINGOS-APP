@@ -3,7 +3,7 @@
 library;
 
 import 'package:flutter/material.dart';
-import '../../core/theme/app_theme.dart';
+import '../../../core/theme/app_theme.dart';
 
 class AboutScreen extends StatelessWidget {
   const AboutScreen({super.key});
@@ -30,9 +30,9 @@ class AboutScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          Center(
+          const Center(
             child: Text('LING OS',
-                style: const TextStyle(
+                style: TextStyle(
                     fontFamily: fuiMono,
                     fontSize: 26,
                     fontWeight: FontWeight.w700,
@@ -77,7 +77,7 @@ class AboutScreen extends StatelessWidget {
         children: [
           Icon(icon, size: 18, color: AppColors.gray),
           const SizedBox(width: 14),
-          Text(label + '  ',
+          Text('$label  ',
               style: const TextStyle(fontSize: 13, color: AppColors.textSecondary)),
           Expanded(
             child: Text(value,

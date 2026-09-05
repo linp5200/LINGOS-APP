@@ -43,43 +43,43 @@ class _Category {
 }
 
 const List<_Category> _categories = [
-  const _Category('连接与服务器', Icons.settings_ethernet_outlined, [
-    const _CatItem('连接设置', Icons.link_outlined, const ConnSettingsScreen()),
-    const _CatItem('主机（认证）', Icons.dns_outlined, const ConnectScreen()),
-    const _CatItem('Rootfs 本地沙箱', Icons.developer_board_outlined, const RootfsScreen()),
+  _Category('连接与服务器', Icons.settings_ethernet_outlined, [
+    _CatItem('连接设置', Icons.link_outlined, ConnSettingsScreen()),
+    _CatItem('主机（认证）', Icons.dns_outlined, ConnectScreen()),
+    _CatItem('Rootfs 本地沙箱', Icons.developer_board_outlined, RootfsScreen()),
   ]),
-  const _Category('对话与 AI', Icons.smart_toy_outlined, [
-    const _CatItem('模型提供商', Icons.add_circle_outline, const ProvidersScreen()),
-    const _CatItem('Token 用量', Icons.data_usage_outlined, const TokenUsageScreen()),
-    const _CatItem('人格', Icons.person_outline, const PersonalityScreen()),
-    const _CatItem('技能', Icons.extension_outlined, const SkillsScreen()),
-    const _CatItem('记忆管理', Icons.psychology_outlined, const MemoryScreen()),
+  _Category('对话与 AI', Icons.smart_toy_outlined, [
+    _CatItem('模型提供商', Icons.add_circle_outline, ProvidersScreen()),
+    _CatItem('Token 用量', Icons.data_usage_outlined, TokenUsageScreen()),
+    _CatItem('人格', Icons.person_outline, PersonalityScreen()),
+    _CatItem('技能', Icons.extension_outlined, SkillsScreen()),
+    _CatItem('记忆管理', Icons.psychology_outlined, MemoryScreen()),
   ]),
-  const _Category('语音', Icons.record_voice_over_outlined, [
-    const _CatItem('语音提供商与测试', Icons.voice_over_off_outlined, const ProvidersScreen()),
+  _Category('语音', Icons.record_voice_over_outlined, [
+    _CatItem('语音提供商与测试', Icons.voice_over_off_outlined, ProvidersScreen()),
   ]),
-  const _Category('通知与后台', Icons.notifications_active_outlined, [
-    const _CatItem('通知与后台', Icons.notifications_active_outlined, const NotifScreen()),
-    const _CatItem('特权（Shizuku）', Icons.security_outlined, const PrivilegeScreen()),
+  _Category('通知与后台', Icons.notifications_active_outlined, [
+    _CatItem('通知与后台', Icons.notifications_active_outlined, NotifScreen()),
+    _CatItem('特权（Shizuku）', Icons.security_outlined, PrivilegeScreen()),
   ]),
-  const _Category('外观与主题', Icons.palette_outlined, [
-    const _CatItem('外观与偏好', Icons.palette_outlined, const AppearanceScreen()),
+  _Category('外观与主题', Icons.palette_outlined, [
+    _CatItem('外观与偏好', Icons.palette_outlined, AppearanceScreen()),
   ]),
-  const _Category('会话与同步', Icons.sync_outlined, [
-    const _CatItem('同步设置', Icons.sync_outlined, const SyncSettingsScreen()),
-    const _CatItem('会话管理', Icons.forum_outlined, const SessionsScreen()),
+  _Category('会话与同步', Icons.sync_outlined, [
+    _CatItem('同步设置', Icons.sync_outlined, SyncSettingsScreen()),
+    _CatItem('会话管理', Icons.forum_outlined, SessionsScreen()),
   ]),
-  const _Category('隐私与安全', Icons.lock_outline, [
-    const _CatItem('权限管理', Icons.admin_panel_settings_outlined, const PermissionScreen()),
-    const _CatItem('挂载外部文件', Icons.folder_special_outlined, const MountScreen()),
+  _Category('隐私与安全', Icons.lock_outline, [
+    _CatItem('权限管理', Icons.admin_panel_settings_outlined, PermissionScreen()),
+    _CatItem('挂载外部文件', Icons.folder_special_outlined, MountScreen()),
   ]),
-  const _Category('系统与日志', Icons.settings_suggest_outlined, [
-    const _CatItem('日志', Icons.article_outlined, const LogsScreen()),
-    const _CatItem('管理服务端文件', Icons.folder_special_outlined, const ServerFilesScreen()),
-    const _CatItem('MCP', Icons.dns_outlined, const McpScreen()),
+  _Category('系统与日志', Icons.settings_suggest_outlined, [
+    _CatItem('日志', Icons.article_outlined, LogsScreen()),
+    _CatItem('管理服务端文件', Icons.folder_special_outlined, ServerFilesScreen()),
+    _CatItem('MCP', Icons.dns_outlined, McpScreen()),
   ]),
-  const _Category('关于', Icons.info_outline, [
-    const _CatItem('版本与信息', Icons.info_outline, const AboutScreen()),
+  _Category('关于', Icons.info_outline, [
+    _CatItem('版本与信息', Icons.info_outline, AboutScreen()),
   ]),
 ];
 
