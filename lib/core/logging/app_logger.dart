@@ -6,6 +6,7 @@
 library;
 
 import 'dart:io';
+import '../app_info.dart';
 
 import 'package:path_provider/path_provider.dart';
 
@@ -20,8 +21,9 @@ class AppLogger {
   bool _saveToFile = false; // 【定稿】默认不保存文件，导出才落盘
   int maxLines = 500; // 内存缓冲上限（显示取最近 100）
 
-  /// 当前 App 版本（发版同步）
-  static const appVersion = '0.4.3';
+  /// 当前 App 版本 —— 【0.4.4】统一取自 AppInfo（唯一来源，避免多处不同步）
+  static String get appVersion => AppInfo.version;
+  static String get appVersionFull => AppInfo.full;
 
   Future<void> init() async {
     try {

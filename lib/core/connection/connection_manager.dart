@@ -5,6 +5,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'channel.dart';
+import '../app_info.dart';
 import 'tcp_channel.dart';
 import '../storage/app_store.dart';
 import '../storage/offline_cache.dart';
@@ -25,6 +26,17 @@ class ConnectionManager implements ChannelListener {
 
   final _eventController = StreamController<String>.broadcast();
   Stream<String> get events => _eventController.stream;
+
+  /// 【0.4.4 新增】统一连接判定（UI 用——避免各处自行拼装 tcp/ws 判断）
+  bool get isConnected =>
+      (ws != null && ws!.isConnected) || (tcp != null && tcp!.isConnected);
+
+  /// 连接方式描述（用于状态显示）
+  String get transportLabel {
+    if (ws != null && ws!.isConnected) return 'WebSocket';
+    if (tcp != null && tcp!.isConnected) return 'TCP';
+    return '未连接';
+  }
 
   /// 连接 + 等待验证码（TCP 主通道——认证流程）
   String? _tcpHost;
@@ -313,6 +325,8 @@ class ConnectionManager implements ChannelListener {
         appLog('ConnectionManager', '自动连 WS 条件不满足: token=${t.isEmpty ? "空" : "有"} host=$host port=$port ws已连=${ws?.isConnected ?? false}');
       }
     }
+    // 【0.4.4】集中捕获服务端版本（system_info 等）——关于页据此显示真实版本
+    AppInfo.updateFromEvent(line);
     _eventController.add(line);
   }
 
@@ -320,6 +334,7 @@ class ConnectionManager implements ChannelListener {
   void onDisconnected(String reason) {
     lastError = reason;
     state = ConnState.disconnected;
+    AppInfo.clearServerVersion();   // 【0.4.4】断开后不再声称知道服务端版本
     // 【0.2.1 #1】断连 → 离线只读事件（UI 切缓存显示 + 操作拦截）
     _eventController.add('{"type":"disconnected","reason":"$reason"}');
     _eventController.add('{"type":"offline","reason":"$reason"}');

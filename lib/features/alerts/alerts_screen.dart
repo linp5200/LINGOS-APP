@@ -1,4 +1,5 @@
-/// 预警中心（协议 v3——alert_query 查询预警）
+/// 预警中心（协议 v3——alert_query 查询 + alert_event 实时广播）
+/// 【0.4.4】新增 alert_event 实时消费（此前仅轮询）
 library;
 
 import 'dart:async';
@@ -28,6 +29,20 @@ class _AlertsScreenState extends ConsumerState<AlertsScreen> {
     _sub = ref.read(connectionProvider).events.listen((line) {
       try {
         final evt = jsonDecode(line);
+        // 【0.4.4 新增】服务端实时广播 alert_event（alertd → ai_server → WS）
+        //   此前 App 只有 alert_query 轮询 → 预警不能即时弹出（先生实测反馈）
+        if (evt is Map && evt['type'] == 'alert_event') {
+          final payload = evt['data'] ?? evt['alert'] ?? evt;
+          if (payload is Map) {
+            final a = Map<String, dynamic>.from(payload);
+            setState(() {
+              _alerts.insert(0, a);
+              if (_alerts.length > 200) _alerts.removeLast();
+            });
+            _showBanner(a);
+          }
+          return;
+        }
         if (evt is Map && evt['type'] == 'command_response') {
           final data = evt['data'];
           Map<String, dynamic>? resp;
@@ -64,6 +79,33 @@ class _AlertsScreenState extends ConsumerState<AlertsScreen> {
   void dispose() {
     _sub?.cancel();
     super.dispose();
+  }
+
+  /// 实时预警横幅（先生：预警需即时可见）
+  void _showBanner(Map<String, dynamic> a) {
+    if (!mounted) return;
+    final title = a['title']?.toString() ??
+        a['description']?.toString() ??
+        '新预警';
+    final level = a['level']?.toString() ?? '';
+    final isHigh = level.contains('high') || level.contains('critical') || level == 'L3';
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        backgroundColor: isHigh ? AppColors.brandRed : AppColors.surfaceHigh,
+        content: Row(children: [
+          Icon(isHigh ? Icons.warning_amber_rounded : Icons.notifications_active_outlined,
+              size: 18, color: isHigh ? Colors.white : AppColors.brandGreen),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(title,
+                style: TextStyle(
+                    fontSize: 12,
+                    color: isHigh ? Colors.white : AppColors.textPrimary)),
+          ),
+        ]),
+        duration: Duration(seconds: isHigh ? 8 : 4),
+      ),
+    );
   }
 
   void _refresh() {

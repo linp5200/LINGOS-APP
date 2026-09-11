@@ -5,10 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/providers.dart';
+import '../../core/app_info.dart';
 import '../../core/logging/app_logger.dart';
 import '../../core/storage/app_store.dart';
 import '../../core/theme/app_theme.dart';
 import '../alerts/alerts_screen.dart';
+import '../weather/weather_screen.dart';
 import '../chat/chat_screen.dart';
 import '../connect/connect_screen.dart';
 import '../dashboard/dashboard_screen.dart';
@@ -184,7 +186,7 @@ class _HomeShellState extends ConsumerState<HomeShell> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 Text('LING OS', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
-                Text('v0.4.3', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                Text(AppInfo.tag, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
               ],
             ),
           ),
@@ -204,6 +206,8 @@ class _HomeShellState extends ConsumerState<HomeShell> {
           // 【0.2.2 vision】摄像头独立入口（预览/检测/OCR）
           _item(context, Icons.videocam_outlined, '摄像头', const VisionScreen()),
           _item(context, Icons.notifications_outlined, '预警中心', const AlertsScreen()),
+          // 【0.4.4】天气独立入口（服务端 weather_current/forecast 已有，App 此前缺屏）
+          _item(context, Icons.wb_cloudy_outlined, '天气', const WeatherScreen()),
           const Divider(color: AppColors.divider),
           ListTile(
             leading: const Icon(Icons.logout, size: 20, color: AppColors.brandRed),

@@ -5,6 +5,28 @@
 
 ---
 
+## [0.4.4] - 2026-09-12（实时预警 + 天气屏 + 版本中心化）
+
+### 新增（Features）
+- **天气屏**（`lib/features/weather/weather_screen.dart`）—— 此前 App 端完全没有天气界面
+  - 当前天气（温度/体感/湿度/风/气压/能见度/UV）+ 逐小时 + 7 日预报
+  - 数据源：服务端 `weather_current` / `weather_forecast`；**无数据一律显示 `--`，不模拟**
+- **预警实时消费**（`alerts_screen.dart`）—— 此前仅 `alert_query` 轮询
+  - 订阅 WS `alert_event`（alertd → ai_server → 广播）→ 即时插入列表 + 横幅提示
+- **`lib/core/app_info.dart`** —— App 版本唯一来源（CI 可用 `--dart-define=APP_VERSION` 注入）
+
+### 修复（Bug Fixes）
+- **关于页版本写死**（先生实测反馈「你怎么知晓服务端版本号」）
+  - App 版本 ← `AppInfo`（不再各处硬编码 `0.4.3+18`）
+  - Server 版本 ← **仅真实连接后**由 `system_info` 填充；未连接显示「未连接（无法获知）」
+  - 断连即清空（`AppInfo.clearServerVersion`）
+- **抽屉版本号**写死 → 改用 `AppInfo.tag`
+- **`ConnectionManager` 缺统一连接判定** → 新增 `isConnected` / `transportLabel`
+
+### 变更（Changes）
+- 版本 `0.4.3+21` → `0.4.4+22`
+
+
 ## [0.4.3+18] - 2026-09-05（FUI v2 实质落地 + 本地模式启动——先生部署指示）
 
 ### 新增（Features）

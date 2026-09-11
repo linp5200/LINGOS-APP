@@ -1,15 +1,29 @@
 /// 关于页（先生：版本显示需带图标/Logo——非纯文字）
-/// 显示 App 图标 + LINGOS Logo + 版本 0.4.3+18 + server 关联信息
+/// 【0.4.4 修复】版本不再写死：
+///   - App 版本 ← AppInfo（唯一来源）
+///   - Server 版本 ← 仅在真实连接后由 system_info 填充；未连接显示「未连接（无法获知）」
 library;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../core/app_info.dart';
+import '../../../core/providers.dart';
 import '../../../core/theme/app_theme.dart';
 
-class AboutScreen extends StatelessWidget {
+class AboutScreen extends ConsumerStatefulWidget {
   const AboutScreen({super.key});
 
   @override
+  ConsumerState<AboutScreen> createState() => _AboutScreenState();
+}
+
+class _AboutScreenState extends ConsumerState<AboutScreen> {
+  @override
   Widget build(BuildContext context) {
+    final cm = ref.watch(connectionProvider);
+    final connected = cm.isConnected;
+
     return Scaffold(
       appBar: AppBar(title: const Text('关于')),
       body: ListView(
@@ -47,18 +61,23 @@ class AboutScreen extends StatelessWidget {
                 border: Border.all(color: AppColors.green.withValues(alpha: 0.5)),
                 borderRadius: BorderRadius.circular(20),
               ),
-              child: const Text('v0.4.3+18',
-                  style: TextStyle(
+              child: Text(AppInfo.tag,
+                  style: const TextStyle(
                       fontFamily: fuiMono, fontSize: 13, color: AppColors.green, letterSpacing: 1)),
             ),
           ),
           const SizedBox(height: 28),
           // 信息行（图标 + 内容——先生要求每项带图标）
-          _info(Icons.smartphone, 'App', '0.4.3+18 · Flutter'),
-          _info(Icons.dns_outlined, 'Server', '0.4.3 · LN-0.4.3'),
+          _info(Icons.smartphone, 'App', '${AppInfo.full} · Flutter'),
+          _info(
+            connected ? Icons.dns_outlined : Icons.cloud_off_outlined,
+            'Server',
+            connected ? AppInfo.serverDisplay : '未连接（无法获知）',
+            dim: !connected,
+          ),
           _info(Icons.account_tree_outlined, '架构', '核心/通讯/配置/数据/插件/安全/AI/天气'),
-          _info(Icons.folder_open, '数据根', '/LINGOS'),
-          _info(Icons.link, '仓库', 'github.com/linp5200/LINGOS-APP'),
+          _info(Icons.folder_open, '数据根', AppInfo.dataRoot),
+          _info(Icons.link, '仓库', AppInfo.repo),
           _info(Icons.palette_outlined, '界面', 'FUI v2 · 灰白地形'),
           const SizedBox(height: 20),
           const Center(
@@ -70,20 +89,18 @@ class AboutScreen extends StatelessWidget {
     );
   }
 
-  Widget _info(IconData icon, String label, String value) {
+  Widget _info(IconData icon, String label, String value, {bool dim = false}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
         children: [
-          Icon(icon, size: 18, color: AppColors.gray),
+          Icon(icon, size: 18, color: dim ? AppColors.dim : AppColors.gray),
           const SizedBox(width: 14),
           Text('$label  ',
-              style: const TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+              style: const TextStyle(fontSize: 12, color: AppColors.dim)),
           Expanded(
             child: Text(value,
-                textAlign: TextAlign.right,
-                style: const TextStyle(
-                    fontFamily: fuiMono, fontSize: 12, color: AppColors.textPrimary)),
+                style: TextStyle(fontSize: 12, color: dim ? AppColors.dim : AppColors.white)),
           ),
         ],
       ),
