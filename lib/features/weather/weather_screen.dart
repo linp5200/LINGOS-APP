@@ -73,12 +73,14 @@ class _WeatherScreenState extends ConsumerState<WeatherScreen> {
           return;
         }
       }
-      if (resp['hourly'] is List || resp['daily'] is List) {
+      // 闭包内类型提升失效 → 提取非空局部变量（CI: unchecked_use_of_nullable_value）
+      final r = resp;
+      if (r['hourly'] is List || r['daily'] is List) {
         setState(() {
-          _hourly = ((resp['hourly'] as List?) ?? [])
+          _hourly = ((r['hourly'] as List?) ?? [])
               .map((e) => Map<String, dynamic>.from(e is Map ? e : {}))
               .toList();
-          _daily = ((resp['daily'] as List?) ?? [])
+          _daily = ((r['daily'] as List?) ?? [])
               .map((e) => Map<String, dynamic>.from(e is Map ? e : {}))
               .toList();
           _loading = false;
@@ -108,7 +110,7 @@ class _WeatherScreenState extends ConsumerState<WeatherScreen> {
     if (c <= 57) return (Icons.grain, '毛毛雨');
     if (c <= 67) return (Icons.water_drop_outlined, '雨');
     if (c <= 77) return (Icons.ac_unit, '雪');
-    if (c <= 82) return (Icons.showers, '阵雨');
+    if (c <= 82) return (Icons.grain, '阵雨');
     if (c <= 86) return (Icons.ac_unit, '阵雪');
     if (c <= 99) return (Icons.thunderstorm_outlined, '雷暴');
     return (Icons.help_outline, '--');
@@ -174,7 +176,7 @@ class _WeatherScreenState extends ConsumerState<WeatherScreen> {
         Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
           Icon(icon, size: 52, color: AppColors.brandGreen),
           const SizedBox(width: 18),
-          Text(temp == null ? '--' : '${temp}°',
+          Text(temp == null ? '--' : '$temp°',
               style: const TextStyle(
                   fontFamily: fuiMono,
                   fontSize: 44,

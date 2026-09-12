@@ -179,14 +179,19 @@ class _HomeShellState extends ConsumerState<HomeShell> {
       child: ListView(
         padding: EdgeInsets.zero,
         children: [
-          const DrawerHeader(
-            decoration: BoxDecoration(color: AppColors.surface),
+          DrawerHeader(
+            decoration: const BoxDecoration(color: AppColors.surface),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                Text('LING OS', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
-                Text(AppInfo.tag, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                const Text('LING OS',
+                    style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textPrimary)),
+                Text(AppInfo.tag,
+                    style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
               ],
             ),
           ),
