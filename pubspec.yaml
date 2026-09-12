@@ -1,7 +1,7 @@
 name: lingos_app
 description: "LING OS App - Flutter 重写版（协议 v3）"
 publish_to: 'none'
-version: 0.5.1+23  # App 0.5.1（可选项+6屏+中英双语基础设施）
+version: 0.5.1+24  # App 0.5.1（i18n + Tabler 图标体系）
 
 environment:
   sdk: '>=3.4.0 <4.0.0'
@@ -20,6 +20,7 @@ dependencies:
   shared_preferences: ^2.2.3
   flutter_local_notifications: ^17.2.2
   flutter_secure_storage: ^9.2.2
+  flutter_tabler_icons: ^1.43.0     # 【0.5.1】图标体系（先生定稿：Tabler）
   permission_handler: ^11.3.1 # 【A4修复】真实 Android 授权
   shizuku_api: ^1.2.2 # 【A5】Shizuku 特权——AI 经 adb 执行命令
   record: ^6.1.1 # 【0.2.0】语音——录音（STT 输入）——兼容 Flutter ≥3.24

@@ -5,6 +5,26 @@
 
 ---
 
+## [0.5.1+3] - 2026-09-12（图标体系接入 · 先生定稿）
+
+### 新增（Features）
+- **图标体系组件**（`lib/core/icons/lingos_icon.dart`）
+  - 图标库：**Tabler**（`flutter_tabler_icons ^1.43.0` · Tabler v3.31.0 · 支持 Dart 3）
+  - `LingIcons`：基础图形 9 项（上传/下载/同步/连接/信号/蓝牙/主机/内部服务/AI）
+  - 状态变体**用库原生**（`wifi_off` / `bluetooth_x` / `server_off` / `antenna_bars_off`…）——不叠加
+  - `LingIcon`：基础图形 + 角标叠加组件
+    - 左上：H 本地 / S 服务端 / AI
+    - 右上：W 互联网通讯
+    - 右下：I 互联网连接 / ⇅ 同步中 / ! 冲突 / ? 未知 / **E 错误（红 #E5484D，恒最末）**
+  - `signalLevel(1~5)`：信号强度阶梯
+  - `LingStatusIcon`：连接状态图标（连接/断开 + 域 + 同步 + 错误）
+- 抽屉菜单 13 项图标替换为 Tabler
+
+### 说明
+- 选择提示符（diamond）已按先生裁决取消
+- 冲突 = `alert_circle` · 未知 = `help_circle`
+- **启动动画未接入**（先生：需后续当面看效果）
+
 ## [0.5.1+2] - 2026-09-12（中英双语基础设施）
 
 ### 新增（Features）
