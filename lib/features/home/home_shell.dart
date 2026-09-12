@@ -11,6 +11,8 @@ import '../../core/storage/app_store.dart';
 import '../../core/theme/app_theme.dart';
 import '../alerts/alerts_screen.dart';
 import '../weather/weather_screen.dart';
+import '../ext/ext_screens.dart';
+import '../options/options_screen.dart';
 import '../chat/chat_screen.dart';
 import '../connect/connect_screen.dart';
 import '../dashboard/dashboard_screen.dart';
@@ -213,6 +215,14 @@ class _HomeShellState extends ConsumerState<HomeShell> {
           _item(context, Icons.notifications_outlined, '预警中心', const AlertsScreen()),
           // 【0.4.4】天气独立入口（服务端 weather_current/forecast 已有，App 此前缺屏）
           _item(context, Icons.wb_cloudy_outlined, '天气', const WeatherScreen()),
+          // 【0.5.1】批次2~5 新功能（先生 2026-09-12）
+          _item(context, Icons.home_outlined, '智能家居', const HomeExtScreen()),
+          _item(context, Icons.timeline_outlined, '监控时间线', const TimelineScreen()),
+          const Divider(color: AppColors.divider),
+          _item(context, Icons.notifications_active_outlined, '通知中心', const NotifyCenterScreen()),
+          _item(context, Icons.music_note_outlined, '媒体控制', const MediaScreen()),
+          _item(context, Icons.menu_book_outlined, '知识库', const KbScreen()),
+          _item(context, Icons.toggle_on_outlined, '可选项', const OptionsScreen()),
           const Divider(color: AppColors.divider),
           ListTile(
             leading: const Icon(Icons.logout, size: 20, color: AppColors.brandRed),
