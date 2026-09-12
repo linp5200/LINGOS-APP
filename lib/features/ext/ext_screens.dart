@@ -39,9 +39,11 @@ mixin _ExtMixin<T extends ConsumerStatefulWidget> on ConsumerState<T> {
         final cmds = resp['cmd'];
         if (cmds is! String) return;
         if (!listenCmds.contains(cmds) && !listenCmds.contains(cmds.trim())) return;
+        // 【CI 修复】闭包内类型提升失效 → 提取非空局部变量（unchecked_use_of_nullable_value）
+        final r = resp;
         setState(() {
-          extData[cmds.trim()] = resp['data'] ?? resp;
-          extData['_status_$cmds'] = resp['status'];
+          extData[cmds.trim()] = r['data'] ?? r;
+          extData['_status_$cmds'] = r['status'];
         });
       } catch (_) {}
     });

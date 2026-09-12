@@ -5,6 +5,14 @@
 
 ---
 
+## [0.5.1+5] - 2026-09-12（CI 修复 · 第 2 轮）
+
+### 修复（Fixes）
+- `ext_screens.dart`：闭包内提取非空局部变量 `final r = resp`（消除 unchecked_use_of_nullable_value ×2；第 1 轮直接去 `!` 的方向有误）
+- `lingos_icon.dart`：`final fw` → `const fw`（消除 prefer_const_declarations）
+
+---
+
 ## [0.5.1+4] - 2026-09-12（CI 修复补全 + i18n 第 1~2 批）
 
 ### 修复（Fixes）

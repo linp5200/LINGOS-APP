@@ -116,7 +116,7 @@ class LingIcon extends StatelessWidget {
     final c = color ?? const Color(0xFFE8EAED);
     // 角标字号（先生：图标 52 → 角标 22，即 0.42；此处按比例适配小图标）
     final fs = (size * badgeScale * 0.52).clamp(8.0, 22.0);
-    final fw = FontWeight.w800;
+    const fw = FontWeight.w800;
 
     Widget badge(String text, {bool red = false}) => Text(
           text,
