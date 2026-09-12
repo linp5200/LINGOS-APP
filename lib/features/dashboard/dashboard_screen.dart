@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/i18n/app_i18n.dart';
 import '../../core/providers.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/fui_widgets.dart';
@@ -46,7 +47,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             setState(() {
               _loading = false;
               _info = null;
-              _error = '核心数据无有效响应（格式异常）';
+              _error = tr('dash_invalid_resp');
             });
             return;
           }
@@ -55,7 +56,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             setState(() {
               _loading = false;
               _info = null;
-              _error = '获取失败：${r['msg'] ?? r['message'] ?? '未知错误'}';
+              _error = '${tr('dash_fetch_fail')}${r['msg'] ?? r['message'] ?? tr('dash_unknown_error')}';
             });
             return;
           }
@@ -70,7 +71,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             setState(() {
               _loading = false;
               _info = null;
-              _error = '核心数据为空（服务端无有效数据）';
+              _error = tr('dash_empty');
             });
           }
         }
@@ -88,7 +89,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     setState(() { _loading = true; _error = null; });
     final ok = await ref.read(connectionProvider).sendCommand({'cmd': 'system_info'});
     // 响应经事件流返回（command_response）
-    if (!ok) setState(() { _loading = false; _error = '命令发送失败'; });
+    if (!ok) setState(() { _loading = false; _error = tr('dash_cmd_fail'); });
   }
 
   @override
@@ -100,7 +101,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           icon: const Icon(Icons.menu, size: 22),
           onPressed: widget.onOpenDrawer,
         ),
-        title: const Text('仪表盘'),
+        title: Text(tr('nav_dashboard')),
         actions: [
         IconButton(icon: const Icon(Icons.refresh, size: 20), onPressed: _loading ? null : _load),
       ]),
@@ -114,7 +115,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 : _error != null
                     ? Center(child: Text(_error!, style: const TextStyle(color: AppColors.brandRed)))
                     : _info == null
-                        ? const Center(child: Text('点击刷新获取系统状态', style: TextStyle(color: AppColors.textSecondary)))
+                        ? Center(child: Text(tr('dash_tap_refresh'), style: const TextStyle(color: AppColors.textSecondary)))
                         : _buildGrid(),
           ),
         ],
@@ -145,11 +146,11 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       childAspectRatio: 1.4,
       children: [
         _card(Icons.memory, 'CPU', '$cpu%', AppColors.green),
-        _card(Icons.storage, '内存', '$memPct%', AppColors.green),
-        _card(Icons.storage_rounded, '磁盘', '$disk%', AppColors.amber),
-        _card(Icons.timer_outlined, '运行时长', upStr, AppColors.textSecondary),
-        _card(Icons.network_check, '网络', '--', AppColors.textSecondary),
-        _card(Icons.info_outline, '状态', 'LINGOS', AppColors.brandCyan),
+        _card(Icons.storage, tr('dash_mem'), '$memPct%', AppColors.green),
+        _card(Icons.storage_rounded, tr('dash_disk'), '$disk%', AppColors.amber),
+        _card(Icons.timer_outlined, tr('dash_uptime'), upStr, AppColors.textSecondary),
+        _card(Icons.network_check, tr('dash_net'), '--', AppColors.textSecondary),
+        _card(Icons.info_outline, tr('dash_status'), 'LINGOS', AppColors.brandCyan),
       ],
     );
   }

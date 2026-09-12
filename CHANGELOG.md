@@ -5,6 +5,27 @@
 
 ---
 
+## [0.5.1+4] - 2026-09-12（CI 修复补全 + i18n 第 1~2 批）
+
+### 修复（Fixes）
+- **先生报告「编译出现错误」—— CI 静态分析修复补全**（此前在本地，因推送通道按「单提交差异」漏传）：
+  - `ext_screens.dart`：移除闭包内多余的 `!`（Dart 3.2+ 闭包内类型提升生效 → 消除 unnecessary_non_null_assertion，2 处）
+  - `options_screen.dart`：`payload` 提取非空局部变量（同上，2 处）
+  - `home_shell.dart`：Text style 补 `const`（2 处，已随图标提交上远端）
+- `app_i18n.dart`：`AppLangState` 全局语言态落地（无 context 的 `tr()` 正式可用）
+
+### 新增（Features）
+- **i18n 第 1~2 批（4 屏 · 47 处）**：
+  - 天气屏 22 处（含 WMO 天气状况 10 种随语言）
+  - 仪表盘 12 处 · 预警屏 7 处 · 启动屏 6 处
+- `app_strings.dart`：**+44 条**（111 → 155）—— `weather_*` / `w_*` / `alert_*` / `dash_*` / `boot_*` / `common_*`
+
+### 验证
+- Dart 平衡检查 56/56 通过（检查器 v2：支持字符串插值 / 三引号 / raw 字符串 / 嵌套块注释）
+- 无残留硬编码文案（4 屏，注释与技术日志除外）
+
+---
+
 ## [0.5.1+3] - 2026-09-12（图标体系接入 · 先生定稿）
 
 ### 新增（Features）

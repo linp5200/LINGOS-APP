@@ -40,8 +40,8 @@ mixin _ExtMixin<T extends ConsumerStatefulWidget> on ConsumerState<T> {
         if (cmds is! String) return;
         if (!listenCmds.contains(cmds) && !listenCmds.contains(cmds.trim())) return;
         setState(() {
-          extData[cmds.trim()] = resp!['data'] ?? resp;
-          extData['_status_$cmds'] = resp!['status'];
+          extData[cmds.trim()] = resp['data'] ?? resp;
+          extData['_status_$cmds'] = resp['status'];
         });
       } catch (_) {}
     });

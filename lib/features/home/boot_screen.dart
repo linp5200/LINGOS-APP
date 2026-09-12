@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/fui_widgets.dart';
+import '../../core/i18n/app_i18n.dart';
 import '../../core/logging/app_logger.dart';
 import '../../core/storage/app_store.dart';
 import '../../core/providers.dart';
@@ -57,7 +58,7 @@ class _BootScreenState extends ConsumerState<BootScreen>
       if (!mounted) return;
       setState(() {
         _restoring = true;
-        _restoreStatus = '检测到已保存会话——自动恢复…';
+        _restoreStatus = tr('boot_restore_detected');
       });
       final cm = ref.read(connectionProvider);
       final ok = await cm.connectWsAndSave(host, port ?? 2939, token);
@@ -65,7 +66,7 @@ class _BootScreenState extends ConsumerState<BootScreen>
       if (!mounted) return;
       setState(() {
         _restoring = false;
-        _restoreStatus = ok ? '会话已恢复' : '自动恢复失败——本地模式';
+        _restoreStatus = ok ? tr('boot_restore_ok') : tr('boot_restore_fail');
       });
       if (ok) {
         await Future.delayed(const Duration(milliseconds: 500));
@@ -143,7 +144,7 @@ class _BootScreenState extends ConsumerState<BootScreen>
                             child: Text(
                               _restoring
                                   ? _restoreStatus
-                                  : 'LOCAL MODE —— 未连接主机，本地功能可用',
+                                  : tr('boot_local_mode'),
                               style: const TextStyle(
                                   fontFamily: fuiMono,
                                   fontSize: 10,
@@ -165,8 +166,8 @@ class _BootScreenState extends ConsumerState<BootScreen>
                               shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(4)),
                             ),
-                            child: const Text('进入主控台 ›',
-                                style: TextStyle(
+                            child: Text(tr('boot_enter_console'),
+                                style: const TextStyle(
                                     fontFamily: fuiMono, fontSize: 11, letterSpacing: 1)),
                           ),
                         ),
@@ -181,8 +182,8 @@ class _BootScreenState extends ConsumerState<BootScreen>
                               shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(4)),
                             ),
-                            child: const Text('连接主机',
-                                style: TextStyle(
+                            child: Text(tr('connect_host'),
+                                style: const TextStyle(
                                     fontFamily: fuiMono, fontSize: 11, letterSpacing: 1)),
                           ),
                         ),

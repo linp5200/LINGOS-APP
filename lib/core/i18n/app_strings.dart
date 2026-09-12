@@ -163,6 +163,61 @@ class AppStrings {
     'conn_connecting': ['连接中…', 'Connecting…'],
     'conn_connected': ['已连接', 'Connected'],
     'conn_offline': ['离线', 'Offline'],
+
+    // ---------- 通用（补充）----------
+    'common_not_simulated': ['（显示 -- 不模拟）', '(showing --, not simulated)'],
+
+    // ---------- 天气屏 ----------
+    'weather_title': ['天气', 'Weather'],
+    'weather_unreachable': ['天气源不可达', 'Weather source unreachable'],
+    'weather_location': ['当前位置', 'Current location'],
+    'weather_feels': ['体感', 'Feels like'],
+    'weather_humidity': ['湿度', 'Humidity'],
+    'weather_wind': ['风速', 'Wind speed'],
+    'weather_wind_dir': ['风向', 'Wind direction'],
+    'weather_pressure': ['气压', 'Pressure'],
+    'weather_visibility': ['能见度', 'Visibility'],
+    'weather_hourly': ['逐小时', 'Hourly'],
+    'weather_daily': ['7 日预报', '7-day forecast'],
+    // WMO 天气状况（weather_screen 代码映射）
+    'w_clear': ['晴', 'Clear'],
+    'w_partly': ['少云', 'Partly cloudy'],
+    'w_overcast': ['阴', 'Overcast'],
+    'w_fog': ['雾', 'Fog'],
+    'w_drizzle': ['毛毛雨', 'Drizzle'],
+    'w_rain': ['雨', 'Rain'],
+    'w_snow': ['雪', 'Snow'],
+    'w_showers': ['阵雨', 'Showers'],
+    'w_snow_showers': ['阵雪', 'Snow showers'],
+    'w_thunder': ['雷暴', 'Thunderstorm'],
+
+    // ---------- 预警屏（补充）----------
+    'alert_title': ['预警中心', 'Alert Center'],
+    'alert_generic': ['预警', 'Alert'],
+    'alert_new': ['新预警', 'New alert'],
+    'alert_none': ['暂无预警', 'No alerts'],
+    'alert_source': ['来源：', 'Source: '],
+    'alert_type': ['类型：', 'Type: '],
+
+    // ---------- 仪表盘（补充）----------
+    'dash_invalid_resp': ['核心数据无有效响应（格式异常）', 'Invalid core response (malformed)'],
+    'dash_fetch_fail': ['获取失败：', 'Fetch failed: '],
+    'dash_unknown_error': ['未知错误', 'Unknown error'],
+    'dash_empty': ['核心数据为空（服务端无有效数据）', 'Empty core data (server returned nothing)'],
+    'dash_cmd_fail': ['命令发送失败', 'Command send failed'],
+    'dash_tap_refresh': ['点击刷新获取系统状态', 'Tap refresh to load system status'],
+    'dash_mem': ['内存', 'Memory'],
+    'dash_disk': ['磁盘', 'Disk'],
+    'dash_uptime': ['运行时长', 'Uptime'],
+    'dash_net': ['网络', 'Network'],
+    'dash_status': ['状态', 'Status'],
+
+    // ---------- 启动屏 ----------
+    'boot_restore_detected': ['检测到已保存会话——自动恢复…', 'Saved session detected — auto restoring…'],
+    'boot_restore_ok': ['会话已恢复', 'Session restored'],
+    'boot_restore_fail': ['自动恢复失败——本地模式', 'Auto restore failed — local mode'],
+    'boot_local_mode': ['LOCAL MODE —— 未连接主机，本地功能可用', 'LOCAL MODE — host not connected, local features available'],
+    'boot_enter_console': ['进入主控台 ›', 'Enter Console ›'],
   };
 
   /// 取字符串

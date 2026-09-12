@@ -9,6 +9,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/i18n/app_i18n.dart';
 import '../../core/providers.dart';
 import '../../core/theme/app_theme.dart';
 
@@ -56,7 +57,7 @@ class _WeatherScreenState extends ConsumerState<WeatherScreen> {
       if (resp['status'] != 'ok') {
         setState(() {
           _loading = false;
-          _error = resp?['msg']?.toString() ?? '天气源不可达';
+          _error = resp?['msg']?.toString() ?? tr('weather_unreachable');
         });
         return;
       }
@@ -103,16 +104,16 @@ class _WeatherScreenState extends ConsumerState<WeatherScreen> {
   /// WMO 天气代码 → 图标 + 中文
   static (IconData, String) _codeInfo(dynamic code) {
     final c = int.tryParse(code?.toString() ?? '') ?? -1;
-    if (c == 0) return (Icons.wb_sunny_outlined, '晴');
-    if (c <= 2) return (Icons.wb_cloudy_outlined, '少云');
-    if (c == 3) return (Icons.cloud_outlined, '阴');
-    if (c <= 48) return (Icons.foggy, '雾');
-    if (c <= 57) return (Icons.grain, '毛毛雨');
-    if (c <= 67) return (Icons.water_drop_outlined, '雨');
-    if (c <= 77) return (Icons.ac_unit, '雪');
-    if (c <= 82) return (Icons.grain, '阵雨');
-    if (c <= 86) return (Icons.ac_unit, '阵雪');
-    if (c <= 99) return (Icons.thunderstorm_outlined, '雷暴');
+    if (c == 0) return (Icons.wb_sunny_outlined, tr('w_clear'));
+    if (c <= 2) return (Icons.wb_cloudy_outlined, tr('w_partly'));
+    if (c == 3) return (Icons.cloud_outlined, tr('w_overcast'));
+    if (c <= 48) return (Icons.foggy, tr('w_fog'));
+    if (c <= 57) return (Icons.grain, tr('w_drizzle'));
+    if (c <= 67) return (Icons.water_drop_outlined, tr('w_rain'));
+    if (c <= 77) return (Icons.ac_unit, tr('w_snow'));
+    if (c <= 82) return (Icons.grain, tr('w_showers'));
+    if (c <= 86) return (Icons.ac_unit, tr('w_snow_showers'));
+    if (c <= 99) return (Icons.thunderstorm_outlined, tr('w_thunder'));
     return (Icons.help_outline, '--');
   }
 
@@ -120,7 +121,7 @@ class _WeatherScreenState extends ConsumerState<WeatherScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('天气'),
+        title: Text(tr('weather_title')),
         actions: [
           IconButton(
               icon: const Icon(Icons.refresh, size: 20),
@@ -144,7 +145,7 @@ class _WeatherScreenState extends ConsumerState<WeatherScreen> {
                   const Icon(Icons.cloud_off_outlined, size: 18, color: AppColors.brandRed),
                   const SizedBox(width: 10),
                   Expanded(
-                    child: Text('$_error（显示 -- 不模拟）',
+                    child: Text('$_error${tr('common_not_simulated')}',
                         style: const TextStyle(fontSize: 12, color: AppColors.brandRed)),
                   ),
                 ]),
@@ -170,7 +171,7 @@ class _WeatherScreenState extends ConsumerState<WeatherScreen> {
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(c?['city']?.toString() ?? '当前位置',
+        Text(c?['city']?.toString() ?? tr('weather_location'),
             style: const TextStyle(fontSize: 13, color: AppColors.textSecondary)),
         const SizedBox(height: 10),
         Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
@@ -187,12 +188,12 @@ class _WeatherScreenState extends ConsumerState<WeatherScreen> {
         ]),
         const SizedBox(height: 16),
         Wrap(spacing: 18, runSpacing: 8, children: [
-          _metric(Icons.thermostat, '体感', c?['feels_like'] ?? c?['apparent_temperature'], '°'),
-          _metric(Icons.water_drop_outlined, '湿度', c?['humidity'], '%'),
-          _metric(Icons.air, '风速', c?['wind_speed'] ?? c?['wind_speed_10m'], 'km/h'),
-          _metric(Icons.explore_outlined, '风向', c?['wind_dir'] ?? c?['wind_direction'], '°'),
-          _metric(Icons.speed, '气压', c?['pressure'] ?? c?['surface_pressure'], 'hPa'),
-          _metric(Icons.visibility_outlined, '能见度', c?['visibility'], 'm'),
+          _metric(Icons.thermostat, tr('weather_feels'), c?['feels_like'] ?? c?['apparent_temperature'], '°'),
+          _metric(Icons.water_drop_outlined, tr('weather_humidity'), c?['humidity'], '%'),
+          _metric(Icons.air, tr('weather_wind'), c?['wind_speed'] ?? c?['wind_speed_10m'], 'km/h'),
+          _metric(Icons.explore_outlined, tr('weather_wind_dir'), c?['wind_dir'] ?? c?['wind_direction'], '°'),
+          _metric(Icons.speed, tr('weather_pressure'), c?['pressure'] ?? c?['surface_pressure'], 'hPa'),
+          _metric(Icons.visibility_outlined, tr('weather_visibility'), c?['visibility'], 'm'),
           _metric(Icons.wb_sunny_outlined, 'UV', c?['uv'] ?? c?['uv_index'], ''),
         ]),
       ]),
@@ -213,7 +214,7 @@ class _WeatherScreenState extends ConsumerState<WeatherScreen> {
     return Padding(
       padding: const EdgeInsets.only(top: 14),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        const Text('逐小时', style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+        Text(tr('weather_hourly'), style: const TextStyle(fontSize: 13, color: AppColors.textSecondary)),
         const SizedBox(height: 8),
         SizedBox(
           height: 96,
@@ -257,7 +258,7 @@ class _WeatherScreenState extends ConsumerState<WeatherScreen> {
     return Padding(
       padding: const EdgeInsets.only(top: 16),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        const Text('7 日预报', style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+        Text(tr('weather_daily'), style: const TextStyle(fontSize: 13, color: AppColors.textSecondary)),
         const SizedBox(height: 8),
         ..._daily.map((d) {
           final (ic, label) = _codeInfo(d['code']);

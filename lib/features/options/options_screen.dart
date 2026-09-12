@@ -65,12 +65,14 @@ class _OptionsScreenState extends ConsumerState<OptionsScreen> {
         payload = resp;
       }
       if (payload == null) return;
-      if (payload['options'] is List) {
+      // 【CI 修复】闭包内类型提升失效 → 提取非空局部变量
+      final p = payload;
+      if (p['options'] is List) {
         setState(() {
-          _opts = (payload!['options'] as List)
+          _opts = (p['options'] as List)
               .map((e) => Map<String, dynamic>.from(e is Map ? e : {}))
               .toList();
-          _privacyMode = payload!['privacy_mode'] == true;
+          _privacyMode = p['privacy_mode'] == true;
           _loading = false;
           _error = null;
         });

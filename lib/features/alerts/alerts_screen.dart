@@ -8,6 +8,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/i18n/app_i18n.dart';
 import '../../core/providers.dart';
 import '../../core/theme/app_theme.dart';
 
@@ -86,7 +87,7 @@ class _AlertsScreenState extends ConsumerState<AlertsScreen> {
     if (!mounted) return;
     final title = a['title']?.toString() ??
         a['description']?.toString() ??
-        '新预警';
+        tr('alert_new');
     final level = a['level']?.toString() ?? '';
     final isHigh = level.contains('high') || level.contains('critical') || level == 'L3';
     ScaffoldMessenger.of(context).showSnackBar(
@@ -116,7 +117,7 @@ class _AlertsScreenState extends ConsumerState<AlertsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('预警中心'), actions: [
+      appBar: AppBar(title: Text(tr('alert_title')), actions: [
         IconButton(icon: const Icon(Icons.refresh, size: 20), onPressed: _loading ? null : _refresh),
       ]),
       body: _loading
@@ -128,9 +129,9 @@ class _AlertsScreenState extends ConsumerState<AlertsScreen> {
                     children: [
                       const Icon(Icons.notifications_none, size: 48, color: AppColors.textSecondary),
                       const SizedBox(height: 12),
-                      const Text('暂无预警', style: TextStyle(color: AppColors.textSecondary)),
+                      Text(tr('alert_none'), style: const TextStyle(color: AppColors.textSecondary)),
                       const SizedBox(height: 12),
-                      TextButton(onPressed: _refresh, child: const Text('刷新')),
+                      TextButton(onPressed: _refresh, child: Text(tr('refresh'))),
                     ],
                   ),
                 )
@@ -152,12 +153,12 @@ class _AlertsScreenState extends ConsumerState<AlertsScreen> {
                         title: Text(
                             a['title']?.toString() ??
                                 a['description']?.toString() ??
-                                '预警',
+                                tr('alert_generic'),
                             style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
                         subtitle: Text([
                           if (a['location']?.toString().isNotEmpty ?? false) a['location'].toString(),
-                          if (a['source']?.toString().isNotEmpty ?? false) '来源: ${a['source']}',
-                          if (a['type']?.toString().isNotEmpty ?? false) '类型: ${a['type']}',
+                          if (a['source']?.toString().isNotEmpty ?? false) '${tr('alert_source')}${a['source']}',
+                          if (a['type']?.toString().isNotEmpty ?? false) '${tr('alert_type')}${a['type']}',
                         ].join(' · ')),
                         trailing: Text(
                             a['time']?.toString() ??
