@@ -1,13 +1,15 @@
 name: lingos_app
 description: "LING OS App - Flutter 重写版（协议 v3）"
 publish_to: 'none'
-version: 0.5.1+23  # App 0.5.1（可选项 + 6 个新功能屏）
+version: 0.5.1+23  # App 0.5.1（可选项+6屏+中英双语基础设施）
 
 environment:
   sdk: '>=3.4.0 <4.0.0'
 
 dependencies:
   flutter:
+    sdk: flutter
+  flutter_localizations:            # 【0.5.1】Material 组件本地化（中英）
     sdk: flutter
   flutter_riverpod: ^2.5.1
   path_provider: ^2.1.3

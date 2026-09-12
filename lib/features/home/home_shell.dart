@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/providers.dart';
 import '../../core/app_info.dart';
+import '../../core/i18n/app_i18n.dart';
 import '../../core/logging/app_logger.dart';
 import '../../core/storage/app_store.dart';
 import '../../core/theme/app_theme.dart';
@@ -198,35 +199,35 @@ class _HomeShellState extends ConsumerState<HomeShell> {
             ),
           ),
           // 【0.1.9】设置统一入口（原 AI 配置改名——内部区块不变）
-          _item(context, Icons.tune, '设置', const AiConfigScreen()),
+          _item(context, Icons.tune, trCtx(context, 'settings'), const AiConfigScreen()),
           // 【0.4.3】主机连接（本地模式——需连主机时主动进入）
           ListTile(
             leading: const Icon(Icons.link, size: 20, color: AppColors.brandGreen),
-            title: const Text('连接主机', style: TextStyle(color: AppColors.brandGreen)),
+            title: Text(trCtx(context, 'connect_host'), style: TextStyle(color: AppColors.brandGreen)),
             subtitle: const Text('对话/同步/远端摄像头需连接', style: TextStyle(fontSize: 10, color: AppColors.dim)),
             onTap: _goConnect,
           ),
           // 【0.2.1 B1 改名】Help AI（帮助档案——原 HA 面板）
-          _item(context, Icons.home_work_outlined, 'Help AI', const HaScreen()),
+          _item(context, Icons.home_work_outlined, trCtx(context, 'nav_help_ai'), const HaScreen()),
           // 【0.2.1 #11 C2】Home Assistant 独立入口（智能家居——不藏 AI 配置里）
-          _item(context, Icons.home_outlined, 'Home Assistant', const HaControlScreen()),
+          _item(context, Icons.home_outlined, trCtx(context, 'nav_ha'), const HaControlScreen()),
           // 【0.2.2 vision】摄像头独立入口（预览/检测/OCR）
-          _item(context, Icons.videocam_outlined, '摄像头', const VisionScreen()),
-          _item(context, Icons.notifications_outlined, '预警中心', const AlertsScreen()),
+          _item(context, Icons.videocam_outlined, trCtx(context, 'nav_vision'), const VisionScreen()),
+          _item(context, Icons.notifications_outlined, trCtx(context, 'nav_alert'), const AlertsScreen()),
           // 【0.4.4】天气独立入口（服务端 weather_current/forecast 已有，App 此前缺屏）
-          _item(context, Icons.wb_cloudy_outlined, '天气', const WeatherScreen()),
+          _item(context, Icons.wb_cloudy_outlined, trCtx(context, 'nav_weather'), const WeatherScreen()),
           // 【0.5.1】批次2~5 新功能（先生 2026-09-12）
-          _item(context, Icons.home_outlined, '智能家居', const HomeExtScreen()),
-          _item(context, Icons.timeline_outlined, '监控时间线', const TimelineScreen()),
+          _item(context, Icons.home_outlined, trCtx(context, 'nav_home'), const HomeExtScreen()),
+          _item(context, Icons.timeline_outlined, trCtx(context, 'nav_timeline'), const TimelineScreen()),
           const Divider(color: AppColors.divider),
-          _item(context, Icons.notifications_active_outlined, '通知中心', const NotifyCenterScreen()),
-          _item(context, Icons.music_note_outlined, '媒体控制', const MediaScreen()),
-          _item(context, Icons.menu_book_outlined, '知识库', const KbScreen()),
-          _item(context, Icons.toggle_on_outlined, '可选项', const OptionsScreen()),
+          _item(context, Icons.notifications_active_outlined, trCtx(context, 'nav_notify'), const NotifyCenterScreen()),
+          _item(context, Icons.music_note_outlined, trCtx(context, 'nav_media'), const MediaScreen()),
+          _item(context, Icons.menu_book_outlined, trCtx(context, 'nav_kb'), const KbScreen()),
+          _item(context, Icons.toggle_on_outlined, trCtx(context, 'nav_options'), const OptionsScreen()),
           const Divider(color: AppColors.divider),
           ListTile(
             leading: const Icon(Icons.logout, size: 20, color: AppColors.brandRed),
-            title: const Text('断开连接', style: TextStyle(color: AppColors.brandRed)),
+            title: Text(trCtx(context, 'disconnect'), style: TextStyle(color: AppColors.brandRed)),
             onTap: () {
               ref.read(connectionProvider).disconnect();
               Navigator.of(context).popUntil((r) => r.isFirst);

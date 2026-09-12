@@ -5,6 +5,20 @@
 
 ---
 
+## [0.5.1+2] - 2026-09-12（中英双语基础设施）
+
+### 新增（Features）
+- **国际化基础设施**（`lib/core/i18n/`）
+  - `app_strings.dart` —— **113 条**中英字符串表（不用 intl/.arb，避免 CI 版本冲突）
+  - `app_i18n.dart` —— `tr()` / `trCtx()` / `alertLevelLabel()` 运行时
+  - `alertLevelLabel()`：预警分级**随语言**（L1 轻微/L1 Minor … L4 极端/L4 Extreme）
+- `main.dart` 接入 `flutter_localizations`（Material 组件中文化）
+- 抽屉菜单 14 项标签已 i18n 化（含新增 6 个入口）
+
+### 说明
+- 语言来源：`AppStore.ui_language`（system/zh/en）；system 时跟随设备
+- **未全量转换**：既有 50+ 屏中的硬编码文案尚未逐条替换（基础设施已就绪，可增量推进）
+
 ## [0.5.1] - 2026-09-12（可选项 + 6 个新功能屏）
 
 ### 新增（Features）

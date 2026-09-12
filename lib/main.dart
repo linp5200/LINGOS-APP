@@ -3,6 +3,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/logging/app_logger.dart';
@@ -26,6 +27,21 @@ class LingOsApp extends StatelessWidget {
       title: 'LING OS',
       debugShowCheckedModeBanner: false,
       theme: buildAppTheme(),
+      // 【0.5.1 先生裁决】中英双语：Material 组件本地化 + 支持语言声明
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [Locale('zh'), Locale('en')],
+      localeResolutionCallback: (device, supported) {
+        // AppStore 的 ui_language 可强制 zh/en；否则跟随设备
+        final code = device?.languageCode ?? 'zh';
+        return supported.firstWhere(
+          (l) => l.languageCode == code,
+          orElse: () => const Locale('zh'),
+        );
+      },
       // 【0.4.3】Boot 启动屏（本地模式——先生预览落地）：
       // 不强制连接；有已存 token 自动恢复；需用时"连接主机"按钮
       home: const BootScreen(),
