@@ -188,11 +188,16 @@ class _WeatherScreenState extends ConsumerState<WeatherScreen> {
         ]),
         const SizedBox(height: 16),
         Wrap(spacing: 18, runSpacing: 8, children: [
-          _metric(Icons.thermostat, tr('weather_feels'), c?['feels_like'] ?? c?['apparent_temperature'], '°'),
+          // 【0.5.2】读取加回退（服务端 terse 名兼容）
+          _metric(Icons.thermostat, tr('weather_feels'),
+              c?['feels'] ?? c?['feels_like'] ?? c?['apparent_temperature'], '°'),
           _metric(Icons.water_drop_outlined, tr('weather_humidity'), c?['humidity'], '%'),
-          _metric(Icons.air, tr('weather_wind'), c?['wind_speed'] ?? c?['wind_speed_10m'], 'km/h'),
-          _metric(Icons.explore_outlined, tr('weather_wind_dir'), c?['wind_dir'] ?? c?['wind_direction'], '°'),
-          _metric(Icons.speed, tr('weather_pressure'), c?['pressure'] ?? c?['surface_pressure'], 'hPa'),
+          _metric(Icons.air, tr('weather_wind'),
+              c?['wind'] ?? c?['wind_speed'] ?? c?['wind_speed_10m'], 'km/h'),
+          _metric(Icons.explore_outlined, tr('weather_wind_dir'),
+              c?['wind_dir'] ?? c?['wind_direction'], '°'),
+          _metric(Icons.speed, tr('weather_pressure'),
+              c?['pressure'] ?? c?['surface_pressure'], 'hPa'),
           _metric(Icons.visibility_outlined, tr('weather_visibility'), c?['visibility'], 'm'),
           _metric(Icons.wb_sunny_outlined, 'UV', c?['uv'] ?? c?['uv_index'], ''),
         ]),
@@ -223,7 +228,8 @@ class _WeatherScreenState extends ConsumerState<WeatherScreen> {
             itemCount: _hourly.length,
             itemBuilder: (ctx, i) {
               final h = _hourly[i];
-              final t = h['time']?.toString() ?? '';
+              // 【0.5.2】t/time 双名兼容
+              final t = (h['t'] ?? h['time'])?.toString() ?? '';
               final (ic, _) = _codeInfo(h['code']);
               return Container(
                 width: 62,
@@ -280,8 +286,9 @@ class _WeatherScreenState extends ConsumerState<WeatherScreen> {
               Expanded(
                   child: Text(label,
                       style: const TextStyle(fontSize: 11, color: AppColors.textSecondary))),
+              // 【0.5.2】temp_min/max 与 lo/hi 双名兼容
               Text(
-                  '${d['temp_min'] ?? '--'}° / ${d['temp_max'] ?? '--'}°',
+                  '${d['temp_min'] ?? d['lo'] ?? '--'}° / ${d['temp_max'] ?? d['hi'] ?? '--'}°',
                   style: const TextStyle(fontFamily: fuiMono, fontSize: 12)),
             ]),
           );

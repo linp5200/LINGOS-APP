@@ -1,7 +1,7 @@
 name: lingos_app
 description: "LING OS App - Flutter 重写版（协议 v3）"
 publish_to: 'none'
-version: 0.5.1+26  # App 0.5.1（CI 修复第2轮：ext局部变量+图标const）
+version: 0.6.0+28  # App 0.6.0（GUI链/审批链修复 + 版本显示配套）
 
 environment:
   sdk: '>=3.4.0 <4.0.0'

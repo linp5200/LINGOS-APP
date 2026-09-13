@@ -9,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/fui_widgets.dart';
 import '../../core/i18n/app_i18n.dart';
+import '../../core/app_info.dart';
 import '../../core/logging/app_logger.dart';
 import '../../core/storage/app_store.dart';
 import '../../core/providers.dart';
@@ -111,8 +112,9 @@ class _BootScreenState extends ConsumerState<BootScreen>
                           letterSpacing: 8,
                           color: AppColors.white)),
                   const SizedBox(height: 10),
-                  const Text('SYSTEM INITIALIZE · LN-0.4.3',
-                      style: TextStyle(
+                  // 【0.5.2 修复】版本动态化（原硬编码 LN-0.4.3——先生报告版本不更新）
+                  Text('SYSTEM INITIALIZE · ${AppInfo.tag}',
+                      style: const TextStyle(
                           fontFamily: fuiMono,
                           fontSize: 9,
                           letterSpacing: 2,

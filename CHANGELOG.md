@@ -13,6 +13,36 @@
 
 ---
 
+## [0.6.0] - 2026-09-13（GUI 链 / 审批链修复——与 server 0.6.0 配套）
+
+### 修复（Fixes）
+- **GUI 交互链修复**（此前 6 个 gui_* 事件仅 1 个有处理——AI 提问用户永远看不到）：
+  - `chat_controller.dart`：gui_ask / gui_open_url / gui_share / gui_location / gui_clipboard 事件全处理（gui_notify 原有）
+  - `chat_screen.dart`：**AI 提问弹窗**（问题文本 + 选项按钮 + 自由输入 → 回传 AI 继续对话）；状态驱动自动弹出（`respondGuiAsk`——AI 忙时等待本轮结束再发，防消息丢失）
+- **审批链修复**（此前 auth_request 静默丢弃 → 高风险操作必 60s 超时）：
+  - `chat_controller.dart`：auth_request 事件处理 + `respondAuth(approve)` 回执（发送 `auth_respond` 命令 → 服务端写入 auth.sock）
+  - `chat_screen.dart`：**审批卡片弹窗**（工具名/参数/原因/时限 + 批准/拒绝）
+
+### 版本
+- pubspec 0.6.0+28 · app_info 默认值 0.6.0
+
+---
+
+## [0.5.2] - 2026-09-12（版本显示修复）
+
+### 修复（Fixes）
+- **App 内部版本显示不更新**（先生实测报告）：
+  - `app_info.dart`：默认版本 0.4.4 → **0.5.2**（唯一版本来源）
+  - 启动屏 `SYSTEM INITIALIZE · LN-0.4.3` → 动态 `AppInfo.tag`
+  - 主控台「App 版本 0.4.3」硬编码 → `AppInfo.tag`
+  - **根因**：CI 从未注入 `--dart-define` → `String.fromEnvironment` 永远回退旧默认值
+  - **修复**：`build.yml` 提取版本并注入 `APP_VERSION` / `APP_BUILD`（Android + Linux）
+
+### 说明
+- 本版为先生实测问题修复配套（server 侧 0.5.2 同步：TCP 命令转发 + 端口兜底 + 版本动态化）
+
+---
+
 ## [0.5.1+4] - 2026-09-12（CI 修复补全 + i18n 第 1~2 批）
 
 ### 修复（Fixes）

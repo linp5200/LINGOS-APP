@@ -12,12 +12,15 @@ class AppInfo {
   AppInfo._();
 
   /// 语义版本（不含构建号）—— CI 注入优先，回退到默认值
+  /// 【0.5.2 修复】CI 此前从未注入 → 永远显示旧默认值（先生报告）。
+  ///   构建注入：--dart-define=APP_VERSION=$VERSION（build.yml 已加）
+  /// 【0.6.0】默认值升级 0.6.0
   static const String version =
-      String.fromEnvironment('APP_VERSION', defaultValue: '0.4.4');
+      String.fromEnvironment('APP_VERSION', defaultValue: '0.6.0');
 
   /// 构建号
   static const String build =
-      String.fromEnvironment('APP_BUILD', defaultValue: '22');
+      String.fromEnvironment('APP_BUILD', defaultValue: '28');
 
   /// 显示用完整版本
   static String get full => '$version+$build';

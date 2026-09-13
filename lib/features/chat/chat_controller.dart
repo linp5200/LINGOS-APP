@@ -53,6 +53,10 @@ class ChatState {
   final int completionTokens;
   final int cacheHit;
   final bool contextCompressed;
+  // 【0.6.0】待审批高风险管理操作（auth_request 事件——审批链修复）
+  final Map<String, dynamic>? pendingAuth;
+  // 【0.6.0】待回答的 GUI 提问（gui_ask 事件——GUI 链修复）
+  final Map<String, dynamic>? pendingGuiAsk;
 
   const ChatState(
       {this.messages = const [],
@@ -65,7 +69,9 @@ class ChatState {
       this.promptTokens = 0,
       this.completionTokens = 0,
       this.cacheHit = 0,
-      this.contextCompressed = false});
+      this.contextCompressed = false,
+      this.pendingAuth,
+      this.pendingGuiAsk});
 
   ChatState copyWith(
           {List<ChatMsg>? messages,
@@ -78,7 +84,11 @@ class ChatState {
           int? promptTokens,
           int? completionTokens,
           int? cacheHit,
-          bool? contextCompressed}) =>
+          bool? contextCompressed,
+          Map<String, dynamic>? pendingAuth,
+          Map<String, dynamic>? pendingGuiAsk,
+          bool? clearPendingAuth,
+          bool? clearPendingGuiAsk}) =>
       ChatState(
           messages: messages ?? this.messages,
           aiBusy: aiBusy ?? this.aiBusy,
@@ -90,7 +100,9 @@ class ChatState {
           promptTokens: promptTokens ?? this.promptTokens,
           completionTokens: completionTokens ?? this.completionTokens,
           cacheHit: cacheHit ?? this.cacheHit,
-          contextCompressed: contextCompressed ?? this.contextCompressed);
+          contextCompressed: contextCompressed ?? this.contextCompressed,
+          pendingAuth: (clearPendingAuth ?? false) ? null : (pendingAuth ?? this.pendingAuth),
+          pendingGuiAsk: (clearPendingGuiAsk ?? false) ? null : (pendingGuiAsk ?? this.pendingGuiAsk));
 }
 
 class ChatController extends StateNotifier<ChatState> {
@@ -140,6 +152,34 @@ class ChatController extends StateNotifier<ChatState> {
         }
       case EvtType.guiNotify:
         _appendSystem('📢 ${evt.data['title']}');
+      // 【0.6.0】GUI 交互链修复——6 事件全处理（此前仅 notify 有处理）
+      case EvtType.guiAsk:
+        state = state.copyWith(pendingGuiAsk: {
+          'question': evt.data['question']?.toString() ?? '',
+          'options': (evt.data['options'] is List)
+              ? (evt.data['options'] as List).map((e) => e.toString()).toList()
+              : <String>[],
+          'req_id': evt.data['req_id']?.toString() ?? '',
+        });
+        _appendSystem('❓ AI 提问：${evt.data['question'] ?? ''}');
+      case EvtType.guiOpenUrl:
+        _appendSystem('🔗 请求打开链接：${evt.data['url'] ?? ''}');
+      case EvtType.guiShare:
+        _appendSystem('📤 分享内容：${evt.data['text'] ?? ''}');
+      case EvtType.guiLocation:
+        _appendSystem('📍 收到定位请求（请在系统设置中授权定位后由 App 上传）');
+      case EvtType.guiClipboard:
+        _appendSystem('📋 剪贴板请求：${evt.data['action'] ?? 'read'}');
+      // 【0.6.0】审批链修复——高风险操作审批卡片（此前静默丢弃 → 必超时）
+      case EvtType.authRequest:
+        state = state.copyWith(pendingAuth: {
+          'req_id': evt.data['req_id']?.toString() ?? '',
+          'tool': evt.data['tool']?.toString() ?? '',
+          'args': evt.data['args']?.toString() ?? '',
+          'reason': evt.data['reason']?.toString() ?? '',
+          'timeout': evt.data['timeout'] ?? 60,
+        });
+        _appendSystem('🔐 高风险操作待审批：${evt.data['tool'] ?? ''}');
       case EvtType.error:
         _appendSystem('⚠️ ${evt.data['msg'] ?? evt.data['message'] ?? '错误'}');
       // 【0.2.0】上下文压缩通知（先生决策：App 显示提示条）
@@ -321,6 +361,39 @@ class ChatController extends StateNotifier<ChatState> {
   /// 【0.1.9】中断当前 AI 回复
   Future<void> interrupt() async {
     await ref.read(connectionProvider).sendInterrupt();
+  }
+
+  /// 【0.6.0】审批回执（auth_request → 用户决策 → 发送 auth_respond 命令）
+  Future<void> respondAuth(bool approve) async {
+    final p = state.pendingAuth;
+    if (p == null) return;
+    final reqId = p['req_id']?.toString() ?? '';
+    final tool = p['tool']?.toString() ?? '';
+    state = state.copyWith(clearPendingAuth: true);
+    try {
+      await ref.read(connectionProvider).sendCommand({
+        'cmd': 'auth_respond',
+        'req_id': reqId,
+        'decision': approve ? 'approve' : 'reject',
+      });
+      _appendSystem(approve ? '✅ 已批准：$tool' : '⛔ 已拒绝：$tool');
+    } catch (e) {
+      _appendSystem('⚠️ 审批回执发送失败：$e');
+    }
+  }
+
+  /// 【0.6.0】回答 GUI 提问（gui_ask → 用户选择/输入 → 作为消息回传 AI）
+  Future<void> respondGuiAsk(String answer) async {
+    final q = state.pendingGuiAsk;
+    if (q == null) return;
+    state = state.copyWith(clearPendingGuiAsk: true);
+    final text = answer.trim();
+    if (text.isEmpty) return;
+    // AI 繁忙时等待本轮结束再发送（最多 30 秒——防消息丢失）
+    for (int i = 0; i < 60 && state.aiBusy; i++) {
+      await Future<void>.delayed(const Duration(milliseconds: 500));
+    }
+    await send(text);
   }
 
   /// 【0.1.9】继续：重发原文（同会话续接上下文）

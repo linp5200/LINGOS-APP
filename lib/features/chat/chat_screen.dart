@@ -169,9 +169,114 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     });
   }
 
+  // ============================================================
+  // 【0.6.0】审批卡片 + GUI 提问弹窗（GUI 链 / 审批链修复的 UI 端）
+  // ============================================================
+
+  Future<void> _showAuthDialog(Map<String, dynamic> auth) async {
+    if (!mounted) return;
+    final tool = auth['tool']?.toString() ?? '';
+    final args = auth['args']?.toString() ?? '';
+    final reason = auth['reason']?.toString() ?? '';
+    final timeout = auth['timeout'] ?? 60;
+    final ok = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        icon: const Icon(Icons.gpp_maybe, color: Colors.orange, size: 32),
+        title: const Text('高风险操作审批'),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('工具：$tool', style: const TextStyle(fontWeight: FontWeight.w600)),
+              const SizedBox(height: 6),
+              if (args.isNotEmpty && args != '{}')
+                Text('参数：$args', style: const TextStyle(fontSize: 12)),
+              if (reason.isNotEmpty) ...[
+                const SizedBox(height: 6),
+                Text(reason, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+              ],
+              const SizedBox(height: 6),
+              Text('时限：$timeout 秒（超时自动拒绝）',
+                  style: const TextStyle(fontSize: 11, color: Colors.grey)),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, false), child: const Text('拒绝')),
+          FilledButton(
+              onPressed: () => Navigator.pop(ctx, true), child: const Text('批准')),
+        ],
+      ),
+    );
+    if (ok != null && mounted) {
+      await ref.read(chatControllerProvider.notifier).respondAuth(ok);
+    }
+  }
+
+  Future<void> _showGuiAskDialog(Map<String, dynamic> ask) async {
+    if (!mounted) return;
+    final question = ask['question']?.toString() ?? '';
+    final options = (ask['options'] is List)
+        ? (ask['options'] as List).map((e) => e.toString()).toList()
+        : <String>[];
+    final ctrl = TextEditingController();
+    final answer = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        icon: const Icon(Icons.help_outline, color: AppColors.brandCyan, size: 32),
+        title: const Text('AI 提问'),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(question),
+              const SizedBox(height: 12),
+              TextField(
+                controller: ctrl,
+                autofocus: true,
+                decoration: const InputDecoration(
+                  hintText: '输入回答…',
+                  isDense: true,
+                ),
+                onSubmitted: (v) => Navigator.pop(ctx, v),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, null), child: const Text('忽略')),
+          ...options.map((opt) => OutlinedButton(
+                onPressed: () => Navigator.pop(ctx, opt),
+                child: Text(opt, style: const TextStyle(fontSize: 12)),
+              )),
+          FilledButton(
+              onPressed: () => Navigator.pop(ctx, ctrl.text), child: const Text('提交')),
+        ],
+      ),
+    );
+    if (answer != null && answer.trim().isNotEmpty && mounted) {
+      await ref.read(chatControllerProvider.notifier).respondGuiAsk(answer);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final chat = ref.watch(chatControllerProvider);
+    // 【0.6.0】状态驱动弹窗（审批卡片 / GUI 提问）——新增即弹一次
+    ref.listen(chatControllerProvider, (prev, next) {
+      if (next.pendingAuth != null && prev?.pendingAuth == null) {
+        _showAuthDialog(next.pendingAuth!);
+      }
+      if (next.pendingGuiAsk != null && prev?.pendingGuiAsk == null) {
+        _showGuiAskDialog(next.pendingGuiAsk!);
+      }
+    });
     _scrollToBottom();
     return Scaffold(
       appBar: AppBar(

@@ -32,13 +32,16 @@ jobs:
         id: version
         run: |
           VERSION=$(grep -oP '^version:\s*\K[^+\s]+' pubspec.yaml)
+          BUILD=$(grep -oP '^version:\s*[^+]+\+\K\d+' pubspec.yaml)
           echo "VERSION=$VERSION" >> $GITHUB_ENV
-          echo "版本: $VERSION"
+          echo "APP_BUILD=$BUILD" >> $GITHUB_ENV
+          echo "版本: $VERSION+$BUILD"
 
       - name: 编译 Release APK（ABI 拆分——0.4.3 规范：LINGOS_app_android_v<版本>_<架构>.apk，无包型后缀）
         run: |
-          flutter build apk --release --split-per-abi
-          flutter build apk --release
+          # 【0.5.2 修复】注入版本（此前从未注入 → App 内永远显示旧默认值）
+          flutter build apk --release --split-per-abi --dart-define=APP_VERSION=$VERSION --dart-define=APP_BUILD=$APP_BUILD
+          flutter build apk --release --dart-define=APP_VERSION=$VERSION --dart-define=APP_BUILD=$APP_BUILD
           mkdir -p /tmp/release
           V=$(grep -oP '^version:\s*\K[^+\s]+' pubspec.yaml)
           cd build/app/outputs/flutter-apk
@@ -81,7 +84,11 @@ jobs:
       - name: 获取依赖
         run: flutter pub get
       - name: 构建 Linux
-        run: flutter build linux --release
+        run: |
+          # 【0.5.2 修复】就地提取版本并注入（跨 job 环境变量不共享）
+          V=$(grep -oP '^version:\s*\K[^+\s]+' pubspec.yaml)
+          B=$(grep -oP '^version:\s*[^+]+\+\K\d+' pubspec.yaml)
+          flutter build linux --release --dart-define=APP_VERSION=$V --dart-define=APP_BUILD=$B
       - name: 打包
         run: |
           mkdir -p /tmp/linux_out

@@ -4,6 +4,7 @@ library;
 
 import 'package:flutter/material.dart';
 
+import '../../core/app_info.dart';
 import '../../core/theme/app_theme.dart';
 import '../connect/connect_screen.dart';
 import '../alerts/alerts_screen.dart';
@@ -52,7 +53,7 @@ class HomeScreen extends StatelessWidget {
           Row(children: [
             Expanded(child: _localCard('主机', '--', '需连接')),
             const SizedBox(width: 8),
-            Expanded(child: _localCard('App 版本', '0.4.3', '本地')),
+            Expanded(child: _localCard('App 版本', AppInfo.tag, '本地')),
           ]),
           const SizedBox(height: 16),
           _section(context, '本地服务'),
