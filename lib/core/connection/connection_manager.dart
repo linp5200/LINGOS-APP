@@ -24,6 +24,9 @@ class ConnectionManager implements ChannelListener {
   String? lastError;
   String token = '';
 
+  /// 【0.6.0 S1】应用层加密状态（诚实上报——e2e_status 事件更新）
+  bool e2eEncrypted = false;
+
   final _eventController = StreamController<String>.broadcast();
   Stream<String> get events => _eventController.stream;
 
@@ -302,6 +305,11 @@ class ConnectionManager implements ChannelListener {
     } else if (line.contains('"type":"disconnected"')) {
       NotificationService.instance.show('LING OS', '连接已断开');
     }
+    // 【0.6.0 S1】应用层加密状态（诚实上报——不假称加密）
+    if (line.contains('"type":"e2e_status"')) {
+      e2eEncrypted = line.contains('"encrypted":true');
+      appLog('ConnectionManager', '应用层加密状态: ${e2eEncrypted ? "已启用（X25519+XChaCha20）" : "明文"}');
+    }
     // 【先生要求】同步：WS 认证成功（auth_ok）→ 自动拉取核心数据（完善服务端数据请求）
     if (line.contains('auth_ok')) {
       _autoSync();
@@ -334,6 +342,7 @@ class ConnectionManager implements ChannelListener {
   void onDisconnected(String reason) {
     lastError = reason;
     state = ConnState.disconnected;
+    e2eEncrypted = false;   // 【0.6.0 S1】断连即复位（新会话重新协商）
     AppInfo.clearServerVersion();   // 【0.4.4】断开后不再声称知道服务端版本
     // 【0.2.1 #1】断连 → 离线只读事件（UI 切缓存显示 + 操作拦截）
     _eventController.add('{"type":"disconnected","reason":"$reason"}');

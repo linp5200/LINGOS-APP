@@ -23,6 +23,7 @@ import '../ha/ha_control_screen.dart';
 import '../vision/vision_screen.dart';
 import '../sessions/sessions_screen.dart';
 import '../ai_config/ai_config_screen.dart';
+import '../crisis/crisis_controller.dart';
 import 'home_screen.dart';
 
 class HomeShell extends ConsumerStatefulWidget {
@@ -37,6 +38,8 @@ class _HomeShellState extends ConsumerState<HomeShell> {
   bool _tokenListenerAttached = false;
   bool _startupNavApplied = false;
   bool _autoConnectDone = false;
+  // 【0.6.0 §2B】已弹窗的危机 ID（防重复弹窗）
+  String _lastCrisisShown = '';
   // 【A1修复】GlobalKey——子页三横按钮经回调打开 HomeShell 的 Drawer
   final _scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -252,13 +255,121 @@ class _HomeShellState extends ConsumerState<HomeShell> {
     );
   }
 
+  // ============================================================
+  // 【0.6.0 §2B】危机 UI（生命线呈现——全屏告警卡 + 常驻横幅）
+  // ============================================================
+
+  Widget _buildCrisisBanner(CrisisState c) {
+    return Material(
+      color: const Color(0xFFB71C1C),
+      child: InkWell(
+        onTap: () => _showCrisisDialog(c),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+          child: Row(children: [
+            const Icon(Icons.warning_amber_rounded, color: Colors.white, size: 18),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text('🚨 ${c.name}警报处置中——点击查看',
+                  style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600)),
+            ),
+            if (!c.acked)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Text('待确认', style: TextStyle(color: Colors.white, fontSize: 11)),
+              ),
+          ]),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _showCrisisDialog(CrisisState c) async {
+    if (!mounted) return;
+    final actions = c.actions;
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => PopScope(
+        canPop: false,
+        child: AlertDialog(
+          backgroundColor: const Color(0xFF2A0A0A),
+          icon: const Icon(Icons.warning_amber_rounded, color: Color(0xFFFF5252), size: 42),
+          title: Text('🚨 ${c.name}警报',
+              style: const TextStyle(color: Color(0xFFFF8A80), fontWeight: FontWeight.bold)),
+          content: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (c.source.isNotEmpty)
+                  Text('触发源：${c.source}', style: const TextStyle(color: Colors.white70, fontSize: 12)),
+                if (c.detail.isNotEmpty) ...[
+                  const SizedBox(height: 6),
+                  Text(c.detail, style: const TextStyle(color: Colors.white, fontSize: 13)),
+                ],
+                const SizedBox(height: 10),
+                const Text('系统已执行的类别动作：', style: TextStyle(color: Colors.orangeAccent, fontSize: 12)),
+                const SizedBox(height: 4),
+                ...actions.take(8).map((a) {
+                  final m = (a is Map) ? a : const {};
+                  final st = m['status']?.toString() ?? '';
+                  final tag = st == 'done'
+                      ? '✓'
+                      : st == 'noted'
+                          ? 'ℹ'
+                          : st.startsWith('pending')
+                              ? '⏳'
+                              : '✗';
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 2),
+                    child: Text('$tag ${m['desc'] ?? ''}（${m['detail'] ?? st}）',
+                        style: const TextStyle(color: Colors.white70, fontSize: 12)),
+                  );
+                }),
+                const SizedBox(height: 8),
+                const Text('AI 已获全权处置授权——在线时将持续补充处置动作。',
+                    style: TextStyle(color: Colors.white54, fontSize: 11)),
+              ],
+            ),
+          ),
+          actions: [
+            FilledButton(
+              style: FilledButton.styleFrom(backgroundColor: const Color(0xFFD32F2F)),
+              onPressed: () {
+                ref.read(crisisProvider.notifier).acknowledge();
+                Navigator.pop(ctx);
+              },
+              child: const Text('我已知情'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final crisis = ref.watch(crisisProvider);
+    // 【0.6.0 §2B】危机弹窗（同一危机只弹一次——生命线呈现）
+    ref.listen(crisisProvider, (prev, next) {
+      if (next.active && next.crisisId.isNotEmpty && _lastCrisisShown != next.crisisId) {
+        _lastCrisisShown = next.crisisId;
+        WidgetsBinding.instance.addPostFrameCallback((_) => _showCrisisDialog(next));
+      }
+    });
     return Scaffold(
       key: _scaffoldKey,
       drawer: _buildDrawer(context),
       // 【0.4.3】聊天/会话纯净平面（先生 FUI 定稿：地形只进仪表盘/开屏——由各页自决背景）
-      body: _pages[_index],
+      body: Column(children: [
+        if (crisis.active) _buildCrisisBanner(crisis),
+        Expanded(child: _pages[_index]),
+      ]),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _index,
         onDestinationSelected: (i) => setState(() => _index = i),

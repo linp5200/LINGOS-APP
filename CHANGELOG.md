@@ -13,6 +13,30 @@
 
 ---
 
+## [0.6.1] - 2026-09-13（S1 应用层加密 + §2B 危机 UI）
+
+### 新增（Features）
+- **S1 应用层加密（App 侧）**——与 C 端 secure_channel 逐字节对齐：
+  - `lib/core/crypto/blake2b.dart`：BLAKE2b-256 keyed 纯 Dart 实现（RFC 7693）
+    · 算法交叉验证：Python 镜像 → hashlib 标准一致（7 组测试含边界）→ C 实现一致（2 向量）
+  - `lib/core/crypto/secure_channel.dart`：X25519 ECDH + XChaCha20-Poly1305 逐帧 AEAD
+    · nonce = dir(4B LE) || seq(8B BE)；方向约定 客户端发送=1/接收=2；防重放序列
+  - `tcp_channel.dart`：连接建立后自动密钥交换（MSG_KEY_EXCHANGE 0x0B）
+    · 密钥交换失败/超时 → **优雅降级明文**（诚实上报，不假称加密）
+    · 加密会话逐帧 AEAD；解密失败帧丢弃（防篡改）
+  - `connection_manager.dart`：e2e_status 事件捕获 → `e2eEncrypted` 状态（诚实上报）
+- **§2B 危机模式 UI**（生命线呈现）：
+  - `crisis_controller.dart`：crisis_alert/crisis_resolved 事件 → 全局状态
+  - `home_shell.dart`：**全屏危机告警卡**（类别/触发源/系统已执行动作 + 「我已知情」ACK 回执）+ 常驻红色横幅
+
+### 依赖
+- 新增 `cryptography: ^2.7.0`（X25519 + XChaCha20-Poly1305）
+
+### 版本
+- pubspec 0.6.1+29 · app_info 默认值 0.6.1
+
+---
+
 ## [0.6.0] - 2026-09-13（GUI 链 / 审批链修复——与 server 0.6.0 配套）
 
 ### 修复（Fixes）

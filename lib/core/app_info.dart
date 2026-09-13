@@ -16,11 +16,11 @@ class AppInfo {
   ///   构建注入：--dart-define=APP_VERSION=$VERSION（build.yml 已加）
   /// 【0.6.0】默认值升级 0.6.0
   static const String version =
-      String.fromEnvironment('APP_VERSION', defaultValue: '0.6.0');
+      String.fromEnvironment('APP_VERSION', defaultValue: '0.6.1');
 
   /// 构建号
   static const String build =
-      String.fromEnvironment('APP_BUILD', defaultValue: '28');
+      String.fromEnvironment('APP_BUILD', defaultValue: '29');
 
   /// 显示用完整版本
   static String get full => '$version+$build';

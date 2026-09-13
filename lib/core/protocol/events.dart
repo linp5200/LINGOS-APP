@@ -59,6 +59,9 @@ class EvtType {
   static const String sttRequest = 'stt_request'; // App→服务端 STT 请求
   static const String sttResult = 'stt_result'; // 服务端→App STT 结果（text）
   static const String sttError = 'stt_error'; // STT 错误
+  // 【0.6.0 §2B】危机响应（危险时刻全权——生命线）
+  static const String crisisAlert = 'crisis_alert'; // 危机告警（全屏卡+ACK）
+  static const String crisisResolved = 'crisis_resolved'; // 危机解除
   // 连接层事件（ConnectionManager 发出）
   static const String connectionOk = 'connection_ok';
   static const String connError = 'conn_error';

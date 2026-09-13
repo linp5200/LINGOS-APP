@@ -18,6 +18,8 @@ class MsgType {
   static const int heartbeat = 0x0008;
   static const int heartbeatAck = 0x0009;
   static const int error = 0x000A;
+  /// 【0.6.0 S1】应用层加密密钥交换（caps(4BE) + X25519 公钥(32) + salt(16)）
+  static const int keyExchange = 0x000B;
   // 备用（协议 v3——授权实际走 WS）
   static const int authRequest = 0x000B;
   static const int authResponseBackup = 0x000C;
