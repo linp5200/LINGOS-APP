@@ -20,7 +20,7 @@ class AppInfo {
 
   /// 构建号
   static const String build =
-      String.fromEnvironment('APP_BUILD', defaultValue: '29');
+      String.fromEnvironment('APP_BUILD', defaultValue: '30');
 
   /// 显示用完整版本
   static String get full => '$version+$build';

@@ -129,7 +129,6 @@ class TcpChannel implements ConnectChannel {
     final frame = TlvFrame(type, payloadBytes);
     _socket!.add(frame.encode());
     await _socket!.flush();
-    final showLen = payloadBytes.length > 60 ? 60 : payloadBytes.length;
     appLog('TcpChannel', '发送帧 0x${type.toRadixString(16).padLeft(4, '0')} len=${payloadBytes.length}'
         '${_encActive && type != MsgType.keyExchange ? ' [encrypted]' : ''}');
     return true;

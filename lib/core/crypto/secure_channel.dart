@@ -14,7 +14,8 @@ library;
 
 import 'dart:typed_data';
 
-import 'package:cryptography/cryptography.dart';
+// 注：cryptography 包也导出 Blake2b（无密钥版）——hide 之，用本模块的 keyed 实现
+import 'package:cryptography/cryptography.dart' hide Blake2b;
 
 import 'blake2b.dart';
 
