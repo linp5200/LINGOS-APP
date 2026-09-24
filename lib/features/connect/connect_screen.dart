@@ -8,6 +8,7 @@ import '../../core/theme/app_theme.dart';
 import '../../core/providers.dart';
 import '../../core/logging/app_logger.dart';
 import '../../core/storage/app_store.dart';
+import '../../core/services/discovery_service.dart';   // 【0.7.0 P3】局域网自动发现
 import '../home/home_shell.dart';
 
 class ConnectScreen extends ConsumerStatefulWidget {
@@ -29,6 +30,9 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
   String _status = '';
   // 【2026-09-18 接线】连接历史（最近主机——一键填入）
   List<Map<String, dynamic>> _history = [];
+  // 【0.7.0 P3】自动发现（连接 2 步化第一步）
+  bool _scanning = false;
+  List<DiscoveredHost> _found = [];
 
   ConnectionManager get _mgr => ref.read(connectionProvider);
 
@@ -52,6 +56,24 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
       _connecting = false;
       _waitingAuth = ok;
       _status = ok ? '已连接——请输入终端显示的验证码' : '连接失败：${_mgr.lastError ?? '未知错误'}（检查主机 IP/端口/服务是否启动）';
+    });
+  }
+
+  /// 【0.7.0 P3】局域网自动发现（UDP 广播——连接 2 步化）
+  Future<void> _scan() async {
+    setState(() {
+      _scanning = true;
+      _found = [];
+      _status = '正在搜索局域网主机…';
+    });
+    final hosts = await DiscoveryService.scan(timeoutMs: 3000);
+    if (!mounted) return;
+    setState(() {
+      _scanning = false;
+      _found = hosts;
+      _status = hosts.isEmpty
+          ? '未发现主机（确认同一局域网且服务已启动；也可手动输入）'
+          : '发现 ${hosts.length} 台主机——点击选择';
     });
   }
 
@@ -168,6 +190,34 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
                       keyboardType: TextInputType.number,
                       decoration: const InputDecoration(labelText: '端口', prefixIcon: Icon(Icons.numbers, size: 20)),
                     ),
+                    // 【0.7.0 P3】自动发现（连接 2 步化——搜索 → 一键填入）
+                    const SizedBox(height: 10),
+                    OutlinedButton.icon(
+                      onPressed: _scanning ? null : _scan,
+                      icon: _scanning
+                          ? const SizedBox(height: 14, width: 14, child: CircularProgressIndicator(strokeWidth: 2))
+                          : const Icon(Icons.wifi_find, size: 18),
+                      label: Text(_scanning ? '搜索中…' : '搜索局域网主机'),
+                    ),
+                    if (_found.isNotEmpty) ...[
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 4,
+                        children: _found.map((h) {
+                          return ActionChip(
+                            avatar: const Icon(Icons.computer, size: 14),
+                            label: Text('${h.name} · ${h.ip}',
+                                style: const TextStyle(fontSize: 11)),
+                            onPressed: () => setState(() {
+                              _hostCtrl.text = h.ip;
+                              _portCtrl.text = '${h.port}';
+                              _status = '已选择 ${h.name}（${h.ip}）——点击连接';
+                            }),
+                          );
+                        }).toList(),
+                      ),
+                    ],
                     // 【2026-09-18 接线】连接历史（最近主机——点击填入）
                     if (_history.isNotEmpty) ...[
                       const SizedBox(height: 10),

@@ -5,6 +5,25 @@
 
 ---
 
+## [0.7.0] - 2026-09-24（命令面板 + 局域网自动发现 + 后台推送 —— v0.7.0 批次）
+
+### 新增（Features）
+- **命令面板**（`features/commands/command_panel_screen.dart` 新建）：
+  ~130 命令无入口的总出口——服务端 `command_list` 数据源（ext 82 + 技能 + 核心）·
+  搜索 / 来源过滤 / 参数表单（JSON）/ 执行结果底单 · Drawer「命令面板」入口
+- **局域网自动发现**（`core/services/discovery_service.dart` 新建 + 连接页集成）：
+  UDP 广播（2937/"LINGOS-DISCOVER"——协议对齐 C 端 discovery_server）·
+  「搜索局域网主机」按钮 + 结果一键填入 → **连接 2 步化**（搜索 → 连接）
+- **后台推送**（`core/notification_bridge.dart` 新建 + main.dart 接线）：
+  全局订阅事件流——App 非前台时：
+  · `crisis_alert/crisis_repush` → **critical 通知**（最高优先级/全屏意图/震动——绕过静默）
+  · `alert_event` L2+ → 高优先级本地通知（`NotificationService.showCritical` 新增）
+
+### 说明
+- 危机 UI（全屏告警卡 + ACK）与预警实时横幅为既有实现（0.6.0），本版仅补后台通道。
+
+---
+
 ## [0.5.1+5] - 2026-09-12（CI 修复 · 第 2 轮）
 
 ### 修复（Fixes）

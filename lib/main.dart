@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/logging/app_logger.dart';
 import 'core/services/notification_service.dart';
+import 'core/notification_bridge.dart';   // 【0.7.0 P3】后台推送（危机/预警本地通知）
 import 'core/theme/app_theme.dart';
 import 'features/home/boot_screen.dart';
 
@@ -44,7 +45,8 @@ class LingOsApp extends StatelessWidget {
       },
       // 【0.4.3】Boot 启动屏（本地模式——先生预览落地）：
       // 不强制连接；有已存 token 自动恢复；需用时"连接主机"按钮
-      home: const BootScreen(),
+      // 【0.7.0 P3】NotificationBridge：全局订阅事件流 → 后台时危机/预警本地通知
+      home: const NotificationBridge(child: BootScreen()),
     );
   }
 }

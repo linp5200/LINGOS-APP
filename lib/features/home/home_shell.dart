@@ -15,6 +15,7 @@ import '../alerts/alerts_screen.dart';
 import '../weather/weather_screen.dart';
 import '../ext/ext_screens.dart';
 import '../options/options_screen.dart';
+import '../commands/command_panel_screen.dart';   // 【0.7.0 P3】命令面板（~130 命令总出口）
 import '../chat/chat_screen.dart';
 import '../connect/connect_screen.dart';
 import '../dashboard/dashboard_screen.dart';
@@ -229,6 +230,8 @@ class _HomeShellState extends ConsumerState<HomeShell> {
           _item(context, TablerIcons.music, trCtx(context, 'nav_media'), const MediaScreen()),
           _item(context, TablerIcons.book, trCtx(context, 'nav_kb'), const KbScreen()),
           _item(context, TablerIcons.adjustments, trCtx(context, 'nav_options'), const OptionsScreen()),
+          // 【0.7.0 P3】命令面板（~130 命令无入口的总出口——先生"摸不到"治疗）
+          _item(context, TablerIcons.terminal_2, '命令面板', const CommandPanelScreen()),
           const Divider(color: AppColors.divider),
           ListTile(
             leading: const Icon(Icons.logout, size: 20, color: AppColors.brandRed),

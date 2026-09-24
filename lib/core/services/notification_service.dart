@@ -40,4 +40,31 @@ class NotificationService {
       await _plugin.show(id, title, body, details, payload: payload);
     } catch (_) {}
   }
+
+  /// 【0.7.0 P3】危机/生命线通知——最高优先级（锁屏可见 + 声音 + 震动；尽量全屏意图）
+  ///   先生设定：生命线投递"绕过免打扰/静默——系统级 critical 通道"
+  Future<void> showCritical(String title, String body, {int id = 911, String? payload}) async {
+    if (!_ready) return;
+    try {
+      const details = NotificationDetails(
+        android: AndroidNotificationDetails(
+          'lingos_crisis',
+          'LING OS 生命线',
+          channelDescription: '危机告警（生命线——最高优先级）',
+          importance: Importance.max,
+          priority: Priority.max,
+          category: AndroidNotificationCategory.alarm,
+          fullScreenIntent: true,
+          ongoing: true,
+          enableVibration: true,
+          playSound: true,
+        ),
+        iOS: DarwinNotificationDetails(
+          interruptionLevel: InterruptionLevel.critical,
+          presentSound: true,
+        ),
+      );
+      await _plugin.show(id, title, body, details, payload: payload);
+    } catch (_) {}
+  }
 }
