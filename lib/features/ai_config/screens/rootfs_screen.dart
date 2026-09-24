@@ -31,9 +31,6 @@ class _RootfsScreenState extends State<RootfsScreen> {
   final _store = AppStore();
   Map<String, dynamic>? _rootfs; // 已安装的 rootfs 信息
   bool _loading = true;
-  bool _installing = false;
-  double _progress = 0;
-  String _installStatus = '';
 
   @override
   void initState() {
@@ -131,33 +128,9 @@ class _RootfsScreenState extends State<RootfsScreen> {
       appBar: AppBar(title: const Text('Rootfs 本地沙箱管理')),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
-          : _installing
-              ? _buildInstalling()
-              : _rootfs == null
-                  ? _buildEmpty()
-                  : _buildInstalled(),
-    );
-  }
-
-  Widget _buildInstalling() {
-    return Padding(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const CircularProgressIndicator(),
-          const SizedBox(height: 16),
-          Text(_installStatus, style: const TextStyle(fontSize: 14)),
-          const SizedBox(height: 12),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(6),
-            child: LinearProgressIndicator(value: _progress, minHeight: 8),
-          ),
-          const SizedBox(height: 12),
-          Text('${(_progress * 100).toStringAsFixed(0)}%',
-              style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
-        ],
-      ),
+          : _rootfs == null
+              ? _buildEmpty()
+              : _buildInstalled(),
     );
   }
 
