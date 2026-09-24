@@ -112,6 +112,17 @@ class ConnectionManager implements ChannelListener {
         if (data is Map && data['sessions'] is List) {
           final sessions = (data['sessions'] as List).whereType<Map<String, dynamic>>().toList();
           await OfflineCache.instance.saveSnapshot(sessions: sessions);
+          // 【2026-09-18 接线】消费 small 域（此前直接丢弃——服务端全量发但 App 零处理）
+          //   permissions / providers / ha_config / sync_settings
+          final small = data['small'];
+          if (small is Map) {
+            try {
+              await store.saveSyncSmall(jsonEncode(small));
+              appLog('ConnectionManager', 'small 域已保存（permissions/providers/ha_config/sync_settings）');
+            } catch (e) {
+              appLog('ConnectionManager', 'small 域保存失败: $e');
+            }
+          }
           await store.saveLastSync(DateTime.now().millisecondsSinceEpoch / 1000);
           appLog('ConnectionManager', '首次全量同步完成（${sessions.length} 会话）');
         }

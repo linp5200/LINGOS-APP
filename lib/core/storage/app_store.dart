@@ -259,6 +259,54 @@ class AppStore {
     return sp.getDouble(_kLastSync) ?? 0;
   }
 
+  // ---------- 【2026-09-18 接线】sync.small 域（permissions/providers/ha_config/sync_settings）
+  //   背景：服务端 sync_full 全量发 small 域，App 此前零处理（直接丢弃）
+  static const _kSyncSmall = 'sync_small_json';
+
+  Future<void> saveSyncSmall(String json) async {
+    final sp = await SharedPreferences.getInstance();
+    await sp.setString(_kSyncSmall, json);
+  }
+
+  Future<String> getSyncSmall() async {
+    final sp = await SharedPreferences.getInstance();
+    return sp.getString(_kSyncSmall) ?? '';
+  }
+
+  // ---------- 【2026-09-18 接线】连接历史（最近主机——一键填入重连）
+  //   设计（方案3 §1.2）：自动发现 + 连接历史 = App 连接体验第一步
+  static const _kHostHistory = 'conn_host_history';
+
+  Future<void> addHostHistory(String host, int port) async {
+    final sp = await SharedPreferences.getInstance();
+    List<dynamic> list = [];
+    try {
+      final raw = sp.getString(_kHostHistory);
+      if (raw != null && raw.isNotEmpty) {
+        final d = jsonDecode(raw);
+        if (d is List) list = d;
+      }
+    } catch (_) {}
+    list.removeWhere((e) => e is Map && e['h'] == host && e['p'] == port);
+    list.insert(0, {'h': host, 'p': port, 'ts': DateTime.now().millisecondsSinceEpoch});
+    if (list.length > 5) list = list.sublist(0, 5);
+    await sp.setString(_kHostHistory, jsonEncode(list));
+  }
+
+  Future<List<Map<String, dynamic>>> getHostHistory() async {
+    final sp = await SharedPreferences.getInstance();
+    try {
+      final raw = sp.getString(_kHostHistory);
+      if (raw != null && raw.isNotEmpty) {
+        final d = jsonDecode(raw);
+        if (d is List) {
+          return d.whereType<Map>().map((e) => Map<String, dynamic>.from(e)).toList();
+        }
+      }
+    } catch (_) {}
+    return [];
+  }
+
   Future<void> saveAnalytics(bool v) async {
     final sp = await SharedPreferences.getInstance();
     await sp.setBool(_kAnalytics, v);
@@ -384,7 +432,7 @@ class AppStore {
   }
 
   String _generateUuid() {
-    final rnd = Random();
+    final rnd = Random.secure();   /* 【2026-09-18】CSPRNG（原 Random() 可预测） */
     final bytes = List<int>.generate(16, (_) => rnd.nextInt(256));
     bytes[6] = (bytes[6] & 0x0F) | 0x40;
     bytes[8] = (bytes[8] & 0x3F) | 0x80;

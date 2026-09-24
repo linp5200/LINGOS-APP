@@ -13,6 +13,31 @@
 
 ---
 
+## [0.6.2] - 2026-09-24（启动链路配套 + 界面增强批次）
+
+### 修复（Fixes）
+- **离线库弱密钥修复**（`offline_cache.dart`）：原 `microsecondsSinceEpoch % 256` 弱派生（可预测）
+  → `Random.secure()` CSPRNG（审计 🔴 安全项）
+- **device_id 生成改 CSPRNG**（`app_store.dart`：原 `Random()` → `Random.secure()`）
+- **rootfs 假安装诚实化**（`rootfs_screen.dart`）：删除"模拟下载进度"——明确「安装引擎开发中」
+  弹窗说明，不再写入假安装记录（诚实原则）
+- **vision 屏两处显示 bug 修复**：`toStringAsFixed` 误置于插值外（显示为字面文本）
+
+### 新增（Features）
+- **同步 small 域消费**（`connection_manager.dart`）：sync_full 的 permissions/providers/
+  ha_config/sync_settings 此前全丢弃 → 现保存本地（`app_store.saveSyncSmall`）
+- **logs 屏服务端日志 Tab**（`logs_screen.dart` 重写）：App 日志 / **服务端日志**（file_read
+  /LINGOS/log/lingos.log 最近 120 行）双 Tab——此前只显示 App 内部日志（遗憾项补齐）
+- **vision 屏命令补全**（`vision_screen.dart`）：monitor_status / ai_vision_status / 抓拍
+  （monitor_snapshot）/ AI 检测（ai_vision_detect）四项操作——此前仅 1 条配置命令
+- **连接历史**（`connect_screen.dart` + `app_store.dart`）：最近 5 个主机一键填入
+  （连接体验 2 步化的第一步——服务端 UDP 发现已在，后续批次接自动发现）
+
+### 版本
+- pubspec 0.6.2+31 · app_info 默认值 0.6.2
+
+---
+
 ## [0.6.1] - 2026-09-13（S1 应用层加密 + §2B 危机 UI）
 
 ### 新增（Features）

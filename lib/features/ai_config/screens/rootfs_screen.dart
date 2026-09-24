@@ -50,7 +50,9 @@ class _RootfsScreenState extends State<RootfsScreen> {
     });
   }
 
-  /// 安装向导：选发行版 → 下载 rootfs
+  /// 安装向导：选发行版 → （诚实标注：下载引擎未落地）
+  /// 【2026-09-18 诚实化】原实现为「模拟下载进度 → 直接标记安装完成」（假安装——
+  ///   什么都没下载，审计 P0#10 项）。现诚实标注「开发中」，不再伪造安装结果。
   Future<void> _installFlow() async {
     final distro = await Navigator.of(context).push<Map<String, dynamic>>(
       MaterialPageRoute(builder: (_) => const _DistroSelectScreen()),
@@ -58,36 +60,23 @@ class _RootfsScreenState extends State<RootfsScreen> {
     if (distro == null) return;
     if (!mounted) return;
 
-    setState(() {
-      _installing = true;
-      _installStatus = '下载 ${distro['name']} rootfs...';
-      _progress = 0.05;
-    });
-
-    // 模拟下载进度（真实下载引擎在 proot 运行时接入）
-    for (int i = 0; i < 20; i++) {
-      await Future.delayed(const Duration(milliseconds: 300));
-      if (!mounted) return;
-      setState(() => _progress = 0.05 + (i + 1) * 0.045);
-    }
-
-    if (!mounted) return;
-    setState(() {
-      _rootfs = {
-        'distro': distro['id'],
-        'name': distro['name'],
-        'path': '/data/user/0/com.ling.lingos.app/files/rootfs/${distro['id']}',
-        'installedAt': DateTime.now().millisecondsSinceEpoch,
-        'size': distro['size'],
-        'prootPath': '/data/data/com.termux/files/usr/bin/proot',
-      };
-      _installing = false;
-      _installStatus = '';
-    });
-    await _store.saveRootfs(_rootfs!);
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('${distro['name']} 安装完成——配置 proot 路径后启动')),
+    await showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('${distro['name']} · 安装引擎开发中'),
+        content: const Text(
+          'rootfs 下载与解压引擎尚未实现——本页暂不支持真实安装。\n\n'
+          '为避免「假安装」误导，此处不做任何模拟：\n'
+          '· 不会写入假的安装记录\n'
+          '· 不会伪造下载进度\n\n'
+          '当前如已在系统中手动部署 rootfs（如 Termux/proot 环境），\n'
+          '可在下方直接填写 proot 路径与 rootfs 目录进行登记。',
+          style: TextStyle(fontSize: 13, height: 1.6),
+        ),
+        actions: [
+          FilledButton(onPressed: () => Navigator.pop(ctx), child: const Text('知道了')),
+        ],
+      ),
     );
   }
 
@@ -183,8 +172,8 @@ class _RootfsScreenState extends State<RootfsScreen> {
           const SizedBox(height: 16),
           FilledButton.icon(
             onPressed: _installFlow,
-            icon: const Icon(Icons.download, size: 18),
-            label: const Text('安装沙箱'),
+            icon: const Icon(Icons.construction, size: 18),
+            label: const Text('安装沙箱（开发中）'),
           ),
           const SizedBox(height: 24),
           const Text('技术：PRoot（无需 root）——与 RikkaHub 同源\n特殊场景：主机下线时可作备用主机/运行服务端',

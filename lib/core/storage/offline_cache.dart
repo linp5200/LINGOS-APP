@@ -6,6 +6,7 @@
 library;
 
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:path_provider/path_provider.dart';
@@ -30,8 +31,11 @@ class OfflineCache {
     // 密钥：首次生成 32 字节随机 → Keystore 保存；之后复用
     var key = await _secureStorage.read(key: _keyName);
     if (key == null || key.length < 64) {
-      final rnd = List<int>.generate(32, (_) => DateTime.now().microsecondsSinceEpoch % 256);
-      key = base64Encode(rnd);
+      /* 【2026-09-18 修复】原实现 `microsecondsSinceEpoch % 256` 弱派生（可预测——
+       * 审计标为 🔴 安全项）→ 改 CSPRNG（Random.secure——对标 Android SecureRandom） */
+      final rnd = Random.secure();
+      final bytes = List<int>.generate(32, (_) => rnd.nextInt(256));
+      key = base64Encode(bytes);
       await _secureStorage.write(key: _keyName, value: key);
     }
     _db = await openDatabase(

@@ -27,6 +27,8 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
   bool _waitingAuth = false;
   bool _waitingConnCode = false;
   String _status = '';
+  // 【2026-09-18 接线】连接历史（最近主机——一键填入）
+  List<Map<String, dynamic>> _history = [];
 
   ConnectionManager get _mgr => ref.read(connectionProvider);
 
@@ -38,6 +40,13 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
     final host = _hostCtrl.text.trim();
     final port = int.tryParse(_portCtrl.text.trim()) ?? 2937;
     final ok = await _mgr.connectTcp(host, port);
+    if (ok) {
+      // 【2026-09-18 接线】连接成功 → 记录历史（一键重连）
+      try {
+        await AppStore().addHostHistory(host, port);
+        await _loadHistory();
+      } catch (_) {}
+    }
     if (!mounted) return;
     setState(() {
       _connecting = false;
@@ -89,7 +98,15 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
   @override
   void initState() {
     super.initState();
+    _loadHistory();
     _autoResume();
+  }
+
+  /// 【2026-09-18 接线】加载连接历史（最近 5 个主机）
+  Future<void> _loadHistory() async {
+    final h = await AppStore().getHostHistory();
+    if (!mounted) return;
+    setState(() => _history = h);
   }
 
   /// 【先生决策】token 自动恢复：重进 App → 持久 token → WS 直连免认证
@@ -151,6 +168,25 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
                       keyboardType: TextInputType.number,
                       decoration: const InputDecoration(labelText: '端口', prefixIcon: Icon(Icons.numbers, size: 20)),
                     ),
+                    // 【2026-09-18 接线】连接历史（最近主机——点击填入）
+                    if (_history.isNotEmpty) ...[
+                      const SizedBox(height: 10),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 4,
+                        children: _history.map((e) {
+                          final h = e['h']?.toString() ?? '';
+                          final p = (e['p'] as num?)?.toInt() ?? 2937;
+                          return ActionChip(
+                            label: Text('$h:$p', style: const TextStyle(fontSize: 11)),
+                            onPressed: () => setState(() {
+                              _hostCtrl.text = h;
+                              _portCtrl.text = '$p';
+                            }),
+                          );
+                        }).toList(),
+                      ),
+                    ],
                     const SizedBox(height: 20),
                     FilledButton(
                       onPressed: _connecting ? null : _connect,
