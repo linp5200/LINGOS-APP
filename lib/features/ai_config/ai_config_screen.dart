@@ -11,6 +11,7 @@ import '../memory/memory_screen.dart';
 import '../sessions/sessions_screen.dart';
 import 'screens/appearance_screen.dart';
 import 'screens/conn_settings_screen.dart';
+import 'screens/server_mode_screen.dart';   // 【0.7.0】服务器模式控制
 import 'screens/mcp_screen.dart';
 import 'screens/mount_screen.dart';
 import 'screens/notif_screen.dart';
@@ -47,6 +48,7 @@ const List<_Category> _categories = [
     _CatItem('连接设置', Icons.link_outlined, ConnSettingsScreen()),
     _CatItem('主机（认证）', Icons.dns_outlined, ConnectScreen()),
     _CatItem('Rootfs 本地沙箱', Icons.developer_board_outlined, RootfsScreen()),
+    _CatItem('服务器模式', Icons.dns_outlined, ServerModeScreen()),   // 【0.7.0】远程开启/停止服务器
   ]),
   _Category('对话与 AI', Icons.smart_toy_outlined, [
     _CatItem('模型提供商', Icons.add_circle_outline, ProvidersScreen()),

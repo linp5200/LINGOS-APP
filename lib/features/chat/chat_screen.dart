@@ -26,6 +26,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   // 【0.2.0】语音（录音→STT / TTS→播放）
   final VoiceHelper _voice = VoiceHelper();
   bool _recording = false;
+  bool _voiceLoopActive = false;   // 【0.7.0】连续对话模式（voice_continuous_chat）
   // 【0.2.1 #4/#5】工具块/思考块折叠状态（来自外观设置 msgPrefs——默认收缩）
   bool _toolExpanded = false;
   bool _thinkingExpanded = false;
@@ -179,7 +180,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     final args = auth['args']?.toString() ?? '';
     final reason = auth['reason']?.toString() ?? '';
     final timeout = auth['timeout'] ?? 60;
-    final ok = await showDialog<bool>(
+    final ok = await showDialog<String>(
       context: context,
       barrierDismissible: false,
       builder: (ctx) => AlertDialog(
@@ -205,15 +206,26 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           ),
         ),
         actions: [
+          // 【0.7.0-hf2】三态：拒绝 / 始终允许（记忆）/ 批准一次
           TextButton(
-              onPressed: () => Navigator.pop(ctx, false), child: const Text('拒绝')),
+              onPressed: () => Navigator.pop(ctx, 'reject'), child: const Text('拒绝')),
+          OutlinedButton(
+              onPressed: () => Navigator.pop(ctx, 'always'),
+              child: const Text('始终允许', style: TextStyle(fontSize: 12))),
           FilledButton(
-              onPressed: () => Navigator.pop(ctx, true), child: const Text('批准')),
+              onPressed: () => Navigator.pop(ctx, 'approve'), child: const Text('批准')),
         ],
       ),
     );
     if (ok != null && mounted) {
-      await ref.read(chatControllerProvider.notifier).respondAuth(ok);
+      final ctrl = ref.read(chatControllerProvider.notifier);
+      if (ok == 'always') {
+        await ctrl.respondAuth(true, always: true);
+      } else if (ok == 'approve') {
+        await ctrl.respondAuth(true);
+      } else {
+        await ctrl.respondAuth(false);
+      }
     }
   }
 
@@ -543,9 +555,17 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           const SizedBox(width: 8),
           // 【0.2.0】语音输入（录音→STT→发送）
           IconButton(
-            icon: Icon(_recording ? Icons.mic : Icons.mic_none,
-                size: 22, color: _recording ? AppColors.brandRed : AppColors.textSecondary),
-            tooltip: _recording ? '停止录音并识别' : '语音输入（点击录音）',
+            icon: Icon(
+                _voiceLoopActive
+                    ? Icons.graphic_eq
+                    : (_recording ? Icons.mic : Icons.mic_none),
+                size: 22,
+                color: _voiceLoopActive
+                    ? AppColors.brandRed
+                    : (_recording ? AppColors.brandRed : AppColors.textSecondary)),
+            tooltip: _voiceLoopActive
+                ? '连续对话中——点击停止'
+                : (_recording ? '停止录音并识别' : '语音输入（连续对话开启时循环）'),
             onPressed: _toggleRecord,
           ),
           const SizedBox(width: 4),
@@ -585,7 +605,27 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   }
 
   /// 录音开关：点击开始录音 → 再点停止 → STT → 发送
+  /// 【0.7.0】连续对话模式（voice_continuous_chat=on）：循环 录音→STT→发送→朗读
   Future<void> _toggleRecord() async {
+    // 连续模式进行中 → 点击退出
+    if (_voiceLoopActive) {
+      _voiceLoopActive = false;
+      if (_recording) {
+        await _voice.stopRecording();
+        if (mounted) setState(() => _recording = false);
+      }
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('连续对话已停止'), duration: Duration(seconds: 2)));
+      }
+      return;
+    }
+    final continuous = await AppStore().getPrefBool('voice_continuous_chat', false);
+    if (continuous && !_recording) {
+      _voiceLoopActive = true;
+      _runVoiceLoop();
+      return;
+    }
     final cm = ref.read(connectionProvider);
     _voice.configure(host: _hostFromWs(), token: cm.token);
     if (_recording) {
@@ -617,6 +657,71 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         setState(() => _recording = true);
       }
     }
+  }
+
+  /// 【0.7.0】连续对话循环：录音（固定 4s 轮）→ STT → 发送 → 等 AI 完成 → 自动朗读 → 下一轮
+  ///   退出：再次点击麦克风（或识别失败连续空转时自动停）
+  Future<void> _runVoiceLoop() async {
+    final cm = ref.read(connectionProvider);
+    _voice.configure(host: _hostFromWs(), token: cm.token);
+    if (!await _voice.ensureMicPermission()) {
+      _voiceLoopActive = false;
+      return;
+    }
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('连续对话已开始（再点麦克风停止）'), duration: Duration(seconds: 2)));
+    }
+    int emptyRounds = 0;
+    while (_voiceLoopActive && mounted) {
+      final path = await _voice.startRecording();
+      if (path == null) break;
+      if (mounted) setState(() => _recording = true);
+      // 录音窗口（简化 VAD——固定 4 秒轮，可中途点击停止）
+      for (int i = 0; i < 8 && _voiceLoopActive && mounted; i++) {
+        await Future.delayed(const Duration(milliseconds: 500));
+      }
+      final p2 = await _voice.stopRecording();
+      if (mounted) setState(() => _recording = false);
+      if (!_voiceLoopActive || !mounted) break;
+      if (p2 == null) break;
+      final text = await _voice.transcribe(p2);
+      if (text == null || text.isEmpty) {
+        emptyRounds++;
+        if (emptyRounds >= 3) {
+          _voiceLoopActive = false;
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('连续对话已停止（多次未识别到语音）')));
+          }
+          break;
+        }
+        continue;
+      }
+      emptyRounds = 0;
+      _inputCtrl.text = text;
+      await _send();
+      // 等 AI 完成（最多 120 秒）
+      for (int i = 0; i < 240; i++) {
+        if (!mounted || !_voiceLoopActive) break;
+        if (!ref.read(chatControllerProvider).aiBusy) break;
+        await Future.delayed(const Duration(milliseconds: 500));
+      }
+      // 自动朗读（voice_auto_read）
+      try {
+        final autoRead = await AppStore().getPrefBool('voice_auto_read', false);
+        if (autoRead && mounted) {
+          final msgs = ref.read(chatControllerProvider).messages;
+          for (int i = msgs.length - 1; i >= 0; i--) {
+            if (msgs[i].type == ChatMsgType.ai) {
+              await _speakAi(msgs[i]);
+              break;
+            }
+          }
+        }
+      } catch (_) {}
+    }
+    if (mounted) setState(() => _recording = false);
   }
 
   /// 朗读最后一条 AI 回复（服务端代理 TTS → 下载播放）

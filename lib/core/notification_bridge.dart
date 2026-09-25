@@ -15,6 +15,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'providers.dart';
 import 'services/notification_service.dart';
+import 'storage/app_store.dart';   // 【0.7.0-hf2】通知开关接线
 
 class NotificationBridge extends ConsumerStatefulWidget {
   final Widget child;
@@ -28,6 +29,7 @@ class _NotificationBridgeState extends ConsumerState<NotificationBridge>
     with WidgetsBindingObserver {
   StreamSubscription<dynamic>? _sub;
   AppLifecycleState _lifecycle = AppLifecycleState.resumed;
+  final _store = AppStore();   // 【0.7.0-hf2】读取用户通知开关
 
   @override
   void initState() {
@@ -52,7 +54,7 @@ class _NotificationBridgeState extends ConsumerState<NotificationBridge>
     _lifecycle = state;
   }
 
-  void _onEvent(dynamic line) {
+  Future<void> _onEvent(dynamic line) async {
     try {
       final m = jsonDecode(line.toString());
       if (m is! Map) return;
@@ -66,7 +68,7 @@ class _NotificationBridgeState extends ConsumerState<NotificationBridge>
         if (dec is Map) d = Map<String, dynamic>.from(dec);
       }
 
-      // ① 危机/生命线——始终 critical 通知（即使在前台也发系统通知？不——前台已有全屏卡）
+      // ① 危机/生命线——始终 critical 通知（生命线不可静音——先生铁律）
       if (type == 'crisis_alert' || type == 'crisis_repush') {
         final fg = _lifecycle == AppLifecycleState.resumed;
         if (!fg) {
@@ -80,16 +82,40 @@ class _NotificationBridgeState extends ConsumerState<NotificationBridge>
         }
       }
 
-      // ② 预警事件——非前台时按级别推送（L2+）
+      // ② 预警事件——非前台时按级别推送（L2+）；【0.7.0-hf2】读取「预警通知」开关
       if (type == 'alert_event') {
         final lvl = int.tryParse('${d['level']}') ?? 0;
         final fg = _lifecycle == AppLifecycleState.resumed;
-        if (!fg && lvl >= 2) {
+        final on = await _store.getPrefBool('notif_alert', true);
+        if (!fg && lvl >= 2 && on) {
           NotificationService.instance.show(
             '⚠️ ${d['type'] ?? '预警'}（L$lvl）',
             d['description']?.toString() ?? '',
             id: 900 + lvl,
           );
+        }
+      }
+
+      // ③ 【0.7.0-hf2】服务端通知推送（notify_event——AI/任务/预警联动）→ 本地通知
+      //   前台也应提示（轻量）——但避免与自身 UI 重复：仅非前台弹系统通知。
+      if (type == 'notify_event') {
+        final fg = _lifecycle == AppLifecycleState.resumed;
+        final on = await _store.getPrefBool('notif_task', true);
+        final lv = d['level']?.toString() ?? 'info';
+        if (!fg && on) {
+          if (lv == 'critical' || lv == 'error') {
+            NotificationService.instance.showCritical(
+              d['title']?.toString() ?? '通知',
+              d['body']?.toString() ?? '',
+              id: 700 + lv.length,
+            );
+          } else {
+            NotificationService.instance.show(
+              d['title']?.toString() ?? '通知',
+              d['body']?.toString() ?? '',
+              id: 700 + lv.length,
+            );
+          }
         }
       }
     } catch (_) {}

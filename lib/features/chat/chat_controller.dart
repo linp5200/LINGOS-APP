@@ -364,7 +364,8 @@ class ChatController extends StateNotifier<ChatState> {
   }
 
   /// 【0.6.0】审批回执（auth_request → 用户决策 → 发送 auth_respond 命令）
-  Future<void> respondAuth(bool approve) async {
+  /// 【0.7.0-hf2】三态：approve（一次）/ always（始终允许——写服务端记忆表）/ reject
+  Future<void> respondAuth(bool approve, {bool always = false}) async {
     final p = state.pendingAuth;
     if (p == null) return;
     final reqId = p['req_id']?.toString() ?? '';
@@ -374,9 +375,13 @@ class ChatController extends StateNotifier<ChatState> {
       await ref.read(connectionProvider).sendCommand({
         'cmd': 'auth_respond',
         'req_id': reqId,
-        'decision': approve ? 'approve' : 'reject',
+        'decision': always ? 'always' : (approve ? 'approve' : 'reject'),
+        'tool': tool,
       });
-      _appendSystem(approve ? '✅ 已批准：$tool' : '⛔ 已拒绝：$tool');
+      _appendSystem(
+          always
+              ? '✅ 已设为始终允许：$tool（后续同类操作自动批准）'
+              : (approve ? '✅ 已批准：$tool' : '⛔ 已拒绝：$tool'));
     } catch (e) {
       _appendSystem('⚠️ 审批回执发送失败：$e');
     }

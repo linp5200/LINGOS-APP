@@ -337,6 +337,28 @@ class _HomeShellState extends ConsumerState<HomeShell> {
                 const SizedBox(height: 8),
                 const Text('AI 已获全权处置授权——在线时将持续补充处置动作。',
                     style: TextStyle(color: Colors.white54, fontSize: 11)),
+                const SizedBox(height: 6),
+                // 【0.7.0】生命线投递状态（server crisis_delivery——多通道并行+ACK）
+                FutureBuilder<Map<String, dynamic>?>(
+                  future: ref.read(connectionProvider).requestJson(
+                      {'cmd': 'crisis_delivery_status'},
+                      timeout: const Duration(seconds: 6)),
+                  builder: (bctx, snap) {
+                    String txt = '投递状态：查询中…';
+                    try {
+                      final d = snap.data?['data'];
+                      final inner = (d is Map && d['data'] is Map) ? d['data'] as Map : d;
+                      if (inner is Map) {
+                        final acked = inner['acked'] == true;
+                        final running = inner['running'] == true;
+                        txt = '投递状态：${acked ? "✅ 已确认（ACK）" : (running ? "📡 多通道投递中（含重推）" : "—")}';
+                      } else if (snap.connectionState != ConnectionState.waiting) {
+                        txt = '投递状态：未连接';
+                      }
+                    } catch (_) {}
+                    return Text(txt, style: const TextStyle(color: Colors.lightGreenAccent, fontSize: 11));
+                  },
+                ),
               ],
             ),
           ),

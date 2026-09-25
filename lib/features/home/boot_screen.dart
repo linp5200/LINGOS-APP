@@ -14,6 +14,7 @@ import '../../core/logging/app_logger.dart';
 import '../../core/storage/app_store.dart';
 import '../../core/providers.dart';
 import '../connect/connect_screen.dart';
+import '../onboarding/onboarding_screen.dart';   // 【0.7.0】首启引导
 import 'home_shell.dart';
 
 class BootScreen extends ConsumerStatefulWidget {
@@ -37,8 +38,23 @@ class _BootScreenState extends ConsumerState<BootScreen>
         vsync: this, duration: const Duration(milliseconds: 2600))
       ..forward().whenComplete(() {
         if (mounted) setState(() => _done = true);
-        _autoRestore();
+        _afterBoot();
       });
+  }
+
+  /// 【0.7.0】启动分流：首启 → 引导页（一次）；否则 → 自动恢复连接
+  Future<void> _afterBoot() async {
+    try {
+      final store = AppStore();
+      final done = await store.getPrefBool('onboarding_done', false);
+      if (!done) {
+        if (!mounted) return;
+        Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (_) => const OnboardingScreen()));
+        return;
+      }
+    } catch (_) {}
+    _autoRestore();
   }
 
   @override

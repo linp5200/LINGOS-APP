@@ -123,6 +123,11 @@ class _WeatherScreenState extends ConsumerState<WeatherScreen> {
       appBar: AppBar(
         title: Text(tr('weather_title')),
         actions: [
+          // 【0.7.0 P3】城市管理（服务端 weather_set_city——添加/切换城市）
+          IconButton(
+              icon: const Icon(Icons.location_city, size: 20),
+              tooltip: '城市管理',
+              onPressed: _loading ? null : _showCityDialog),
           IconButton(
               icon: const Icon(Icons.refresh, size: 20),
               onPressed: _loading ? null : _refresh),
@@ -157,6 +162,52 @@ class _WeatherScreenState extends ConsumerState<WeatherScreen> {
         ),
       ),
     );
+  }
+
+  /// 【0.7.0 P3】城市管理（服务端 weather_set_city——先生"天气城市 UI"缺口补齐）
+  Future<void> _showCityDialog() async {
+    final ctrl = TextEditingController(text: '${_current?['city'] ?? ''}');
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        title: const Text('城市管理', style: TextStyle(fontSize: 16)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('输入城市名（中文/英文均可，如：上海 / Shanghai）',
+                style: TextStyle(fontSize: 11, color: AppColors.dim)),
+            const SizedBox(height: 10),
+            TextField(
+              controller: ctrl,
+              autofocus: true,
+              decoration: const InputDecoration(
+                labelText: '城市',
+                prefixIcon: Icon(Icons.location_city, size: 20),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('取消')),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('设置')),
+        ],
+      ),
+    );
+    if (ok != true) return;
+    final city = ctrl.text.trim();
+    if (city.isEmpty) return;
+
+    final resp = await ref.read(connectionProvider).requestJson(
+        {'cmd': 'weather_set_city', 'city': city},
+        timeout: const Duration(seconds: 10));
+    if (!mounted) return;
+    final st = resp?['data'];
+    final err = (st is Map && st['status'] == 'error') ? (st['msg']?.toString() ?? '设置失败') : null;
+    ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(err ?? '城市已设置：$city（正在刷新…）')));
+    if (err == null) _refresh();
   }
 
   Widget _currentCard() {
