@@ -700,7 +700,13 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       }
       emptyRounds = 0;
       _inputCtrl.text = text;
-      await _send();
+      _send();   // 【修正】_send 为 void——不能 await（use_of_void_result）
+      // 等 AI 开始（aiBusy 变 true——最多 5 秒）
+      for (int i = 0; i < 10; i++) {
+        if (!mounted || !_voiceLoopActive) break;
+        if (ref.read(chatControllerProvider).aiBusy) break;
+        await Future.delayed(const Duration(milliseconds: 500));
+      }
       // 等 AI 完成（最多 120 秒）
       for (int i = 0; i < 240; i++) {
         if (!mounted || !_voiceLoopActive) break;

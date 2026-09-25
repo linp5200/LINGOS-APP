@@ -27,7 +27,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Timer? _timer;
   bool _connected = false;
   Map<String, dynamic> _info = {};   // server system_info data
-  String _host = '';
 
   @override
   void initState() {

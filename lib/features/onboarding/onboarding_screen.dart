@@ -13,7 +13,7 @@ import 'package:flutter/material.dart';
 import '../../core/storage/app_store.dart';
 import '../../core/theme/app_theme.dart';
 import '../connect/connect_screen.dart';
-import 'home_shell.dart';
+import '../home/home_shell.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -117,18 +117,18 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   Widget _welcome() {
-    return Padding(
-      padding: const EdgeInsets.all(28),
+    return const Padding(
+      padding: EdgeInsets.all(28),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.wb_twilight, size: 64, color: AppColors.brandGreen),
-          const SizedBox(height: 18),
-          const Text('欢迎使用 LING OS',
+          Icon(Icons.wb_twilight, size: 64, color: AppColors.brandGreen),
+          SizedBox(height: 18),
+          Text('欢迎使用 LING OS',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
-          const SizedBox(height: 14),
-          const Text(
+          SizedBox(height: 14),
+          Text(
             '个人 / 家庭安防智能 AI 系统。\n\n'
             '· 生命线：地震预警 / 台风 / 火灾 / 入侵——宁可误报不可漏报\n'
             '· AI 对话 + 69 项技能（家庭自动化 / 监控 / 语音 / 记忆）\n'
@@ -141,26 +141,26 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   Widget _connectStep() {
-    return Padding(
-      padding: const EdgeInsets.all(28),
+    return const Padding(
+      padding: EdgeInsets.all(28),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.lan_outlined, size: 56, color: AppColors.brandGreen),
-          const SizedBox(height: 18),
-          const Text('连接你的主机',
+          Icon(Icons.lan_outlined, size: 56, color: AppColors.brandGreen),
+          SizedBox(height: 18),
+          Text('连接你的主机',
               style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
-          const SizedBox(height: 12),
-          const Text(
+          SizedBox(height: 12),
+          Text(
             'LING OS 服务端运行在你的主机（Linux 设备）上。\n\n'
             '· 同一局域网：连接页「搜索局域网主机」→ 一键填入\n'
             '· 认证：终端验证码 → 连接码（两步）\n'
             '· 也可以先跳过——本地模式可用，之后在 设置 → 连接设置 中连接',
             style: TextStyle(fontSize: 13, height: 1.7, color: AppColors.textSecondary),
           ),
-          const SizedBox(height: 18),
-          const Text('提示：服务端启动后终端会显示验证码。',
+          SizedBox(height: 18),
+          Text('提示：服务端启动后终端会显示验证码。',
               style: TextStyle(fontSize: 11, color: AppColors.dim)),
         ],
       ),

@@ -129,9 +129,9 @@ class _ServerModeScreenState extends ConsumerState<ServerModeScreen> {
               padding: const EdgeInsets.all(16),
               children: [
                 if (_crisis)
-                  Card(
-                    color: const Color(0xFF3A0A0A),
-                    child: const Padding(
+                  const Card(
+                    color: Color(0xFF3A0A0A),
+                    child: Padding(
                       padding: EdgeInsets.all(12),
                       child: Text('🚨 危机进行中——停止服务器被禁用（人身安全让路）',
                           style: TextStyle(color: Color(0xFFFF8A80), fontSize: 13)),
