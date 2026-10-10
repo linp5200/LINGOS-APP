@@ -11,7 +11,7 @@ import '../../core/providers.dart';
 import '../../core/protocol/events.dart';
 
 /// 消息类型
-enum ChatMsgType { user, ai, thinking, tool, system, toolError }
+enum ChatMsgType { user, ai, thinking, tool, system, toolError, ask }
 
 class ChatMsg {
   final ChatMsgType type;
@@ -25,19 +25,25 @@ class ChatMsg {
   // 【0.2.1 #4】工具结果（tool_result 事件——点击展开查看）
   final String? toolResult;
   final bool? toolSuccess;
+  // 【2026-10-02 · B2】内联提问卡片（gui_ask——替代弹窗）
+  final List<String>? options;
+  final String? answered;    // 已回答内容（null=未答）
 
   const ChatMsg(this.type, this.content,
       {this.toolName, this.streaming = false, this.interrupted = false,
-      this.errorType, this.errorAction, this.toolResult, this.toolSuccess});
+      this.errorType, this.errorAction, this.toolResult, this.toolSuccess,
+      this.options, this.answered});
 
-  ChatMsg copyWith({String? content, bool? streaming, bool? interrupted, String? toolResult, bool? toolSuccess}) =>
+  ChatMsg copyWith({String? content, bool? streaming, bool? interrupted, String? toolResult, bool? toolSuccess, String? answered}) =>
       ChatMsg(type, content ?? this.content,
           toolName: toolName,
           streaming: streaming ?? this.streaming,
           interrupted: interrupted ?? this.interrupted,
           errorType: errorType, errorAction: errorAction,
           toolResult: toolResult ?? this.toolResult,
-          toolSuccess: toolSuccess ?? this.toolSuccess);
+          toolSuccess: toolSuccess ?? this.toolSuccess,
+          options: options,
+          answered: answered ?? this.answered);
 }
 
 class ChatState {
@@ -154,14 +160,17 @@ class ChatController extends StateNotifier<ChatState> {
         _appendSystem('📢 ${evt.data['title']}');
       // 【0.6.0】GUI 交互链修复——6 事件全处理（此前仅 notify 有处理）
       case EvtType.guiAsk:
+        // 【2026-10-02 · B2 先生定稿】内联卡片渲染（替代弹窗——误关不丢失）
+        final _q = evt.data['question']?.toString() ?? '';
+        final _opts = (evt.data['options'] is List)
+            ? (evt.data['options'] as List).map((e) => e.toString()).toList()
+            : <String>[];
+        _appendAsk(_q, _opts);
         state = state.copyWith(pendingGuiAsk: {
-          'question': evt.data['question']?.toString() ?? '',
-          'options': (evt.data['options'] is List)
-              ? (evt.data['options'] as List).map((e) => e.toString()).toList()
-              : <String>[],
+          'question': _q,
+          'options': _opts,
           'req_id': evt.data['req_id']?.toString() ?? '',
         });
-        _appendSystem('❓ AI 提问：${evt.data['question'] ?? ''}');
       case EvtType.guiOpenUrl:
         _appendSystem('🔗 请求打开链接：${evt.data['url'] ?? ''}');
       case EvtType.guiShare:
@@ -233,6 +242,17 @@ class ChatController extends StateNotifier<ChatState> {
       case EvtType.disconnected:
         break;
     }
+  }
+
+
+  // 【2026-10-02 · B2】内联提问消息（gui_ask 卡片）
+  int _askMsgIdx = -1;
+  void _appendAsk(String question, List<String> options) {
+    state = state.copyWith(messages: [
+      ...state.messages,
+      ChatMsg(ChatMsgType.ask, question, options: options),
+    ]);
+    _askMsgIdx = state.messages.length - 1;
   }
 
   void _appendSystem(String text) {
@@ -387,13 +407,19 @@ class ChatController extends StateNotifier<ChatState> {
     }
   }
 
-  /// 【0.6.0】回答 GUI 提问（gui_ask → 用户选择/输入 → 作为消息回传 AI）
-  Future<void> respondGuiAsk(String answer) async {
-    final q = state.pendingGuiAsk;
-    if (q == null) return;
-    state = state.copyWith(clearPendingGuiAsk: true);
+  /// 【2026-10-02 · B2】回答内联提问（标记卡片已答 + 作为消息回传 AI）
+  Future<void> respondGuiAsk(String answer, {int? messageIndex}) async {
+    final idx = messageIndex ?? _askMsgIdx;
     final text = answer.trim();
     if (text.isEmpty) return;
+    if (idx >= 0 && idx < state.messages.length) {
+      final msgs = [...state.messages];
+      msgs[idx] = msgs[idx].copyWith(answered: text);
+      state = state.copyWith(messages: msgs, clearPendingGuiAsk: true);
+    } else {
+      state = state.copyWith(clearPendingGuiAsk: true);
+    }
+    if (idx == _askMsgIdx) _askMsgIdx = -1;
     // AI 繁忙时等待本轮结束再发送（最多 30 秒——防消息丢失）
     for (int i = 0; i < 60 && state.aiBusy; i++) {
       await Future<void>.delayed(const Duration(milliseconds: 500));

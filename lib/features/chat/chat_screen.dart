@@ -229,54 +229,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     }
   }
 
-  Future<void> _showGuiAskDialog(Map<String, dynamic> ask) async {
-    if (!mounted) return;
-    final question = ask['question']?.toString() ?? '';
-    final options = (ask['options'] is List)
-        ? (ask['options'] as List).map((e) => e.toString()).toList()
-        : <String>[];
-    final ctrl = TextEditingController();
-    final answer = await showDialog<String>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        icon: const Icon(Icons.help_outline, color: AppColors.brandCyan, size: 32),
-        title: const Text('AI 提问'),
-        content: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(question),
-              const SizedBox(height: 12),
-              TextField(
-                controller: ctrl,
-                autofocus: true,
-                decoration: const InputDecoration(
-                  hintText: '输入回答…',
-                  isDense: true,
-                ),
-                onSubmitted: (v) => Navigator.pop(ctx, v),
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(ctx, null), child: const Text('忽略')),
-          ...options.map((opt) => OutlinedButton(
-                onPressed: () => Navigator.pop(ctx, opt),
-                child: Text(opt, style: const TextStyle(fontSize: 12)),
-              )),
-          FilledButton(
-              onPressed: () => Navigator.pop(ctx, ctrl.text), child: const Text('提交')),
-        ],
-      ),
-    );
-    if (answer != null && answer.trim().isNotEmpty && mounted) {
-      await ref.read(chatControllerProvider.notifier).respondGuiAsk(answer);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final chat = ref.watch(chatControllerProvider);
@@ -285,9 +237,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       if (next.pendingAuth != null && prev?.pendingAuth == null) {
         _showAuthDialog(next.pendingAuth!);
       }
-      if (next.pendingGuiAsk != null && prev?.pendingGuiAsk == null) {
-        _showGuiAskDialog(next.pendingGuiAsk!);
-      }
+      /* 【2026-10-02 · B2】gui_ask 改内联卡片——不再弹窗（误关不丢失） */
     });
     _scrollToBottom();
     return Scaffold(
@@ -375,6 +325,14 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         setState(() => _balance = '可用');
       }
     }
+  }
+
+  // 【2026-10-02 · B2】回答内联提问（定位消息索引 → 控制器标记+回传）
+  Future<void> _answerAsk(ChatMsg msg, String answer) async {
+    final chat = ref.read(chatControllerProvider);
+    final idx = chat.messages.indexOf(msg);
+    await ref.read(chatControllerProvider.notifier)
+        .respondGuiAsk(answer, messageIndex: idx >= 0 ? idx : null);
   }
 
   Widget _buildMsg(ChatMsg msg) {
@@ -475,12 +433,72 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         return _CollapsibleBlock(
           title: '▸ ${msg.toolName ?? '工具'}${hasResult ? (ok ? ' ✓' : ' ✗') : ' …'}',
           content: [
-            if (msg.content.isNotEmpty) '参数: ${msg.content}',
+            if (msg.content.isNotEmpty && msg.content != '{}') '参数: ${msg.content}',
             if (hasResult) '结果: ${msg.toolResult}',
           ].join('\n\n'),
           collapsed: !_toolExpanded,
           icon: Icons.build_outlined,
           color: ok ? AppColors.textSecondary : AppColors.brandRed,
+        );
+      // 【2026-10-02 · B2】内联提问卡片（gui_ask——消息流中渲染，非弹窗）
+      case ChatMsgType.ask:
+        final answered = msg.answered;
+        return Container(
+          margin: const EdgeInsets.only(bottom: 8),
+          padding: const EdgeInsets.all(11),
+          decoration: BoxDecoration(
+            color: AppColors.brandCyan.withValues(alpha: 0.06),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: AppColors.brandCyan.withValues(alpha: 0.35)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(children: const [
+                Icon(Icons.help_outline, size: 14, color: AppColors.brandCyan),
+                SizedBox(width: 4),
+                Text('AI 提问', style: TextStyle(color: AppColors.brandCyan, fontSize: 12, fontWeight: FontWeight.bold)),
+              ]),
+              const SizedBox(height: 7),
+              Text(msg.content, style: const TextStyle(color: AppColors.textPrimary, fontSize: 13, height: 1.45)),
+              const SizedBox(height: 9),
+              if (answered != null && answered.isNotEmpty)
+                Row(children: [
+                  const Icon(Icons.check_circle, size: 14, color: AppColors.brandGreen),
+                  const SizedBox(width: 5),
+                  Expanded(
+                    child: Text('已回答：\$answered',
+                        style: const TextStyle(color: AppColors.textSecondary, fontSize: 12)),
+                  ),
+                ])
+              else ...[
+                if ((msg.options ?? const <String>[]).isNotEmpty)
+                  Wrap(
+                    spacing: 8, runSpacing: 6,
+                    children: (msg.options ?? const <String>[])
+                        .map((opt) => OutlinedButton(
+                              style: OutlinedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                                minimumSize: Size.zero,
+                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                side: BorderSide(color: AppColors.brandCyan.withValues(alpha: 0.55)),
+                              ),
+                              onPressed: () => _answerAsk(msg, opt),
+                              child: Text(opt, style: const TextStyle(fontSize: 12)),
+                            ))
+                        .toList(),
+                  ),
+                const SizedBox(height: 6),
+                TextField(
+                  decoration: const InputDecoration(hintText: '或输入回答…', isDense: true),
+                  style: const TextStyle(fontSize: 12.5),
+                  onSubmitted: (v) {
+                    if (v.trim().isNotEmpty) _answerAsk(msg, v.trim());
+                  },
+                ),
+              ],
+            ],
+          ),
         );
       // 【0.2.0】工具错误卡片（红色——17 类详细说明 + 建议）
       case ChatMsgType.toolError:
@@ -824,10 +842,16 @@ class _CollapsibleBlockState extends State<_CollapsibleBlock> {
           ),
           if (_open && widget.content.isNotEmpty)
             Container(
+              /* 【2026-10-02 · B3 先生定稿】固定高度区域 + 内部滚动：
+                 原展开后全文平铺 → 聊天上下文极长；现限制最大高 180px，
+                 超出部分上下滑动查看（思考/工具结果同为折叠块——统一受益） */
+              constraints: const BoxConstraints(maxHeight: 180),
               width: double.infinity,
               padding: const EdgeInsets.fromLTRB(10, 0, 10, 8),
-              child: SelectableText(widget.content,
-                  style: const TextStyle(color: AppColors.textSecondary, fontSize: 11, height: 1.4, fontFamily: fuiMono)),
+              child: SingleChildScrollView(
+                child: SelectableText(widget.content,
+                    style: const TextStyle(color: AppColors.textSecondary, fontSize: 11, height: 1.4, fontFamily: fuiMono)),
+              ),
             ),
         ],
       ),
