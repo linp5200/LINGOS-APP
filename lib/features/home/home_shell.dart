@@ -127,24 +127,23 @@ class _HomeShellState extends ConsumerState<HomeShell> {
       barrierDismissible: false,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.surface,
-        title: const Text('令牌无法使用', style: TextStyle(color: AppColors.textPrimary)),
+        title: Text(tr('shell_token_unusable'), style: TextStyle(color: AppColors.textPrimary)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('当前令牌已被服务端拒绝——需要重新验证。',
+            Text(tr('shell_the_server_rejected_the_current_token_re'),
                 style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
             const SizedBox(height: 6),
-            const Text(
-              '若新令牌仍被拒绝：可在主机端输入 token remove login <当前App的IP> <时间> 强行使用（受限模式——危险操作不允许）。\n'
-              '或输入 token login again <验证码> 重新验证。',
+            Text(
+              tr('shell_if_the_new_token_is_rejected_too_on_the'),
               style: TextStyle(color: AppColors.textSecondary, fontSize: 11),
             ),
             const SizedBox(height: 8),
             TextField(
               controller: codeCtrl,
               style: const TextStyle(color: AppColors.textPrimary),
-              decoration: const InputDecoration(
-                labelText: '主机端验证码（token login again <验证码>）',
+              decoration: InputDecoration(
+                labelText: tr('shell_host_side_code_token_login_again_code'),
                 border: OutlineInputBorder(),
                 isDense: true,
               ),
@@ -164,7 +163,7 @@ class _HomeShellState extends ConsumerState<HomeShell> {
                 );
               }
             },
-            child: const Text('登出并重新连接'),
+            child: Text(tr('shell_log_out_and_reconnect')),
           ),
           FilledButton(
             onPressed: () async {
@@ -175,7 +174,7 @@ class _HomeShellState extends ConsumerState<HomeShell> {
               await cm.sendConnectionCode(payload);
               if (ctx.mounted) Navigator.of(ctx).pop();
             },
-            child: const Text('发送验证码'),
+            child: Text(tr('conn_send_code')),
           ),
         ],
       ),
@@ -210,7 +209,7 @@ class _HomeShellState extends ConsumerState<HomeShell> {
             leading: const LingIcon(LingIcons.connect, size: 20, color: AppColors.brandGreen),
             title: Text(trCtx(context, 'connect_host'),
                 style: const TextStyle(color: AppColors.brandGreen)),
-            subtitle: const Text('对话/同步/远端摄像头需连接', style: TextStyle(fontSize: 10, color: AppColors.dim)),
+            subtitle: Text(tr('shell_chat_sync_remote_cameras_require_a'), style: TextStyle(fontSize: 10, color: AppColors.dim)),
             onTap: _goConnect,
           ),
           // 【0.2.1 B1 改名】Help AI（帮助档案——原 HA 面板）
@@ -231,7 +230,7 @@ class _HomeShellState extends ConsumerState<HomeShell> {
           _item(context, TablerIcons.book, trCtx(context, 'nav_kb'), const KbScreen()),
           _item(context, TablerIcons.adjustments, trCtx(context, 'nav_options'), const OptionsScreen()),
           // 【0.7.0 P3】命令面板（~130 命令无入口的总出口——先生"摸不到"治疗）
-          _item(context, TablerIcons.terminal_2, '命令面板', const CommandPanelScreen()),
+          _item(context, TablerIcons.terminal_2, tr('cmd_command_panel'), const CommandPanelScreen()),
           const Divider(color: AppColors.divider),
           ListTile(
             leading: const Icon(Icons.logout, size: 20, color: AppColors.brandRed),
@@ -273,7 +272,7 @@ class _HomeShellState extends ConsumerState<HomeShell> {
             const Icon(Icons.warning_amber_rounded, color: Colors.white, size: 18),
             const SizedBox(width: 8),
             Expanded(
-              child: Text('🚨 ${c.name}警报处置中——点击查看',
+              child: Text(trp('shell_handling_alert_tap_to_view', {'p0': '${c.name}'}),
                   style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600)),
             ),
             if (!c.acked)
@@ -283,7 +282,7 @@ class _HomeShellState extends ConsumerState<HomeShell> {
                   color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const Text('待确认', style: TextStyle(color: Colors.white, fontSize: 11)),
+                child: Text(tr('shell_pending_confirmation'), style: TextStyle(color: Colors.white, fontSize: 11)),
               ),
           ]),
         ),
@@ -302,7 +301,7 @@ class _HomeShellState extends ConsumerState<HomeShell> {
         child: AlertDialog(
           backgroundColor: const Color(0xFF2A0A0A),
           icon: const Icon(Icons.warning_amber_rounded, color: Color(0xFFFF5252), size: 42),
-          title: Text('🚨 ${c.name}警报',
+          title: Text(trp('shell_alert', {'p0': '${c.name}'}),
               style: const TextStyle(color: Color(0xFFFF8A80), fontWeight: FontWeight.bold)),
           content: SingleChildScrollView(
             child: Column(
@@ -310,13 +309,13 @@ class _HomeShellState extends ConsumerState<HomeShell> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 if (c.source.isNotEmpty)
-                  Text('触发源：${c.source}', style: const TextStyle(color: Colors.white70, fontSize: 12)),
+                  Text(trp('shell_trigger', {'p0': '${c.source}'}), style: const TextStyle(color: Colors.white70, fontSize: 12)),
                 if (c.detail.isNotEmpty) ...[
                   const SizedBox(height: 6),
                   Text(c.detail, style: const TextStyle(color: Colors.white, fontSize: 13)),
                 ],
                 const SizedBox(height: 10),
-                const Text('系统已执行的类别动作：', style: TextStyle(color: Colors.orangeAccent, fontSize: 12)),
+                Text(tr('shell_category_actions_already_taken_by_the_system'), style: TextStyle(color: Colors.orangeAccent, fontSize: 12)),
                 const SizedBox(height: 4),
                 ...actions.take(8).map((a) {
                   final m = (a is Map) ? a : const {};
@@ -330,12 +329,12 @@ class _HomeShellState extends ConsumerState<HomeShell> {
                               : '✗';
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 2),
-                    child: Text('$tag ${m['desc'] ?? ''}（${m['detail'] ?? st}）',
+                    Text(trp('shell_action_line', {'p0': '$tag', 'p1': '${m['desc'] ?? ''}', 'p2': '${m['detail'] ?? st}'}),
                         style: const TextStyle(color: Colors.white70, fontSize: 12)),
                   );
                 }),
                 const SizedBox(height: 8),
-                const Text('AI 已获全权处置授权——在线时将持续补充处置动作。',
+                Text(tr('shell_the_ai_has_full_handling_authority_it_keeps'),
                     style: TextStyle(color: Colors.white54, fontSize: 11)),
                 const SizedBox(height: 6),
                 // 【0.7.0】生命线投递状态（server crisis_delivery——多通道并行+ACK）
@@ -344,16 +343,20 @@ class _HomeShellState extends ConsumerState<HomeShell> {
                       {'cmd': 'crisis_delivery_status'},
                       timeout: const Duration(seconds: 6)),
                   builder: (bctx, snap) {
-                    String txt = '投递状态：查询中…';
+                    String txt = tr('shell_delivery_status_checking');
                     try {
                       final d = snap.data?['data'];
                       final inner = (d is Map && d['data'] is Map) ? d['data'] as Map : d;
                       if (inner is Map) {
                         final acked = inner['acked'] == true;
                         final running = inner['running'] == true;
-                        txt = '投递状态：${acked ? "✅ 已确认（ACK）" : (running ? "📡 多通道投递中（含重推）" : "—")}';
+                        txt = trp('shell_delivery_status', {
+                          'p0': acked
+                              ? tr('shell_acked')
+                              : (running ? tr('shell_delivering') : '—')
+                        });
                       } else if (snap.connectionState != ConnectionState.waiting) {
-                        txt = '投递状态：未连接';
+                        txt = tr('shell_delivery_status_not_connected');
                       }
                     } catch (_) {}
                     return Text(txt, style: const TextStyle(color: Colors.lightGreenAccent, fontSize: 11));
@@ -369,7 +372,7 @@ class _HomeShellState extends ConsumerState<HomeShell> {
                 ref.read(crisisProvider.notifier).acknowledge();
                 Navigator.pop(ctx);
               },
-              child: const Text('我已知情'),
+              child: Text(tr('shell_acknowledged')),
             ),
           ],
         ),
@@ -398,11 +401,11 @@ class _HomeShellState extends ConsumerState<HomeShell> {
       bottomNavigationBar: NavigationBar(
         selectedIndex: _index,
         onDestinationSelected: (i) => setState(() => _index = i),
-        destinations: const [
-          NavigationDestination(icon: Icon(Icons.home_outlined), selectedIcon: Icon(Icons.home), label: '主控台'),
-          NavigationDestination(icon: Icon(Icons.chat_bubble_outline), selectedIcon: Icon(Icons.chat_bubble), label: '对话'),
-          NavigationDestination(icon: Icon(Icons.forum_outlined), selectedIcon: Icon(Icons.forum), label: '会话'),
-          NavigationDestination(icon: Icon(Icons.dashboard_outlined), selectedIcon: Icon(Icons.dashboard), label: '仪表盘'),
+        destinations: [
+          NavigationDestination(icon: Icon(Icons.home_outlined), selectedIcon: Icon(Icons.home), label: tr('nav_console')),
+          NavigationDestination(icon: Icon(Icons.chat_bubble_outline), selectedIcon: Icon(Icons.chat_bubble), label: tr('nav_chat')),
+          NavigationDestination(icon: Icon(Icons.forum_outlined), selectedIcon: Icon(Icons.forum), label: tr('nav_sessions')),
+          NavigationDestination(icon: Icon(Icons.dashboard_outlined), selectedIcon: Icon(Icons.dashboard), label: tr('nav_dashboard')),
         ],
       ),
     );

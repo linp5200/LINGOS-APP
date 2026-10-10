@@ -7,6 +7,7 @@
 library;
 
 import 'dart:convert';
+import '../../core/i18n/app_i18n.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -88,15 +89,15 @@ class _CommandPanelScreenState extends ConsumerState<CommandPanelScreen> {
                 Text(c['desc'].toString(),
                     style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
               const SizedBox(height: 4),
-              Text('来源: ${c['source'] ?? '-'}  风险: ${c['risk'] ?? '-'}',
+              Text(trp('cmd_source_risk', {'p0': c['source'] ?? '-', 'p1': c['risk'] ?? '-'}),
                   style: const TextStyle(fontSize: 11, color: AppColors.dim)),
               const SizedBox(height: 12),
               TextField(
                 controller: paramsCtrl,
                 maxLines: 4,
                 style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
-                decoration: const InputDecoration(
-                  labelText: '参数（JSON，可留 {}）',
+                decoration: InputDecoration(
+                  labelText: tr('cmd_arguments_json_allowed'),
                   border: OutlineInputBorder(),
                 ),
               ),
@@ -104,8 +105,8 @@ class _CommandPanelScreenState extends ConsumerState<CommandPanelScreen> {
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('取消')),
-          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('执行')),
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr('cancel'))),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(tr('cmd_run'))),
         ],
       ),
     );
@@ -118,14 +119,14 @@ class _CommandPanelScreenState extends ConsumerState<CommandPanelScreen> {
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text('参数不是有效 JSON')));
+            .showSnackBar(SnackBar(content: Text(tr('cmd_arguments_are_not_valid_json'))));
       }
       return;
     }
 
     if (mounted) {
       ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('执行 $name ...')));
+          .showSnackBar(SnackBar(content: Text(trp('cmd_running', {'p0': '$name'}))));
     }
     final resp = await ref
         .read(connectionProvider)
@@ -162,11 +163,11 @@ class _CommandPanelScreenState extends ConsumerState<CommandPanelScreen> {
 
   String _pretty(dynamic resp) {
     try {
-      if (resp == null) return '（超时或无响应）';
+      if (resp == null) return tr('cmd_timeout_or_no_response');
       final data = (resp is Map) ? resp['data'] : resp;
       return const JsonEncoder.withIndent('  ').convert(data ?? resp);
     } catch (_) {
-      return resp?.toString() ?? '（空）';
+      return resp?.toString() ?? tr('cmd_empty');
     }
   }
 
@@ -176,7 +177,7 @@ class _CommandPanelScreenState extends ConsumerState<CommandPanelScreen> {
     return Scaffold(
       backgroundColor: AppColors.bg,
       appBar: AppBar(
-        title: const Text('命令面板'),
+        title: Text(tr('cmd_command_panel')),
         backgroundColor: AppColors.surface,
         actions: [
           IconButton(icon: const Icon(Icons.refresh), onPressed: _load),
@@ -188,8 +189,8 @@ class _CommandPanelScreenState extends ConsumerState<CommandPanelScreen> {
             padding: const EdgeInsets.fromLTRB(12, 10, 12, 4),
             child: TextField(
               onChanged: (v) => setState(() => _filter = v),
-              decoration: const InputDecoration(
-                hintText: '搜索命令（名称/描述）…',
+              decoration: InputDecoration(
+                hintText: tr('cmd_search_commands_name_description'),
                 prefixIcon: Icon(Icons.search, size: 20),
                 isDense: true,
                 border: OutlineInputBorder(),
@@ -206,7 +207,7 @@ class _CommandPanelScreenState extends ConsumerState<CommandPanelScreen> {
                   padding: const EdgeInsets.only(right: 6),
                   child: ChoiceChip(
                     label: Text(
-                      {'all': '全部', 'ext': '扩展', 'skill': '技能', 'core': '核心'}[s] ?? s,
+                      {'all': tr('skill_all'), 'ext': tr('cmd_extension'), 'skill': tr('cfg_skills'), 'core': tr('cmd_core')}[s] ?? s,
                       style: const TextStyle(fontSize: 11),
                     ),
                     selected: sel,
@@ -220,7 +221,7 @@ class _CommandPanelScreenState extends ConsumerState<CommandPanelScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
             child: Align(
               alignment: Alignment.centerLeft,
-              child: Text('共 ${shown.length} 条命令',
+              child: Text(trp('cmd_commands', {'p0': '${shown.length}'}),
                   style: const TextStyle(fontSize: 11, color: AppColors.dim)),
             ),
           ),
@@ -228,8 +229,8 @@ class _CommandPanelScreenState extends ConsumerState<CommandPanelScreen> {
             child: _loading
                 ? const Center(child: CircularProgressIndicator())
                 : shown.isEmpty
-                    ? const Center(
-                        child: Text('无匹配命令（或未连接主机）',
+                    ? Center(
+                        child: Text(tr('cmd_no_matching_commands_or_host_not_connected'),
                             style: TextStyle(color: AppColors.dim, fontSize: 12)))
                     : ListView.builder(
                         itemCount: shown.length,
@@ -243,10 +244,10 @@ class _CommandPanelScreenState extends ConsumerState<CommandPanelScreen> {
                             subtitle: Text(
                               [
                                 if ((c['source']?.toString() ?? '').isNotEmpty)
-                                  '来源:${c['source']}',
+                                  trp('cmd_source', {'p0': c['source']}),
                                 if ((c['module']?.toString() ?? '').isNotEmpty)
-                                  '模块:${c['module']}',
-                                if (risk.isNotEmpty && risk != 'low') '风险:$risk',
+                                  trp('cmd_module', {'p0': c['module']}),
+                                if (risk.isNotEmpty && risk != 'low') trp('cmd_risk', {'p0': '$risk'}),
                                 if ((c['desc']?.toString() ?? '').isNotEmpty)
                                   c['desc'].toString(),
                               ].join(' · '),

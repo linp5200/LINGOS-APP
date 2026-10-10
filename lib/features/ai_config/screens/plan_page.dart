@@ -3,6 +3,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import '../../core/i18n/app_i18n.dart';
 
 import '../../../core/theme/app_theme.dart';
 
@@ -25,11 +26,11 @@ class PlanPage extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
-          const Row(
+          Row(
             children: [
               Icon(Icons.construction, size: 18, color: AppColors.brandCyan),
               SizedBox(width: 8),
-              Text('功能规划中——服务端命令就绪后启用',
+              Text(tr('plan_planned_feature_enabled_once_the_server'),
                   style: TextStyle(fontSize: 12, color: AppColors.brandCyan)),
             ],
           ),

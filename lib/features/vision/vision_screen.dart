@@ -10,6 +10,7 @@
 library;
 
 import 'dart:async';
+import '../../core/i18n/app_i18n.dart';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -116,8 +117,12 @@ class _VisionScreenState extends ConsumerState<VisionScreen> {
       if (!mounted) return;
       final ok = resp != null && resp['status'] == 'ok';
       final msg = ok
-          ? '已抓拍：${(resp['data'] is Map ? (resp['data'] as Map)['file'] : null) ?? '完成'}'
-          : '抓拍失败：${resp?['msg'] ?? '未连接或超时'}';
+          ? trp('vis_capture_ok', {
+              'p0': (resp['data'] is Map ? (resp['data'] as Map)['file'] : null) ?? tr('vis_done')
+            })
+          : trp('vis_capture_failed', {
+              'p0': resp?['msg'] ?? tr('vis_not_connected_or_timeout')
+            });
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -143,11 +148,14 @@ class _VisionScreenState extends ConsumerState<VisionScreen> {
           _detections.clear();
           _detections.addAll(dets);
         });
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('检测完成：${dets.length} 个目标')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(trp('vis_detection_complete_objects', {'p0': '${dets.length}'}))));
       } else {
         // 引擎未运行/无帧来源 → 服务端明确错误（如实展示，不伪造）
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('检测失败：${resp?['msg'] ?? '未连接或超时'}')),
+          SnackBar(
+              content: Text(trp('vis_detect_failed', {
+            'p0': resp?['msg'] ?? tr('vis_not_connected_or_timeout'),
+          }))),
         );
       }
     } finally {
@@ -162,11 +170,11 @@ class _VisionScreenState extends ConsumerState<VisionScreen> {
     final vd = _visionStatus;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('摄像头'),
+        title: Text(tr('nav_vision')),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh, size: 20),
-            tooltip: '刷新状态',
+            tooltip: tr('vis_refresh_status'),
             onPressed: _refresh,
           ),
         ],
@@ -188,7 +196,7 @@ class _VisionScreenState extends ConsumerState<VisionScreen> {
                           size: 18, color: AppColors.brandCyan),
                       const SizedBox(width: 8),
                       Expanded(
-                        child: Text('视频源: ${_source == 'rtsp' ? 'RTSP ($_rtspUrl)' : 'V4L2 (/dev/video0)'}',
+                        child: Text('${tr('vis_source')}${_source == 'rtsp' ? 'RTSP ($_rtspUrl)' : 'V4L2 (/dev/video0)'}',
                             style: const TextStyle(fontSize: 13)),
                       ),
                     ],
@@ -196,7 +204,7 @@ class _VisionScreenState extends ConsumerState<VisionScreen> {
                   const SizedBox(height: 6),
                   Row(
                     children: [
-                      const Text('预览: ', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                      Text(tr('vis_preview'), style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
                       Text('http://$host:$_httpPort/stream',
                           style: const TextStyle(fontSize: 12, color: AppColors.brandCyan, fontFamily: 'monospace')),
                     ],
@@ -204,9 +212,15 @@ class _VisionScreenState extends ConsumerState<VisionScreen> {
                   if (md != null || vd != null) ...[
                     const Divider(height: 16),
                     Text(
-                      '监控: ${md != null ? '${(md['cameras'] is List ? (md['cameras'] as List).length : 0)} 路配置' : '--'}'
-                      ' · 引擎: ${vd != null ? (vd['yolo'] == true ? 'YOLO 运行中' : 'YOLO 未运行') : '--'}'
-                      '${vd != null && vd['visiond'] == true ? ' · visiond 在' : ''}',
+                      trp('vis_status_line', {
+                        'p0': md != null
+                            ? '${(md['cameras'] is List ? (md['cameras'] as List).length : 0)}'
+                            : '--',
+                        'p1': vd != null
+                            ? (vd['yolo'] == true ? tr('vis_yolo_running') : tr('vis_yolo_stopped'))
+                            : '--',
+                        'p2': vd != null && vd['visiond'] == true ? tr('vis_visiond_present') : '',
+                      }),
                       style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
                     ),
                   ],
@@ -222,7 +236,7 @@ class _VisionScreenState extends ConsumerState<VisionScreen> {
                 child: OutlinedButton.icon(
                   onPressed: _busy ? null : _snapshot,
                   icon: const Icon(Icons.camera_alt_outlined, size: 16),
-                  label: const Text('抓拍', style: TextStyle(fontSize: 12)),
+                  label: Text(tr('vis_capture'), style: TextStyle(fontSize: 12)),
                 ),
               ),
               const SizedBox(width: 8),
@@ -232,7 +246,7 @@ class _VisionScreenState extends ConsumerState<VisionScreen> {
                   icon: _busy
                       ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2))
                       : const Icon(Icons.center_focus_strong, size: 16),
-                  label: const Text('AI 检测', style: TextStyle(fontSize: 12)),
+                  label: Text(tr('vis_ai_detect'), style: TextStyle(fontSize: 12)),
                 ),
               ),
             ],
@@ -249,20 +263,20 @@ class _VisionScreenState extends ConsumerState<VisionScreen> {
                 ? Image.network(
                     'http://$host:$_httpPort/stream',
                     fit: BoxFit.contain,
-                    errorBuilder: (_, __, ___) => const Center(
-                      child: Text('预览不可用——确认 rtsp_streamer 运行中',
+                    errorBuilder: (_, __, ___) => Center(
+                      child: Text(tr('vis_preview_unavailable_make_sure_rtsp_streamer'),
                           style: TextStyle(color: Colors.white54, fontSize: 12)),
                     ),
                   )
-                : const Center(
-                    child: Text('V4L2 本地摄像头——预览走服务端（二期）',
+                : Center(
+                    child: Text(tr('vis_v4l2_local_camera_preview_goes_through_the'),
                         style: TextStyle(color: Colors.white54, fontSize: 12)),
                   ),
           ),
           const SizedBox(height: 16),
           // 检测结果
           if (_detections.isNotEmpty) ...[
-            const Text('物体检测', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+            Text(tr('vis_object_detection'), style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
             const SizedBox(height: 6),
             ..._detections.map((d) => Container(
                   margin: const EdgeInsets.only(bottom: 4),
@@ -282,7 +296,7 @@ class _VisionScreenState extends ConsumerState<VisionScreen> {
           ],
           // OCR 结果
           if (_ocrs.isNotEmpty) ...[
-            const Text('文字识别（OCR）', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+            Text(tr('vis_text_recognition_ocr'), style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
             const SizedBox(height: 6),
             ..._ocrs.map((o) => Container(
                   margin: const EdgeInsets.only(bottom: 4),
@@ -300,10 +314,10 @@ class _VisionScreenState extends ConsumerState<VisionScreen> {
             const SizedBox(height: 8),
           ],
           if (_detections.isEmpty && _ocrs.isEmpty)
-            const Padding(
+            Padding(
               padding: EdgeInsets.symmetric(vertical: 12),
               child: Center(
-                child: Text('暂无检测结果——等待 visiond 识别事件，或点上方「AI 检测」',
+                child: Text(tr('vis_no_detection_results_yet_waiting_for'),
                     style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
               ),
             ),

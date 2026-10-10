@@ -9,6 +9,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import '../../core/i18n/app_i18n.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/providers.dart';
@@ -50,7 +51,7 @@ class _ServerModeScreenState extends ConsumerState<ServerModeScreen> {
         _crisis = data['crisis_active'] == true;
         _msg = '';
       } else {
-        _msg = '未连接主机或查询失败';
+        _msg = tr('srvm_host_not_connected_or_query_failed');
       }
     });
   }
@@ -74,10 +75,10 @@ class _ServerModeScreenState extends ConsumerState<ServerModeScreen> {
         context: context,
         builder: (ctx) => AlertDialog(
           backgroundColor: AppColors.surface,
-          title: Text(confirmText ?? '确认操作？'),
+          title: Text(confirmText ?? tr('srvm_confirm_action')),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('取消')),
-            FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('确认')),
+            TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr('cancel'))),
+            FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(tr('srvm_confirm'))),
           ],
         ),
       );
@@ -95,15 +96,15 @@ class _ServerModeScreenState extends ConsumerState<ServerModeScreen> {
       final d = resp?['data'];
       if (d is Map) {
         if (d['status'] == 'error') {
-          msg = d['msg']?.toString() ?? '操作失败';
+          msg = d['msg']?.toString() ?? tr('srvm_operation_failed');
         } else {
-          msg = d['msg']?.toString() ?? '已发送';
+          msg = d['msg']?.toString() ?? tr('srvm_sent');
         }
       } else {
-        msg = '无响应（未连接？）';
+        msg = tr('srvm_no_response_not_connected');
       }
     } catch (_) {
-      msg = '无响应（未连接？）';
+      msg = tr('srvm_no_response_not_connected');
     }
     if (!mounted) return;
     setState(() {
@@ -119,7 +120,7 @@ class _ServerModeScreenState extends ConsumerState<ServerModeScreen> {
     return Scaffold(
       backgroundColor: AppColors.bg,
       appBar: AppBar(
-        title: const Text('服务器模式'),
+        title: Text(tr('cfg_server_mode')),
         backgroundColor: AppColors.surface,
         actions: [IconButton(icon: const Icon(Icons.refresh), onPressed: _loading ? null : _load)],
       ),
@@ -129,11 +130,11 @@ class _ServerModeScreenState extends ConsumerState<ServerModeScreen> {
               padding: const EdgeInsets.all(16),
               children: [
                 if (_crisis)
-                  const Card(
+                  Card(
                     color: Color(0xFF3A0A0A),
                     child: Padding(
                       padding: EdgeInsets.all(12),
-                      child: Text('🚨 危机进行中——停止服务器被禁用（人身安全让路）',
+                      child: Text(tr('srvm_crisis_in_progress_stopping_the_server_is'),
                           style: TextStyle(color: Color(0xFFFF8A80), fontSize: 13)),
                     ),
                   ),
@@ -142,9 +143,9 @@ class _ServerModeScreenState extends ConsumerState<ServerModeScreen> {
                   child: Column(
                     children: [
                       ListTile(
-                        title: const Text('模式状态', style: TextStyle(fontSize: 14)),
+                        title: Text(tr('srvm_mode_status'), style: TextStyle(fontSize: 14)),
                         trailing: Text(
-                          _enabled ? '已开启' : '关闭',
+                          _enabled ? tr('srvm_enabled') : tr('close'),
                           style: TextStyle(
                             color: _enabled ? AppColors.brandGreen : AppColors.dim,
                             fontWeight: FontWeight.w600,
@@ -152,17 +153,16 @@ class _ServerModeScreenState extends ConsumerState<ServerModeScreen> {
                         ),
                       ),
                       if (_package)
-                        const ListTile(
+                        ListTile(
                           dense: true,
-                          title: Text('服务器模式包', style: TextStyle(fontSize: 12)),
-                          trailing: Text('常规关闭无效', style: TextStyle(fontSize: 11, color: AppColors.brandAmber)),
+                          title: Text(tr('srvm_server_mode_package'), style: TextStyle(fontSize: 12)),
+                          trailing: Text(tr('srvm_normal_stop_has_no_effect'), style: TextStyle(fontSize: 11, color: AppColors.brandAmber)),
                         ),
                       const Divider(height: 1, color: AppColors.divider),
-                      const ListTile(
+                      ListTile(
                         dense: true,
                         title: Text(
-                          '服务器模式 = 只显示日志、不接受输入（控制键 Ctrl-Q/Q）。'
-                          '开启后服务端重启仍保持该模式。',
+                          tr('srvm_server_mode_logs_only_no_input_accepted'),
                           style: TextStyle(fontSize: 11, color: AppColors.dim),
                         ),
                       ),
@@ -173,16 +173,16 @@ class _ServerModeScreenState extends ConsumerState<ServerModeScreen> {
                 FilledButton.icon(
                   onPressed: _busy || _enabled ? null : () => _send('server_mode_on'),
                   icon: const Icon(Icons.play_arrow),
-                  label: const Text('开启服务器模式（持久化）'),
+                  label: Text(tr('srvm_enable_server_mode_persistent')),
                 ),
                 const SizedBox(height: 10),
                 OutlinedButton.icon(
                   onPressed: _busy || _crisis
                       ? null
                       : () => _send('server_mode_stop',
-                          confirm: true, confirmText: '停止整个服务器？\n（服务端所有服务将优雅退出）'),
+                          confirm: true, confirmText: tr('srvm_stop_the_entire_server_n_all_server')),
                   icon: const Icon(Icons.stop_circle_outlined, color: AppColors.brandRed),
-                  label: const Text('停止服务器（唯一停止出口）',
+                  label: Text(tr('srvm_stop_server_the_only_exit'),
                       style: TextStyle(color: AppColors.brandRed)),
                 ),
                 if (_msg.isNotEmpty) ...[
@@ -192,9 +192,8 @@ class _ServerModeScreenState extends ConsumerState<ServerModeScreen> {
                       style: const TextStyle(fontSize: 12, color: AppColors.brandAmber)),
                 ],
                 const SizedBox(height: 18),
-                const Text(
-                  '提示：服务端「server mode on」也会在自己终端进入日志模式；'
-                  '本页操作经 WS 命令通道，与终端等效。',
+                Text(
+                  tr('srvm_note_the_server_side_server_mode_on_also'),
                   style: TextStyle(fontSize: 11, color: AppColors.dim),
                 ),
               ],

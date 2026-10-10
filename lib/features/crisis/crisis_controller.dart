@@ -3,6 +3,7 @@
 library;
 
 import 'dart:async';
+import '../../core/i18n/app_i18n.dart';
 import 'dart:convert';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -20,7 +21,7 @@ class CrisisState {
   const CrisisState({this.active = false, this.data, this.shownId = ''});
 
   String get crisisId => data?['crisis_id']?.toString() ?? '';
-  String get name => data?['name']?.toString() ?? '危机';
+  String get name => data?['name']?.toString() ?? tr('crisis_crisis');
   String get crisisType => data?['crisis_type']?.toString() ?? '';
   String get source => data?['source']?.toString() ?? '';
   String get detail => data?['detail']?.toString() ?? '';

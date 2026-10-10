@@ -5,6 +5,7 @@
 library;
 
 import 'dart:async';
+import '../../core/i18n/app_i18n.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -50,7 +51,7 @@ class _SyncSettingsScreenState extends ConsumerState<SyncSettingsScreen> {
     await cm.requestJson({'cmd': 'sync_settings_set', 'allow_cross_device': v});
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(v ? '已允许其他设备修改本设备会话' : '已恢复默认（仅创建者可修改）'),
+      content: Text(v ? tr('sync_other_devices_may_now_modify_sessions_of') : tr('sync_defaults_restored_only_the_creator_can')),
       duration: const Duration(seconds: 2),
     ));
   }
@@ -66,14 +67,14 @@ class _SyncSettingsScreenState extends ConsumerState<SyncSettingsScreen> {
       _syncing = false;
       _lastSync = last;
     });
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-      content: Text('同步完成'),
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(tr('sync_sync_complete')),
       duration: Duration(seconds: 2),
     ));
   }
 
   String _fmtLastSync(double ts) {
-    if (ts <= 0) return '从未同步';
+    if (ts <= 0) return tr('sync_never_synced');
     final t = DateTime.fromMillisecondsSinceEpoch((ts * 1000).toInt());
     return '${t.year}-${t.month.toString().padLeft(2, '0')}-${t.day.toString().padLeft(2, '0')} '
         '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}';
@@ -82,25 +83,24 @@ class _SyncSettingsScreenState extends ConsumerState<SyncSettingsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('同步设置')),
+      appBar: AppBar(title: Text(tr('cfg_sync_settings'))),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
           SwitchListTile(
             value: _allowCross,
             onChanged: _toggleCross,
-            title: const Text('允许其他设备修改本设备会话', style: TextStyle(fontSize: 14)),
-            subtitle: const Text(
-              '关闭时：每会话仅创建者可修改/追加，其他设备只读（服务端强制）\n'
-              '开启时：所有设备可修改任何会话',
+            title: Text(tr('sync_allow_other_devices_to_modify_sessions_of'), style: TextStyle(fontSize: 14)),
+            subtitle: Text(
+              tr('sync_off_only_the_session_creator_can_modify'),
               style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
             ),
           ),
           const Divider(),
           ListTile(
             leading: const Icon(Icons.sync, size: 20, color: AppColors.brandCyan),
-            title: Text(_syncing ? '同步中…' : '手动同步', style: const TextStyle(fontSize: 14)),
-            subtitle: Text('最近同步：${_fmtLastSync(_lastSync)}',
+            title: Text(_syncing ? tr('sync_syncing') : tr('sync_sync_now'), style: const TextStyle(fontSize: 14)),
+            subtitle: Text(trp('sync_last_sync', {'p0': '${_fmtLastSync(_lastSync)}'}),
                 style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
             trailing: _syncing
                 ? const SizedBox(
@@ -110,13 +110,10 @@ class _SyncSettingsScreenState extends ConsumerState<SyncSettingsScreen> {
             onTap: _syncing ? null : _manualSync,
           ),
           const Divider(),
-          const Padding(
+          Padding(
             padding: EdgeInsets.all(12),
             child: Text(
-              '同步机制：\n'
-              '· 首次连接：完整同步包（全量快照）\n'
-              '· 之后：时间戳增量（新增/修改消息）+ 列表哈希对比（增删/改名）\n'
-              '· 并发冲突：设备优先——最新改动生效，冲突窗口内双方修改均拒绝',
+              tr('sync_how_sync_works_n_first_connection_full_sync'),
               style: TextStyle(fontSize: 11, color: AppColors.textSecondary, height: 1.6),
             ),
           ),

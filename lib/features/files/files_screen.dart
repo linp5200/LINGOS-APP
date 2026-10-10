@@ -2,6 +2,7 @@
 library;
 
 import 'dart:async';
+import '../../core/i18n/app_i18n.dart';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -91,7 +92,7 @@ class _FilesScreenState extends ConsumerState<FilesScreen> {
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('关闭')),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(tr('close'))),
         ],
       ),
     );
@@ -120,11 +121,11 @@ class _FilesScreenState extends ConsumerState<FilesScreen> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('删除'),
-        content: Text('确认删除 $name？'),
+        title: Text(tr('delete')),
+        content: Text(trp('file_delete', {'p0': '$name'})),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('取消')),
-          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('删除')),
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr('cancel'))),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(tr('delete'))),
         ],
       ),
     );
@@ -147,11 +148,11 @@ class _FilesScreenState extends ConsumerState<FilesScreen> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('重命名'),
-        content: TextField(controller: ctrl, decoration: const InputDecoration(hintText: '新文件名')),
+        title: Text(tr('sess_rename')),
+        content: TextField(controller: ctrl, decoration: InputDecoration(hintText: tr('file_new_file_name'))),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('取消')),
-          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('保存')),
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr('cancel'))),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(tr('save'))),
         ],
       ),
     );
@@ -169,18 +170,18 @@ class _FilesScreenState extends ConsumerState<FilesScreen> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('新建文件'),
+        title: Text(tr('file_new_file')),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            TextField(controller: nameCtrl, decoration: const InputDecoration(hintText: '文件名')),
+            TextField(controller: nameCtrl, decoration: InputDecoration(hintText: tr('file_file_name'))),
             const SizedBox(height: 8),
-            TextField(controller: contentCtrl, decoration: const InputDecoration(hintText: '内容'), maxLines: 3),
+            TextField(controller: contentCtrl, decoration: InputDecoration(hintText: tr('file_content')), maxLines: 3),
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('取消')),
-          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('创建')),
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr('cancel'))),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(tr('sess_create'))),
         ],
       ),
     );

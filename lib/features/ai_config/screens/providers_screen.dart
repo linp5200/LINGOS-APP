@@ -4,6 +4,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import '../../core/i18n/app_i18n.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/providers.dart';
@@ -21,19 +22,21 @@ class ProviderPreset {
   const ProviderPreset(this.id, this.name, this.category, this.baseUrl, this.hint, this.icon);
 }
 
-const kProviderPresets = [
-  ProviderPreset('openai', 'OpenAI', 'LLM', 'https://api.openai.com/v1', '输入 OpenAI API 密钥', Icons.smart_toy_outlined),
-  ProviderPreset('anthropic', 'Anthropic', 'LLM', 'https://api.anthropic.com', '输入 Anthropic API 密钥', Icons.smart_toy_outlined),
-  ProviderPreset('compatible', 'Compatible API', 'LLM', '', '输入自定义基础 URL 与 API 密钥', Icons.dns_outlined),
-  ProviderPreset('kimi', 'Kimi Code', 'LLM', 'https://api.moonshot.cn/v1', '使用 Kimi Code plan——需 Kimi 账号登录', Icons.smart_toy_outlined),
-  ProviderPreset('elevenlabs', 'ElevenLabs', '语音', 'https://api.elevenlabs.io', '输入 ElevenLabs API 密钥（TTS）', Icons.mic_outlined),
-  ProviderPreset('deepgram', 'Deepgram', '语音', 'https://api.deepgram.com', '输入 Deepgram API 密钥（识别+合成）', Icons.mic_outlined),
-  ProviderPreset('azure_tts', 'Azure TTS', '语音', 'https://eastasia.tts.speech.microsoft.com', '输入 Azure 语音服务订阅密钥；基础URL设为你的区域', Icons.mic_outlined),
-  ProviderPreset('minimax', 'MiniMax', '语音', 'https://api.minimax.chat', '输入 MiniMax API 密钥（TTS）', Icons.mic_outlined),
-  ProviderPreset('bailian', 'Alibaba Bailian', '语音', 'https://dashscope.aliyuncs.com', '输入阿里云百炼 API 密钥（识别+合成）', Icons.mic_outlined),
-  ProviderPreset('doubao', 'Doubao (Volcano)', '语音', 'https://ark.cn-beijing.volces.com', '从火山引擎新控制台输入 API 密钥（识别+合成）', Icons.mic_outlined),
-  ProviderPreset('xunfei', 'iFlytek (Xunfei)', '语音', 'https://api.xfyun.cn', '以“appId;apiKey;apiSecret”形式输入（识别+合成）', Icons.mic_outlined),
-  ProviderPreset('mimo', 'Xiaomi MiMo', '语音', 'https://api.xiaomi.com', '输入小米 MiMo API 密钥（识别+合成）', Icons.mic_outlined),
+/// 【i18n】改为 getter：提示文案经 tr() 后需在每次访问时求值
+/// 注意：category 字段是数据（'语音' 与筛选/存储逻辑绑定），不参与翻译
+List<ProviderPreset> get kProviderPresets => [
+  ProviderPreset('openai', 'OpenAI', 'LLM', 'https://api.openai.com/v1', tr('prov_enter_the_openai_api_key'), Icons.smart_toy_outlined),
+  ProviderPreset('anthropic', 'Anthropic', 'LLM', 'https://api.anthropic.com', tr('prov_enter_the_anthropic_api_key'), Icons.smart_toy_outlined),
+  ProviderPreset('compatible', 'Compatible API', 'LLM', '', tr('prov_enter_a_custom_base_url_and_api_key'), Icons.dns_outlined),
+  ProviderPreset('kimi', 'Kimi Code', 'LLM', 'https://api.moonshot.cn/v1', tr('prov_use_a_kimi_code_plan_requires_kimi_account'), Icons.smart_toy_outlined),
+  ProviderPreset('elevenlabs', 'ElevenLabs', '语音', 'https://api.elevenlabs.io', tr('prov_enter_the_elevenlabs_api_key_tts'), Icons.mic_outlined),
+  ProviderPreset('deepgram', 'Deepgram', '语音', 'https://api.deepgram.com', tr('prov_enter_the_deepgram_api_key_stt_tts'), Icons.mic_outlined),
+  ProviderPreset('azure_tts', 'Azure TTS', '语音', 'https://eastasia.tts.speech.microsoft.com', tr('prov_enter_the_azure_speech_subscription_key_set'), Icons.mic_outlined),
+  ProviderPreset('minimax', 'MiniMax', '语音', 'https://api.minimax.chat', tr('prov_enter_the_minimax_api_key_tts'), Icons.mic_outlined),
+  ProviderPreset('bailian', 'Alibaba Bailian', '语音', 'https://dashscope.aliyuncs.com', tr('prov_enter_the_alibaba_bailian_api_key_stt_tts'), Icons.mic_outlined),
+  ProviderPreset('doubao', 'Doubao (Volcano)', '语音', 'https://ark.cn-beijing.volces.com', tr('prov_enter_the_api_key_from_the_new_volcano'), Icons.mic_outlined),
+  ProviderPreset('xunfei', 'iFlytek (Xunfei)', '语音', 'https://api.xfyun.cn', tr('prov_enter_as_appid_apikey_apisecret_stt_tts'), Icons.mic_outlined),
+  ProviderPreset('mimo', 'Xiaomi MiMo', '语音', 'https://api.xiaomi.com', tr('prov_enter_the_xiaomi_mimo_api_key_stt_tts'), Icons.mic_outlined),
 ];
 
 /// 第一段：已配置提供商列表（竖向）
@@ -94,11 +97,14 @@ class _ProvidersScreenState extends ConsumerState<ProvidersScreen> {
     if (ok) {
       setState(() => _activeModel = modelId);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('已切换模型：$modelId'), duration: const Duration(seconds: 1)),
+        SnackBar(content: Text(trp('chat_model_switched', {'p0': '$modelId'})), duration: const Duration(seconds: 1)),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('切换失败：${resp?['msg'] ?? '未知'}')),
+        SnackBar(
+            content: Text(trp('prov_switch_failed', {
+          'p0': resp?['msg'] ?? tr('dash_unknown_error'),
+        }))),
       );
     }
   }
@@ -174,11 +180,11 @@ class _ProvidersScreenState extends ConsumerState<ProvidersScreen> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('删除提供商'),
-        content: const Text('删除后需重新配置才能使用。确认删除？'),
+        title: Text(tr('prov_delete_provider')),
+        content: Text(tr('prov_you_must_reconfigure_it_before_use_after')),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('取消')),
-          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('删除')),
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr('cancel'))),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(tr('delete'))),
         ],
       ),
     );
@@ -202,11 +208,11 @@ class _ProvidersScreenState extends ConsumerState<ProvidersScreen> {
               children: [
                 const Icon(Icons.model_training, size: 16, color: AppColors.brandCyan),
                 const SizedBox(width: 6),
-                const Text('主机端模型（点击切换）',
+                Text(tr('prov_host_side_models_tap_to_switch'),
                     style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
                 const Spacer(),
                 if (_activeModel.isNotEmpty)
-                  Text('当前: $_activeModel',
+                  Text(trp('prov_current', {'p0': '$_activeModel'}),
                       style: const TextStyle(fontSize: 11, color: AppColors.brandCyan)),
               ],
             ),
@@ -240,7 +246,7 @@ class _ProvidersScreenState extends ConsumerState<ProvidersScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('LLM/MLM 提供商'),
+        title: Text(tr('prov_llm_mlm_providers')),
         actions: [
           // 【先生设计】右上角"+"添加提供商
           IconButton(icon: const Icon(Icons.add, size: 22), onPressed: _addFlow),
@@ -255,9 +261,9 @@ class _ProvidersScreenState extends ConsumerState<ProvidersScreen> {
                     children: [
                       const Icon(Icons.cloud_outlined, size: 48, color: AppColors.textSecondary),
                       const SizedBox(height: 12),
-                      const Text('尚未配置提供商', style: TextStyle(color: AppColors.textSecondary)),
+                      Text(tr('prov_no_providers_configured_yet'), style: TextStyle(color: AppColors.textSecondary)),
                       const SizedBox(height: 12),
-                      TextButton(onPressed: _addFlow, child: const Text('点击右上角 + 添加')),
+                      TextButton(onPressed: _addFlow, child: Text(tr('prov_tap_in_the_top_right_to_add'))),
                     ],
                   ),
                 )
@@ -276,7 +282,7 @@ class _ProvidersScreenState extends ConsumerState<ProvidersScreen> {
                       if (e.id == p['id']) { preset = e; break; }
                     }
                     final isVoice = preset?.category == '语音';
-                    final name = p['name']?.toString() ?? preset?.name ?? '未知';
+                    final name = p['name']?.toString() ?? preset?.name ?? tr('prov_unknown');
                     final baseUrl = p['baseUrl']?.toString() ?? '';
                     final model = p['model']?.toString() ?? '';
                     return Card(
@@ -291,7 +297,7 @@ class _ProvidersScreenState extends ConsumerState<ProvidersScreen> {
                             style: const TextStyle(fontSize: 14, color: AppColors.textPrimary)),
                         subtitle: Text(
                           [if (baseUrl.isNotEmpty) baseUrl, if (model.isNotEmpty) model].join(' · ') +
-                              (isVoice ? '\n语音服务——服务端待接入' : ''),
+                              (isVoice ? tr('prov_nvoice_service_server_integration_pending') : ''),
                           style: const TextStyle(fontSize: 11, color: AppColors.textSecondary, height: 1.4),
                         ),
                         // 【先生设计】点击进入子菜单（编辑）
@@ -343,13 +349,13 @@ class _ProviderSelectScreen extends StatelessWidget {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('选择提供商')),
+      appBar: AppBar(title: Text(tr('prov_choose_a_provider'))),
       body: ListView(
         padding: const EdgeInsets.symmetric(vertical: 8),
         children: [
           section('LLM', llms),
           const Divider(),
-          section('语音', voices),
+          section(tr('grp_voice'), voices),
           const SizedBox(height: 16),
         ],
       ),
@@ -392,7 +398,7 @@ class _ProviderConfigScreenState extends ConsumerState<_ProviderConfigScreen> {
   Future<void> _fetchModels() async {
     if (_keyCtrl.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('请先填写 API 密钥再获取模型列表')),
+        SnackBar(content: Text(tr('prov_enter_the_api_key_first_then_fetch_the'))),
       );
       return;
     }
@@ -410,12 +416,12 @@ class _ProviderConfigScreenState extends ConsumerState<_ProviderConfigScreen> {
       });
       if (_remoteModels.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('服务端返回空模型列表——请检查活跃提供商配置')),
+          SnackBar(content: Text(tr('prov_server_returned_an_empty_model_list_check'))),
         );
       }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(resp?['msg']?.toString() ?? '获取模型列表失败（服务端需先配置 API Key）'),
+        content: Text(resp?['msg']?.toString() ?? tr('prov_failed_to_fetch_the_model_list_configure')),
       ));
     }
   }
@@ -425,7 +431,7 @@ class _ProviderConfigScreenState extends ConsumerState<_ProviderConfigScreen> {
     final p = widget.preset;
     final isVoice = p.category == '语音';
     return Scaffold(
-      appBar: AppBar(title: Text('配置 ${p.name}')),
+      appBar: AppBar(title: Text(trp('prov_configure', {'p0': '${p.name}'}))),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -433,7 +439,7 @@ class _ProviderConfigScreenState extends ConsumerState<_ProviderConfigScreen> {
             children: [
               Icon(p.icon, size: 18, color: AppColors.brandCyan),
               const SizedBox(width: 8),
-              Text('${isVoice ? '语音' : 'LLM'} · ${p.name}',
+              Text('${isVoice ? tr('grp_voice') : 'LLM'} · ${p.name}',
                   style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
             ],
           ),
@@ -442,8 +448,8 @@ class _ProviderConfigScreenState extends ConsumerState<_ProviderConfigScreen> {
           TextField(
             controller: _urlCtrl,
             style: const TextStyle(fontSize: 14),
-            decoration: const InputDecoration(
-              labelText: '基础 URL（已预填）',
+            decoration: InputDecoration(
+              labelText: tr('prov_base_url_prefilled'),
               border: OutlineInputBorder(),
               isDense: true,
             ),
@@ -454,8 +460,8 @@ class _ProviderConfigScreenState extends ConsumerState<_ProviderConfigScreen> {
             TextField(
               controller: _modelCtrl,
               style: const TextStyle(fontSize: 14),
-              decoration: const InputDecoration(
-                labelText: '模型（可选，如 deepseek-v4-flash）',
+              decoration: InputDecoration(
+                labelText: tr('prov_model_optional_e_g_deepseek_v4_flash'),
                 border: OutlineInputBorder(),
                 isDense: true,
               ),
@@ -469,7 +475,7 @@ class _ProviderConfigScreenState extends ConsumerState<_ProviderConfigScreen> {
                   icon: _loadingModels
                       ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2))
                       : const Icon(Icons.list_alt, size: 16),
-                  label: const Text('获取模型列表', style: TextStyle(fontSize: 12)),
+                  label: Text(tr('prov_fetch_model_list'), style: TextStyle(fontSize: 12)),
                 ),
                 if (_remoteModels.isNotEmpty) ...[
                   const SizedBox(width: 8),
@@ -477,8 +483,8 @@ class _ProviderConfigScreenState extends ConsumerState<_ProviderConfigScreen> {
                     child: DropdownButtonFormField<String>(
                       initialValue: _remoteModels.contains(_modelCtrl.text) ? _modelCtrl.text : null,
                       isDense: true,
-                      decoration: const InputDecoration(
-                        labelText: '选择模型',
+                      decoration: InputDecoration(
+                        labelText: tr('prov_select_model'),
                         border: OutlineInputBorder(),
                         isDense: true,
                       ),
@@ -496,23 +502,23 @@ class _ProviderConfigScreenState extends ConsumerState<_ProviderConfigScreen> {
             SwitchListTile(
               value: _thinkingEnabled,
               onChanged: (v) => setState(() => _thinkingEnabled = v),
-              title: const Text('思考模式', style: TextStyle(fontSize: 14)),
-              subtitle: const Text('开启：模型先输出思维链再回答（更准但更慢）',
+              title: Text(tr('prov_thinking_mode'), style: TextStyle(fontSize: 14)),
+              subtitle: Text(tr('prov_on_the_model_outputs_a_reasoning_chain'),
                   style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
               contentPadding: EdgeInsets.zero,
             ),
             Row(
               children: [
-                const Text('思考强度', style: TextStyle(fontSize: 14)),
+                Text(tr('prov_thinking_effort'), style: TextStyle(fontSize: 14)),
                 const Spacer(),
                 DropdownButton<String>(
                   value: _reasoningEffort,
                   underline: const SizedBox.shrink(),
-                  items: const [
-                    DropdownMenuItem(value: 'low', child: Text('低')),
-                    DropdownMenuItem(value: 'medium', child: Text('中')),
-                    DropdownMenuItem(value: 'high', child: Text('高')),
-                    DropdownMenuItem(value: 'max', child: Text('最大')),
+                  items: [
+                    DropdownMenuItem(value: 'low', child: Text(tr('skill_low'))),
+                    DropdownMenuItem(value: 'medium', child: Text(tr('skill_medium'))),
+                    DropdownMenuItem(value: 'high', child: Text(tr('skill_high'))),
+                    DropdownMenuItem(value: 'max', child: Text(tr('prov_max'))),
                   ],
                   onChanged: (v) => setState(() => _reasoningEffort = v ?? 'high'),
                 ),
@@ -526,7 +532,7 @@ class _ProviderConfigScreenState extends ConsumerState<_ProviderConfigScreen> {
             obscureText: true,
             style: const TextStyle(fontSize: 14),
             decoration: InputDecoration(
-              labelText: 'API 密钥',
+              labelText: tr('prov_api_key'),
               hintText: p.hint,
               border: const OutlineInputBorder(),
               isDense: true,
@@ -540,11 +546,11 @@ class _ProviderConfigScreenState extends ConsumerState<_ProviderConfigScreen> {
             onPressed: _keyCtrl.text.trim().isEmpty && p.id != 'compatible'
                 ? null
                 : _save,
-            child: const Text('保存'),
+            child: Text(tr('save')),
           ),
           if (isVoice) ...[
             const SizedBox(height: 8),
-            const Text('语音服务配置将保存到本机——服务端语音通道接入后自动生效',
+            Text(tr('prov_voice_service_config_is_saved_on_this'),
                 style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
           ],
         ],

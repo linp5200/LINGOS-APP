@@ -2,6 +2,7 @@
 library;
 
 import 'dart:async';
+import '../../core/i18n/app_i18n.dart';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -115,7 +116,7 @@ class _SessionsScreenState extends ConsumerState<SessionsScreen> {
   bool _guardOffline() {
     if (!_offline) return false;
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('当前尚未连接主机，无法修改')),
+      SnackBar(content: Text(tr('sess_not_connected_to_a_host_cannot_modify'))),
     );
     return true;
   }
@@ -128,30 +129,30 @@ class _SessionsScreenState extends ConsumerState<SessionsScreen> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('新建会话'),
+        title: Text(tr('sess_new_session')),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
               controller: ctrl,
-              decoration: const InputDecoration(hintText: '会话标题（留空=自动命名）'),
+              decoration: InputDecoration(hintText: tr('sess_session_title_empty_auto_named')),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: descCtrl,
               maxLines: 2,
-              decoration: const InputDecoration(hintText: '会话描述（可选）'),
+              decoration: InputDecoration(hintText: tr('sess_session_description_optional')),
             ),
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('取消')),
-          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('创建')),
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr('cancel'))),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(tr('sess_create'))),
         ],
       ),
     );
     if (ok == true) {
-      final title = ctrl.text.trim().isEmpty ? '新会话' : ctrl.text.trim();
+      final title = ctrl.text.trim().isEmpty ? tr('sess_new_session_2') : ctrl.text.trim();
       final cm = ref.read(connectionProvider);
       final resp = await cm.requestJson({'cmd': 'session_create', 'title': title});
       _refresh();
@@ -177,11 +178,11 @@ class _SessionsScreenState extends ConsumerState<SessionsScreen> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('重命名'),
-        content: TextField(controller: ctrl, decoration: const InputDecoration(hintText: '新标题')),
+        title: Text(tr('sess_rename')),
+        content: TextField(controller: ctrl, decoration: InputDecoration(hintText: tr('sess_new_title'))),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('取消')),
-          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('保存')),
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr('cancel'))),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(tr('save'))),
         ],
       ),
     );
@@ -198,11 +199,11 @@ class _SessionsScreenState extends ConsumerState<SessionsScreen> {
       final code = resp?['code']?.toString();
       if (code == 'readonly') {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('该会话为只读（其他设备创建）——可在高级设置开启"允许其他设备修改"')),
+          SnackBar(content: Text(tr('sess_this_session_is_read_only_created_on'))),
         );
       } else if (code == 'conflict') {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(resp?['msg']?.toString() ?? '修改占线——另一设备正在修改，请稍后重试')),
+          SnackBar(content: Text(resp?['msg']?.toString() ?? tr('sess_edit_busy_another_device_is_editing_try'))),
         );
       }
     }
@@ -221,7 +222,7 @@ class _SessionsScreenState extends ConsumerState<SessionsScreen> {
     final code = resp?['code']?.toString();
     if (code == 'readonly') {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('该会话为只读（其他设备创建）——无法删除')),
+        SnackBar(content: Text(tr('sess_this_session_is_read_only_created_on_2'))),
       );
     }
   }
@@ -268,7 +269,7 @@ class _SessionsScreenState extends ConsumerState<SessionsScreen> {
                     onPressed: widget.onOpenDrawer,
                   )
                 : null),
-        title: Text(_selectMode ? '已选 ${_selected.length}' : '会话管理'),
+        title: Text(_selectMode ? trp('sess_selected', {'p0': '${_selected.length}'}) : tr('cfg_session_manager')),
         actions: [
           if (_selectMode)
             IconButton(
@@ -289,11 +290,11 @@ class _SessionsScreenState extends ConsumerState<SessionsScreen> {
                   width: double.infinity,
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   color: AppColors.brandCyan.withValues(alpha: 0.15),
-                  child: const Row(
+                  child: Row(
                     children: [
                       Icon(Icons.cloud_off, size: 16, color: AppColors.brandCyan),
                       SizedBox(width: 8),
-                      Text('离线只读模式——显示缓存内容，修改需重连主机',
+                      Text(tr('sess_offline_read_only_mode_showing_cached'),
                           style: TextStyle(fontSize: 12, color: AppColors.brandCyan)),
                     ],
                   ),
@@ -309,7 +310,7 @@ class _SessionsScreenState extends ConsumerState<SessionsScreen> {
     return _loading
           ? const Center(child: CircularProgressIndicator())
           : _sessions.isEmpty
-              ? const Center(child: Text('暂无会话', style: TextStyle(color: AppColors.textSecondary)))
+              ? Center(child: Text(tr('sess_no_sessions'), style: TextStyle(color: AppColors.textSecondary)))
               : ListView.builder(
                   padding: const EdgeInsets.all(16),
                   itemCount: _sessions.length,
@@ -330,11 +331,15 @@ class _SessionsScreenState extends ConsumerState<SessionsScreen> {
                           size: 20,
                           color: sel ? AppColors.brandCyan : AppColors.brandCyan,
                         ),
-                        title: Text(s['title']?.toString() ?? '未命名',
+                        title: Text(s['title']?.toString() ?? tr('sess_untitled'),
                             style: const TextStyle(fontSize: 14)),
                         // 【0.2.1 9.1】会话占用显示（token 占用/消息数——服务端 session_list 已带 token_total）
                         subtitle: Text(
-                            '${s['message_count']?.toString() ?? '0'} 条消息 · ${_fmtTokens(s['token_total'])} · ${s['updated'] != null ? _fmtTime(s['updated']) : ''}',
+                            trp('sess_message_count', {
+                              'p0': '${s['message_count']?.toString() ?? '0'}',
+                              'p1': _fmtTokens(s['token_total']),
+                              'p2': s['updated'] != null ? _fmtTime(s['updated']) : '',
+                            }),
                             style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
                         trailing: _selectMode
                             ? null
@@ -366,9 +371,9 @@ class _SessionsScreenState extends ConsumerState<SessionsScreen> {
     final t = DateTime.fromMillisecondsSinceEpoch(ts.toInt() * 1000);
     final now = DateTime.now();
     final d = now.difference(t);
-    if (d.inMinutes < 1) return '刚刚';
-    if (d.inHours < 1) return '${d.inMinutes} 分钟前';
-    if (d.inDays < 1) return '${d.inHours} 小时前';
+    if (d.inMinutes < 1) return tr('sess_just_now');
+    if (d.inHours < 1) return trp('sess_min_ago', {'p0': '${d.inMinutes}'});
+    if (d.inDays < 1) return trp('sess_h_ago', {'p0': '${d.inHours}'});
     return '${t.month}-${t.day} ${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}';
   }
 }

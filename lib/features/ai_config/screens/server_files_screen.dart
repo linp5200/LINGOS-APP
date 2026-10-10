@@ -3,6 +3,7 @@
 library;
 
 import 'dart:async';
+import '../../core/i18n/app_i18n.dart';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -11,16 +12,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/providers.dart';
 import '../../../core/theme/app_theme.dart';
 
-const kSystemDirs = [
-  {'path': '/LINGOS/system/config', 'name': '系统配置', 'icon': Icons.settings_outlined, 'desc': 'ai_config / security / 权限规则'},
-  {'path': '/LINGOS/skills', 'name': '技能', 'icon': Icons.extension_outlined, 'desc': '内置 / 自定义 / 商店技能'},
-  {'path': '/LINGOS/data', 'name': '数据', 'icon': Icons.storage_outlined, 'desc': 'AI记忆 / 日志 / 共享 / 会话'},
-  {'path': '/LINGOS/Debug', 'name': '日志', 'icon': Icons.article_outlined, 'desc': 'lingos_*.log / error_*.log'},
-  {'path': '/LINGOS/state', 'name': '状态', 'icon': Icons.memory, 'desc': 'tokens.json / components / usage'},
-  {'path': '/LINGOS/registry', 'name': '注册表', 'icon': Icons.dns_outlined, 'desc': '技能索引 / 注册数据'},
-  {'path': '/LINGOS/bin', 'name': '二进制', 'icon': Icons.code, 'desc': 'lingos_linux / lingosd / Python'},
-  {'path': '/LINGOS/apps', 'name': '应用', 'icon': Icons.apps_outlined, 'desc': '已安装应用'},
-  {'path': '/LINGOS/plugins', 'name': '插件', 'icon': Icons.extension, 'desc': '预警 / 功能插件'},
+/// 【i18n】改为 getter：目录名/说明经 tr() 后需在每次访问时求值
+List<Map<String, Object>> get kSystemDirs => [
+  {'path': '/LINGOS/system/config', 'name': tr('srvf_system_config'), 'icon': Icons.settings_outlined, 'desc': tr('srvf_ai_config_security_permission_rules')},
+  {'path': '/LINGOS/skills', 'name': tr('cfg_skills'), 'icon': Icons.extension_outlined, 'desc': tr('srvf_built_in_custom_store_skills')},
+  {'path': '/LINGOS/data', 'name': tr('grp_data'), 'icon': Icons.storage_outlined, 'desc': tr('srvf_ai_memory_logs_shared_sessions')},
+  {'path': '/LINGOS/Debug', 'name': tr('cfg_logs'), 'icon': Icons.article_outlined, 'desc': 'lingos_*.log / error_*.log'},
+  {'path': '/LINGOS/state', 'name': tr('dash_status'), 'icon': Icons.memory, 'desc': 'tokens.json / components / usage'},
+  {'path': '/LINGOS/registry', 'name': tr('srvf_registry'), 'icon': Icons.dns_outlined, 'desc': tr('srvf_skill_index_registry_data')},
+  {'path': '/LINGOS/bin', 'name': tr('srvf_binaries'), 'icon': Icons.code, 'desc': 'lingos_linux / lingosd / Python'},
+  {'path': '/LINGOS/apps', 'name': tr('perm_apps'), 'icon': Icons.apps_outlined, 'desc': tr('srvf_installed_apps')},
+  {'path': '/LINGOS/plugins', 'name': tr('srvf_plugins'), 'icon': Icons.extension, 'desc': tr('srvf_alert_feature_plugins')},
 ];
 
 class ServerFilesScreen extends ConsumerStatefulWidget {
@@ -86,7 +88,7 @@ class _ServerFilesScreenState extends ConsumerState<ServerFilesScreen> {
     ref.read(connectionProvider).sendCommand({'cmd': 'file_read', 'path': path});
     // file_read 响应经 command_response 返回——简化：提示用浏览文件页
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('查看 $path——完整阅读请用"浏览文件"页')),
+      SnackBar(content: Text(trp('srvf_viewing_use_the_browse_files_page_for_full', {'p0': '$path'}))),
     );
   }
 
@@ -94,21 +96,21 @@ class _ServerFilesScreenState extends ConsumerState<ServerFilesScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(_currentPath == '/LINGOS' ? '管理服务端文件' : _currentPath),
+        title: Text(_currentPath == '/LINGOS' ? tr('cfg_server_files') : _currentPath),
       ),
       body: _currentPath == '/LINGOS'
           // 根视图：九大目录卡片
           ? ListView(
               padding: const EdgeInsets.all(16),
               children: [
-                const Text('LINGOS 系统目录', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
+                Text(tr('srvf_lingos_system_directories'), style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
                 const SizedBox(height: 8),
                 for (final d in kSystemDirs)
                   Card(
                     margin: const EdgeInsets.only(bottom: 8),
                     child: ListTile(
                       leading: Icon(d['icon'] as IconData, size: 22, color: AppColors.brandCyan),
-                      title: Text('${d['name']}（${d['path']}）', style: const TextStyle(fontSize: 14)),
+                      title: Text(trp('srvf_dir_title', {'p0': d['name'], 'p1': d['path']}), style: const TextStyle(fontSize: 14)),
                       subtitle: Text(d['desc'] as String,
                           style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
                       trailing: const Icon(Icons.chevron_right, size: 18, color: AppColors.textSecondary),
@@ -116,7 +118,7 @@ class _ServerFilesScreenState extends ConsumerState<ServerFilesScreen> {
                     ),
                   ),
                 const SizedBox(height: 12),
-                const Text('仅查看/下载——编辑请用"浏览文件"页；备份走服务端 backup 命令',
+                Text(tr('srvf_view_download_only_edit_on_the_browse_files'),
                     style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
               ],
             )
@@ -134,7 +136,7 @@ class _ServerFilesScreenState extends ConsumerState<ServerFilesScreen> {
                             margin: const EdgeInsets.only(bottom: 8),
                             child: ListTile(
                               leading: const Icon(Icons.arrow_upward, size: 20),
-                              title: const Text('返回上级', style: TextStyle(fontSize: 14)),
+                              title: Text(tr('srvf_go_up'), style: TextStyle(fontSize: 14)),
                               onTap: () {
                                 final idx = _currentPath.lastIndexOf('/');
                                 _list(idx > 0 ? _currentPath.substring(0, idx) : '/LINGOS');

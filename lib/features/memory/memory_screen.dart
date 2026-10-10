@@ -2,6 +2,7 @@
 library;
 
 import 'dart:async';
+import '../../core/i18n/app_i18n.dart';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -78,18 +79,18 @@ class _MemoryScreenState extends ConsumerState<MemoryScreen> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('写入记忆'),
+        title: Text(tr('mem_write_memory')),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            TextField(controller: contentCtrl, decoration: const InputDecoration(hintText: '记忆内容'), maxLines: 3),
+            TextField(controller: contentCtrl, decoration: InputDecoration(hintText: tr('mem_memory_content')), maxLines: 3),
             const SizedBox(height: 8),
-            TextField(controller: typeCtrl, decoration: const InputDecoration(hintText: '类型: short/medium/long')),
+            TextField(controller: typeCtrl, decoration: InputDecoration(hintText: tr('mem_type_short_medium_long'))),
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('取消')),
-          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('保存')),
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr('cancel'))),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(tr('save'))),
         ],
       ),
     );
@@ -121,7 +122,7 @@ class _MemoryScreenState extends ConsumerState<MemoryScreen> {
               style: const TextStyle(fontSize: 14, color: AppColors.textPrimary, height: 1.6)),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('关闭')),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(tr('close'))),
         ],
       ),
     );
@@ -140,7 +141,7 @@ class _MemoryScreenState extends ConsumerState<MemoryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('记忆管理'), actions: [
+      appBar: AppBar(title: Text(tr('cfg_memory')), actions: [
         IconButton(icon: const Icon(Icons.add, size: 20), onPressed: _write),
       ]),
       body: Column(
@@ -153,9 +154,9 @@ class _MemoryScreenState extends ConsumerState<MemoryScreen> {
               setState(() => _autoWrite = v);
               await _store.saveAutoMemoryWrite(v);
             },
-            title: const Text('AI 记忆自动写入',
+            title: Text(tr('mem_ai_memory_auto_write'),
                 style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
-            subtitle: const Text('允许 AI 自主调用 memory_write 记录重要信息',
+            subtitle: Text(tr('mem_allow_the_ai_to_call_memory_write_on_its'),
                 style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
           ),
           Padding(
@@ -166,7 +167,7 @@ class _MemoryScreenState extends ConsumerState<MemoryScreen> {
                   child: TextField(
                     controller: _searchCtrl,
                     onSubmitted: _search,
-                    decoration: const InputDecoration(hintText: '搜索记忆（关键词）'),
+                    decoration: InputDecoration(hintText: tr('mem_search_memory_keyword')),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -181,7 +182,7 @@ class _MemoryScreenState extends ConsumerState<MemoryScreen> {
             child: _loading
                 ? const Center(child: CircularProgressIndicator())
                 : _items.isEmpty
-                    ? const Center(child: Text('暂无记忆', style: TextStyle(color: AppColors.textSecondary)))
+                    ? Center(child: Text(tr('mem_no_memories_yet'), style: TextStyle(color: AppColors.textSecondary)))
                     : ListView.builder(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         itemCount: _items.length,

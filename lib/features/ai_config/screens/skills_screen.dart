@@ -3,6 +3,7 @@
 library;
 
 import 'dart:async';
+import '../../core/i18n/app_i18n.dart';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -18,32 +19,33 @@ const kRiskColors = {
   'critical': AppColors.brandRed,
 };
 
-const kRiskLabels = {
-  'low': '低',
-  'medium': '中',
-  'high': '高',
-  'critical': '危',
+/// 【i18n】改为 getter：风险标签经 tr() 后需在每次访问时求值
+Map<String, String> get kRiskLabels => {
+  'low': tr('skill_low'),
+  'medium': tr('skill_medium'),
+  'high': tr('skill_high'),
+  'critical': tr('skill_critical'),
 };
 
 // 技能分组（按功能前缀映射）
 String skillGroup(String name) {
-  if (name.startsWith('file_')) return '文件';
-  if (name.startsWith('memory_')) return '记忆';
+  if (name.startsWith('file_')) return tr('skill_files');
+  if (name.startsWith('memory_')) return tr('skill_memory');
   if (name.startsWith('system_') || name.startsWith('process_') ||
       name.startsWith('package_') || name.startsWith('net_') ||
       name.startsWith('user_') || name.startsWith('cron_') ||
       name.startsWith('service_') || name == 'sys_command' ||
       name.startsWith('config_') || name.startsWith('script_') ||
       name.startsWith('read_log')) {
-    return '系统';
+    return tr('skill_system');
   }
   if (name.startsWith('git_')) return 'Git';
-  if (name.startsWith('web_')) return '网络';
-  if (name.startsWith('ha_') || name.startsWith('agent_') || name.startsWith('sub_ai')) return 'AI 助手';
-  if (name.startsWith('gui_') || name == 'voice_command') return '交互';
-  if (name.contains('alert') || name.contains('typhoon')) return '预警';
-  if (name.startsWith('vision')) return '视觉';
-  return '其他';
+  if (name.startsWith('web_')) return tr('dash_net');
+  if (name.startsWith('ha_') || name.startsWith('agent_') || name.startsWith('sub_ai')) return tr('skill_ai_assistant');
+  if (name.startsWith('gui_') || name == 'voice_command') return tr('skill_interaction');
+  if (name.contains('alert') || name.contains('typhoon')) return tr('alert_generic');
+  if (name.startsWith('vision')) return tr('skill_vision');
+  return tr('grp_other');
 }
 
 class SkillsScreen extends ConsumerStatefulWidget {
@@ -57,7 +59,7 @@ class _SkillsScreenState extends ConsumerState<SkillsScreen> {
   List<Map<String, dynamic>> _skills = [];
   bool _loading = true;
   String? _error;
-  String _filter = '全部';
+  String _filter = tr('skill_all');
   StreamSubscription? _sub;
 
   @override
@@ -119,10 +121,10 @@ class _SkillsScreenState extends ConsumerState<SkillsScreen> {
     for (final s in _skills) {
       groups.putIfAbsent(skillGroup(s['name']?.toString() ?? ''), () => []).add(s);
     }
-    final filters = ['全部', ...groups.keys];
+    final filters = [tr('skill_all'), ...groups.keys];
 
     return Scaffold(
-      appBar: AppBar(title: const Text('技能'), actions: [
+      appBar: AppBar(title: Text(tr('cfg_skills')), actions: [
         IconButton(icon: const Icon(Icons.refresh, size: 20), onPressed: _loading ? null : _load),
       ]),
       body: _loading
@@ -158,8 +160,8 @@ class _SkillsScreenState extends ConsumerState<SkillsScreen> {
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(color: AppColors.divider),
                       ),
-                      child: const Text(
-                        '启用 ≠ 权限：proot/rootfs 容器内 = 技能拥有所有权限；主机/手机端操作 = 必须用户授权',
+                      child: Text(
+                        tr('skill_enabled_permitted_inside_a_proot_rootfs'),
                         style: TextStyle(fontSize: 11, color: AppColors.textSecondary, height: 1.5),
                       ),
                     ),
@@ -167,7 +169,7 @@ class _SkillsScreenState extends ConsumerState<SkillsScreen> {
                       child: ListView(
                         padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                         children: groups.entries
-                            .where((e) => _filter == '全部' || e.key == _filter)
+                            .where((e) => _filter == tr('skill_all') || e.key == _filter)
                             .map((e) => _groupSection(e.key, e.value))
                             .toList(),
                       ),
@@ -183,7 +185,7 @@ class _SkillsScreenState extends ConsumerState<SkillsScreen> {
       children: [
         Padding(
           padding: const EdgeInsets.only(top: 10, bottom: 4),
-          child: Text('$group（${items.length}）',
+          child: Text(trp('skill_text', {'p0': '$group', 'p1': '${items.length}'}),
               style: const TextStyle(
                   fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
         ),
@@ -215,7 +217,7 @@ class _SkillsScreenState extends ConsumerState<SkillsScreen> {
         ),
         title: Text(name, style: const TextStyle(fontSize: 13)),
         subtitle: Text(
-            [s['description']?.toString() ?? '', if (needConfirm) '需确认'].join(' · '),
+            [s['description']?.toString() ?? '', if (needConfirm) tr('skill_needs_confirmation')].join(' · '),
             style: const TextStyle(fontSize: 10, color: AppColors.textSecondary),
             maxLines: 1,
             overflow: TextOverflow.ellipsis),

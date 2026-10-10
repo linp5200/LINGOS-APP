@@ -2,6 +2,7 @@
 library;
 
 import 'dart:async';
+import '../../core/i18n/app_i18n.dart';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -24,11 +25,12 @@ class _PersonalityInfo {
       this.strict, this.warmth, this.speed);
 }
 
-const _kPersonalities = [
-  _PersonalityInfo('nook', '诺克 (Nook)', '冷静、理性、绝对忠诚。LING OS 的核心 AI。',
-      '男', '男', 8, 3, 7),
-  _PersonalityInfo('noma', '诺玛 (Noma)', '温柔、温暖、睿智。LING OS 的陪伴 AI。',
-      '女', '女', 4, 9, 5),
+/// 【i18n】改为 getter：姓名/描述经 tr() 后需在每次访问时求值
+List<_PersonalityInfo> get _kPersonalities => [
+  _PersonalityInfo('nook', tr('pers_nook'), tr('pers_calm_rational_absolutely_loyal_the_core_ai'),
+      tr('pers_male'), tr('pers_male'), 8, 3, 7),
+  _PersonalityInfo('noma', tr('pers_noma'), tr('pers_gentle_warm_wise_the_companion_ai_of_ling_os'),
+      tr('pers_female'), tr('pers_female'), 4, 9, 5),
 ];
 
 class PersonalityScreen extends ConsumerStatefulWidget {
@@ -94,13 +96,13 @@ class _PersonalityScreenState extends ConsumerState<PersonalityScreen> {
     setState(() => _current = id);
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('已切换人格')));
+        SnackBar(content: Text(tr('pers_personality_switched'))));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('人格'), actions: [
+      appBar: AppBar(title: Text(tr('cfg_personality')), actions: [
         IconButton(icon: const Icon(Icons.refresh, size: 20), onPressed: _loading ? null : _load),
       ]),
       body: _loading
@@ -113,7 +115,7 @@ class _PersonalityScreenState extends ConsumerState<PersonalityScreen> {
                     // 人格选择卡片
                     for (final p in _kPersonalities) _personalityCard(p),
                     const SizedBox(height: 16),
-                    const Text('音色字段联动语音（TTS 通道）——服务端语音接入后生效',
+                    Text(tr('pers_voice_field_links_to_speech_tts_channel'),
                         style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
                   ],
                 ),
@@ -152,15 +154,15 @@ class _PersonalityScreenState extends ConsumerState<PersonalityScreen> {
               const SizedBox(height: 12),
               Row(
                 children: [
-                  _param('性别', p.gender),
+                  _param(tr('pers_gender'), p.gender),
                   const SizedBox(width: 16),
-                  _param('音色', p.voice),
+                  _param(tr('pers_voice'), p.voice),
                 ],
               ),
               const SizedBox(height: 8),
-              _slider('严谨度', p.strict),
-              _slider('温暖度', p.warmth),
-              _slider('语速', p.speed),
+              _slider(tr('pers_strictness'), p.strict),
+              _slider(tr('pers_warmth'), p.warmth),
+              _slider(tr('pers_speed'), p.speed),
             ],
           ),
         ),

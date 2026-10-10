@@ -2,6 +2,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import '../../core/i18n/app_i18n.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme/app_theme.dart';
@@ -39,7 +40,7 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
   Future<void> _connect() async {
     setState(() {
       _connecting = true;
-      _status = '连接中...';
+      _status = tr('conn_connecting');
     });
     final host = _hostCtrl.text.trim();
     final port = int.tryParse(_portCtrl.text.trim()) ?? 2937;
@@ -55,7 +56,11 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
     setState(() {
       _connecting = false;
       _waitingAuth = ok;
-      _status = ok ? '已连接——请输入终端显示的验证码' : '连接失败：${_mgr.lastError ?? '未知错误'}（检查主机 IP/端口/服务是否启动）';
+      _status = ok
+          ? tr('conn_enter_verification_code')
+          : trp('conn_failed_check_host_ip_port', {
+              'p0': _mgr.lastError ?? tr('dash_unknown_error'),
+            });
     });
   }
 
@@ -64,7 +69,7 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
     setState(() {
       _scanning = true;
       _found = [];
-      _status = '正在搜索局域网主机…';
+      _status = tr('conn_searching_for_lan_hosts');
     });
     final hosts = await DiscoveryService.scan(timeoutMs: 3000);
     if (!mounted) return;
@@ -72,8 +77,8 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
       _scanning = false;
       _found = hosts;
       _status = hosts.isEmpty
-          ? '未发现主机（确认同一局域网且服务已启动；也可手动输入）'
-          : '发现 ${hosts.length} 台主机——点击选择';
+          ? tr('conn_no_hosts_found_same_lan_and_service_running')
+          : trp('conn_found_hosts_tap_to_select', {'p0': '${hosts.length}'});
     });
   }
 
@@ -83,7 +88,11 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
     setState(() {
       _waitingAuth = false;
       _waitingConnCode = ok;
-      _status = ok ? '验证码已发送——请输入终端显示的连接码' : '发送失败：${_mgr.lastError ?? '未知错误'}';
+      _status = ok
+          ? tr('conn_code_sent_enter_connection_code')
+          : trp('conn_auth_code_send_failed', {
+              'p0': _mgr.lastError ?? tr('dash_unknown_error'),
+            });
     });
   }
 
@@ -96,12 +105,12 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
       _mgr.startHeartbeat();
       // 【方案B】认证成功——WS 由 ConnectionManager 在 token 收到时自动连接
       appLog('Connect', '认证成功——等待 token 事件自动连 WS');
-      setState(() => _status = '认证成功——正在连接...');
+      setState(() => _status = tr('conn_authenticated_connecting'));
       await Future.delayed(const Duration(milliseconds: 1500));
       if (!mounted) return;
       _enterHome();
     } else {
-      setState(() => _status = '连接码发送失败');
+      setState(() => _status = tr('conn_failed_to_send_connection_code'));
     }
   }
 
@@ -141,17 +150,17 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
     if (token == null || token.isEmpty || host == null || port == null) return;
     if (!mounted) return;
     setState(() {
-      _status = '检测到已保存会话——自动恢复连接...';
+      _status = tr('conn_saved_session_detected_auto_reconnecting');
     });
     final ok = await _mgr.connectWsAndSave(host, port, token);
     if (!mounted) return;
     if (ok) {
-      setState(() => _status = '✅ 会话已恢复（WS token 直连）');
+      setState(() => _status = tr('conn_session_restored_direct_ws_token'));
       await Future.delayed(const Duration(milliseconds: 400));
       if (!mounted) return;
       _enterHome();
     } else {
-      setState(() => _status = 'token 失效——请重新认证');
+      setState(() => _status = tr('conn_token_expired_please_re_authenticate'));
       await _mgr.disconnect();
     }
   }
@@ -175,20 +184,20 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
                       textAlign: TextAlign.center,
                       style: TextStyle(fontSize: 26, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
                   const SizedBox(height: 4),
-                  Text(_status.isEmpty ? '连接到主机' : _status,
+                  Text(_status.isEmpty ? tr('conn_connect_to_host') : _status,
                       textAlign: TextAlign.center,
                       style: TextStyle(fontSize: 13, color: _status.contains('✅') ? AppColors.brandCyan : AppColors.textSecondary)),
                   const SizedBox(height: 28),
                   if (!_waitingAuth && !_waitingConnCode) ...[
                     TextField(
                       controller: _hostCtrl,
-                      decoration: const InputDecoration(labelText: '主机地址', prefixIcon: Icon(Icons.dns_outlined, size: 20)),
+                      decoration: InputDecoration(labelText: tr('conn_host_address'), prefixIcon: Icon(Icons.dns_outlined, size: 20)),
                     ),
                     const SizedBox(height: 12),
                     TextField(
                       controller: _portCtrl,
                       keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(labelText: '端口', prefixIcon: Icon(Icons.numbers, size: 20)),
+                      decoration: InputDecoration(labelText: tr('conn_port'), prefixIcon: Icon(Icons.numbers, size: 20)),
                     ),
                     // 【0.7.0 P3】自动发现（连接 2 步化——搜索 → 一键填入）
                     const SizedBox(height: 10),
@@ -197,7 +206,7 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
                       icon: _scanning
                           ? const SizedBox(height: 14, width: 14, child: CircularProgressIndicator(strokeWidth: 2))
                           : const Icon(Icons.wifi_find, size: 18),
-                      label: Text(_scanning ? '搜索中…' : '搜索局域网主机'),
+                      label: Text(_scanning ? tr('conn_searching') : tr('conn_search_lan_hosts')),
                     ),
                     if (_found.isNotEmpty) ...[
                       const SizedBox(height: 8),
@@ -212,7 +221,7 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
                             onPressed: () => setState(() {
                               _hostCtrl.text = h.ip;
                               _portCtrl.text = '${h.port}';
-                              _status = '已选择 ${h.name}（${h.ip}）——点击连接';
+                              _status = trp('conn_selected_tap_to_connect', {'p0': '${h.name}', 'p1': '${h.ip}'});
                             }),
                           );
                         }).toList(),
@@ -243,7 +252,7 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
                       style: FilledButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14)),
                       child: _connecting
                           ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                          : const Text('连接'),
+                          : Text(tr('grp_conn')),
                     ),
                   ],
                   if (_waitingAuth) ...[
@@ -256,8 +265,8 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
                           _authCtrl.value = _authCtrl.value.copyWith(text: u, selection: TextSelection.collapsed(offset: u.length));
                         }
                       },
-                      decoration: const InputDecoration(
-                        labelText: '验证码（6 位——终端黄色显示）',
+                      decoration: InputDecoration(
+                        labelText: tr('conn_code_6_digits_shown_in_yellow_on_the'),
                         prefixIcon: Icon(Icons.password, size: 20),
                       ),
                     ),
@@ -265,7 +274,7 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
                     FilledButton(
                       onPressed: _submitAuth,
                       style: FilledButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14)),
-                      child: const Text('发送验证码'),
+                      child: Text(tr('conn_send_code')),
                     ),
                   ],
                   if (_waitingConnCode) ...[
@@ -278,8 +287,8 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
                           _connCtrl.value = _connCtrl.value.copyWith(text: u, selection: TextSelection.collapsed(offset: u.length));
                         }
                       },
-                      decoration: const InputDecoration(
-                        labelText: '连接码（XXXX-XXXX-XXXX）',
+                      decoration: InputDecoration(
+                        labelText: tr('conn_connection_code_xxxx_xxxx_xxxx'),
                         prefixIcon: Icon(Icons.vpn_key, size: 20),
                       ),
                     ),
@@ -287,13 +296,13 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
                     FilledButton(
                       onPressed: _submitConnCode,
                       style: FilledButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14)),
-                      child: const Text('确认连接码'),
+                      child: Text(tr('conn_confirm_code')),
                     ),
                   ],
                   const SizedBox(height: 20),
                   TextButton(
                     onPressed: () => _mgr.disconnect(),
-                    child: const Text('断开连接', style: TextStyle(color: AppColors.textSecondary)),
+                    child: Text(tr('disconnect'), style: TextStyle(color: AppColors.textSecondary)),
                   ),
                 ],
               ),

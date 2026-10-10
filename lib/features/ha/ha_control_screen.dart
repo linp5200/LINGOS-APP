@@ -6,6 +6,7 @@
 library;
 
 import 'dart:async';
+import '../../core/i18n/app_i18n.dart';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -90,7 +91,7 @@ class _HaControlScreenState extends ConsumerState<HaControlScreen> {
       if (sd is Map) {
         _statusText = 'HA ${sd['version'] ?? '?'} · ${sd['location_name'] ?? ''}';
       } else {
-        _statusText = st?['msg']?.toString() ?? '状态获取失败';
+        _statusText = st?['msg']?.toString() ?? tr('hac_failed_to_fetch_status');
       }
       final ed = es?['data'];
       if (ed is List) {
@@ -109,7 +110,7 @@ class _HaControlScreenState extends ConsumerState<HaControlScreen> {
     });
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(resp?['msg']?.toString() ?? '已保存'),
+      content: Text(resp?['msg']?.toString() ?? tr('hac_saved')),
       duration: const Duration(seconds: 2),
     ));
     setState(() => _configured = _hostCtrl.text.trim().isNotEmpty);
@@ -132,11 +133,11 @@ class _HaControlScreenState extends ConsumerState<HaControlScreen> {
       final confirmed = await showDialog<bool>(
         context: context,
         builder: (ctx) => AlertDialog(
-          title: const Text('高风险操作确认'),
-          content: Text(resp?['msg']?.toString() ?? '确认执行该操作？'),
+          title: Text(tr('hac_high_risk_action_confirmation')),
+          content: Text(resp?['msg']?.toString() ?? tr('hac_run_this_action')),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('取消')),
-            FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('确认执行')),
+            TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr('cancel'))),
+            FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(tr('hac_confirm'))),
           ],
         ),
       );
@@ -150,7 +151,7 @@ class _HaControlScreenState extends ConsumerState<HaControlScreen> {
         });
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text(r2?['status']?.toString() == 'ok' ? '执行成功' : (r2?['msg'] ?? '执行失败')),
+            content: Text(r2?['status']?.toString() == 'ok' ? tr('hac_success') : (r2?['msg'] ?? tr('hac_failed'))),
             duration: const Duration(seconds: 2),
           ));
         }
@@ -158,7 +159,7 @@ class _HaControlScreenState extends ConsumerState<HaControlScreen> {
       return;
     }
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(st == 'ok' ? '执行成功' : (resp?['msg'] ?? '执行失败')),
+      content: Text(st == 'ok' ? tr('hac_success') : (resp?['msg'] ?? tr('hac_failed'))),
       duration: const Duration(seconds: 2),
     ));
   }
@@ -166,7 +167,7 @@ class _HaControlScreenState extends ConsumerState<HaControlScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Home Assistant 控制')),
+      appBar: AppBar(title: Text(tr('hac_home_assistant_control'))),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -178,12 +179,12 @@ class _HaControlScreenState extends ConsumerState<HaControlScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('连接配置', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                  Text(tr('hac_connection_config'), style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
                   const SizedBox(height: 12),
                   TextField(
                     controller: _hostCtrl,
-                    decoration: const InputDecoration(
-                      labelText: 'HA 主机地址（IP 或域名）',
+                    decoration: InputDecoration(
+                      labelText: tr('hac_ha_host_address_ip_or_domain'),
                       hintText: '192.168.1.10',
                       isDense: true,
                       border: OutlineInputBorder(),
@@ -193,9 +194,9 @@ class _HaControlScreenState extends ConsumerState<HaControlScreen> {
                   TextField(
                     controller: _tokenCtrl,
                     obscureText: true,
-                    decoration: const InputDecoration(
-                      labelText: '长期访问令牌（Long-Lived Token）',
-                      hintText: 'HA 个人资料页生成',
+                    decoration: InputDecoration(
+                      labelText: tr('hac_long_lived_access_token'),
+                      hintText: tr('hac_generated_on_the_ha_profile_page'),
                       isDense: true,
                       border: OutlineInputBorder(),
                     ),
@@ -205,13 +206,13 @@ class _HaControlScreenState extends ConsumerState<HaControlScreen> {
                     children: [
                       FilledButton(
                         onPressed: _saveConfig,
-                        child: const Text('保存并连接'),
+                        child: Text(tr('hac_save_and_connect')),
                       ),
                       const SizedBox(width: 8),
                       if (_configured)
                         OutlinedButton(
                           onPressed: _loading ? null : _refreshStatus,
-                          child: const Text('刷新状态'),
+                          child: Text(tr('vis_refresh_status')),
                         ),
                     ],
                   ),
@@ -227,7 +228,7 @@ class _HaControlScreenState extends ConsumerState<HaControlScreen> {
           const SizedBox(height: 16),
           // 实体列表
           if (_entities.isNotEmpty) ...[
-            const Text('设备实体（前 100）', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+            Text(tr('hac_device_entities_first_100'), style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
             const SizedBox(height: 8),
             ..._entities.map((e) {
               final entityId = e['entity_id']?.toString() ?? '';
@@ -271,17 +272,17 @@ class _HaControlScreenState extends ConsumerState<HaControlScreen> {
               );
             }),
           ] else if (!_loading)
-            const Padding(
+            Padding(
               padding: EdgeInsets.symmetric(vertical: 20),
               child: Center(
-                child: Text('未配置或无可控实体',
+                child: Text(tr('hac_not_configured_or_no_controllable_entities'),
                     style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
               ),
             ),
           // 实时事件流
           if (_events.isNotEmpty) ...[
             const SizedBox(height: 12),
-            const Text('实时事件（state_changed）', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+            Text(tr('hac_live_events_state_changed'), style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
             const SizedBox(height: 4),
             ..._events.take(20).map((evt) {
               final friendly = evt['friendly']?.toString() ?? evt['entity']?.toString() ?? '';

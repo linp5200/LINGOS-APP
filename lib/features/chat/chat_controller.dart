@@ -3,6 +3,7 @@
 library;
 
 import 'dart:async';
+import '../../core/i18n/app_i18n.dart';
 import 'dart:convert';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -134,7 +135,7 @@ class ChatController extends StateNotifier<ChatState> {
       case EvtType.thinkingHide:
         _endThinking();
       case EvtType.toolCall:
-        _appendTool(evt.data['name']?.toString() ?? '工具', evt.data['args']?.toString() ?? '');
+        _appendTool(evt.data['name']?.toString() ?? tr('chatc_tool'), evt.data['args']?.toString() ?? '');
       case EvtType.toolResult:
         _appendToolResult(
           evt.data['name']?.toString() ?? '',
@@ -172,13 +173,13 @@ class ChatController extends StateNotifier<ChatState> {
           'req_id': evt.data['req_id']?.toString() ?? '',
         });
       case EvtType.guiOpenUrl:
-        _appendSystem('🔗 请求打开链接：${evt.data['url'] ?? ''}');
+        _appendSystem(trp('chatc_open_link', {'p0': evt.data['url'] ?? ''}));
       case EvtType.guiShare:
-        _appendSystem('📤 分享内容：${evt.data['text'] ?? ''}');
+        _appendSystem(trp('chatc_share_text', {'p0': evt.data['text'] ?? ''}));
       case EvtType.guiLocation:
-        _appendSystem('📍 收到定位请求（请在系统设置中授权定位后由 App 上传）');
+        _appendSystem(tr('chatc_location_request_received_grant_location'));
       case EvtType.guiClipboard:
-        _appendSystem('📋 剪贴板请求：${evt.data['action'] ?? 'read'}');
+        _appendSystem(trp('chatc_clipboard', {'p0': evt.data['action'] ?? 'read'}));
       // 【0.6.0】审批链修复——高风险操作审批卡片（此前静默丢弃 → 必超时）
       case EvtType.authRequest:
         state = state.copyWith(pendingAuth: {
@@ -188,20 +189,20 @@ class ChatController extends StateNotifier<ChatState> {
           'reason': evt.data['reason']?.toString() ?? '',
           'timeout': evt.data['timeout'] ?? 60,
         });
-        _appendSystem('🔐 高风险操作待审批：${evt.data['tool'] ?? ''}');
+        _appendSystem(trp('chatc_approval_pending', {'p0': evt.data['tool'] ?? ''}));
       case EvtType.error:
         _appendSystem('⚠️ ${evt.data['msg'] ?? evt.data['message'] ?? '错误'}');
       // 【0.2.0】上下文压缩通知（先生决策：App 显示提示条）
       case EvtType.context:
         if ((evt.data['action']?.toString() ?? '') == 'summarized') {
           final removed = evt.data['removed']?.toString() ?? '?';
-          _appendSystem('📋 上下文已压缩（移除 $removed 条旧消息——历史已存档可回溯）');
+          _appendSystem(trp('chatc_context_compressed_old_messages_removed', {'p0': '$removed'}));
           state = state.copyWith(contextCompressed: true);
         }
       // 【0.2.0】工具错误卡片（先生决策：17 类详细说明）
       case EvtType.toolError:
         _appendToolError(
-          evt.data['name']?.toString() ?? '工具',
+          evt.data['name']?.toString() ?? tr('chatc_tool'),
           evt.data['error_type']?.toString() ?? 'Unknown',
           evt.data['error']?.toString() ?? '',
           evt.data['action']?.toString() ?? '',
@@ -214,13 +215,13 @@ class ChatController extends StateNotifier<ChatState> {
         );
       // 【0.2.0】语音事件
       case EvtType.ttsResult:
-        _appendSystem('🔊 语音合成完成：${evt.data['file']}');
+        _appendSystem(trp('chatc_tts_done', {'p0': evt.data['file']}));
       case EvtType.ttsError:
-        _appendSystem('⚠️ 语音合成失败：${evt.data['msg'] ?? evt.data['error'] ?? '未知'}');
+        _appendSystem(trp('chatc_tts_failed', {'p0': evt.data['msg'] ?? evt.data['error'] ?? tr('dash_unknown_error')}));
       case EvtType.sttResult:
-        _appendSystem('🎤 识别结果：${evt.data['text']}');
+        _appendSystem(trp('chatc_stt_result', {'p0': evt.data['text']}));
       case EvtType.sttError:
-        _appendSystem('⚠️ 语音识别失败：${evt.data['msg'] ?? evt.data['error'] ?? '未知'}');
+        _appendSystem(trp('chatc_stt_failed', {'p0': evt.data['msg'] ?? evt.data['error'] ?? tr('dash_unknown_error')}));
       // 【0.1.9】chat_event 解包：服务端把 AI 事件包装为 {"type":"chat_event","data":{...}}
       case EvtType.chatEvent:
         final inner = evt.data['data'];
@@ -400,10 +401,10 @@ class ChatController extends StateNotifier<ChatState> {
       });
       _appendSystem(
           always
-              ? '✅ 已设为始终允许：$tool（后续同类操作自动批准）'
-              : (approve ? '✅ 已批准：$tool' : '⛔ 已拒绝：$tool'));
+              ? trp('chatc_set_to_always_allow_similar_actions_auto', {'p0': '$tool'})
+              : (approve ? trp('chatc_approved', {'p0': '$tool'}) : trp('chatc_rejected', {'p0': '$tool'})));
     } catch (e) {
-      _appendSystem('⚠️ 审批回执发送失败：$e');
+      _appendSystem(trp('chatc_failed_to_send_approval_receipt', {'p0': '$e'}));
     }
   }
 

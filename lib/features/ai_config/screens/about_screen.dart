@@ -5,6 +5,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import '../../core/i18n/app_i18n.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/app_info.dart';
@@ -25,7 +26,7 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
     final connected = cm.isConnected;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('关于')),
+      appBar: AppBar(title: Text(tr('about'))),
       body: ListView(
         padding: const EdgeInsets.all(24),
         children: [
@@ -72,16 +73,16 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
           _info(
             connected ? Icons.dns_outlined : Icons.cloud_off_outlined,
             'Server',
-            connected ? AppInfo.serverDisplay : '未连接（无法获知）',
+            connected ? AppInfo.serverDisplay : tr('unknowable'),
             dim: !connected,
           ),
-          _info(Icons.account_tree_outlined, '架构', '核心/通讯/配置/数据/插件/安全/AI/天气'),
-          _info(Icons.folder_open, '数据根', AppInfo.dataRoot),
-          _info(Icons.link, '仓库', AppInfo.repo),
-          _info(Icons.palette_outlined, '界面', 'FUI v2 · 灰白地形'),
+          _info(Icons.account_tree_outlined, tr('about_architecture'), tr('about_core_comm_config_data_plugin_security_ai')),
+          _info(Icons.folder_open, tr('about_data_root'), AppInfo.dataRoot),
+          _info(Icons.link, tr('about_repository'), AppInfo.repo),
+          _info(Icons.palette_outlined, tr('grp_ui'), tr('about_fui_v2_gray_white_terrain')),
           const SizedBox(height: 20),
-          const Center(
-            child: Text('© 2026 LING OS · 本地优先 · 隐私第一',
+          Center(
+            child: Text(tr('about_2026_ling_os_local_first_privacy_first'),
                 style: TextStyle(fontSize: 10, color: AppColors.dim)),
           ),
         ],

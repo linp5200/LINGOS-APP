@@ -2,6 +2,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import '../../core/i18n/app_i18n.dart';
 
 import '../../../core/storage/app_store.dart';
 import '../../../core/theme/app_theme.dart';
@@ -53,49 +54,49 @@ class _NotifScreenState extends State<NotifScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('通知与后台')),
+      appBar: AppBar(title: Text(tr('cfg_notifications_background'))),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : ListView(
               padding: const EdgeInsets.all(16),
               children: [
-                _section('通知'),
+                _section(tr('notif_notifications')),
                 SwitchListTile(
                   value: _alertNotif,
                   onChanged: (v) => _setBool('notif_alert', v, () => _alertNotif = v),
-                  title: const Text('预警通知', style: TextStyle(fontSize: 14)),
-                  subtitle: const Text('服务端预警 → App 推送', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                  title: Text(tr('notif_alert_notifications'), style: TextStyle(fontSize: 14)),
+                  subtitle: Text(tr('notif_server_alerts_app_push'), style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
                 ),
                 SwitchListTile(
                   value: _capsule,
                   onChanged: (v) => _setBool('notif_capsule', v, () => _capsule = v),
-                  title: const Text('灵动胶囊 / 焦点通知', style: TextStyle(fontSize: 14)),
-                  subtitle: const Text('安卓16+ 常驻通知呈现（Redmi HyperOS）', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                  title: Text(tr('notif_dynamic_capsule_focus_notification'), style: TextStyle(fontSize: 14)),
+                  subtitle: Text(tr('notif_android_16_persistent_notification_redmi'), style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
                 ),
                 SwitchListTile(
                   value: _taskNotif,
                   onChanged: (v) => _setBool('notif_task', v, () => _taskNotif = v),
-                  title: const Text('任务通知', style: TextStyle(fontSize: 14)),
-                  subtitle: const Text('允许 AI / agent 主动通知你 + 预警联动', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                  title: Text(tr('notif_task_notifications'), style: TextStyle(fontSize: 14)),
+                  subtitle: Text(tr('notif_let_ai_agents_notify_you_proactively_alert'), style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
                 ),
                 const Divider(),
-                _section('后台'),
+                _section(tr('notif_background')),
                 SwitchListTile(
                   value: _keepAlive,
                   onChanged: (v) => _setBool('keep_alive', v, () => _keepAlive = v),
-                  title: const Text('后台保活', style: TextStyle(fontSize: 14)),
-                  subtitle: const Text('前台服务 + 常驻通知——保持 WS 连接', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                  title: Text(tr('notif_keep_alive_in_background'), style: TextStyle(fontSize: 14)),
+                  subtitle: Text(tr('notif_foreground_service_persistent_notification'), style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
                 ),
                 ListTile(
                   leading: const Icon(Icons.hourglass_bottom, size: 20, color: AppColors.textSecondary),
-                  title: const Text('后台模式', style: TextStyle(fontSize: 14)),
+                  title: Text(tr('notif_background_mode'), style: TextStyle(fontSize: 14)),
                   trailing: DropdownButton<String>(
                     value: _bgMode,
                     underline: const SizedBox.shrink(),
-                    items: const [
-                      DropdownMenuItem(value: 'allow', child: Text('允许（常驻）')),
-                      DropdownMenuItem(value: 'allow_minutes', child: Text('限时')),
-                      DropdownMenuItem(value: 'deny', child: Text('拒绝（退后台即断）')),
+                    items: [
+                      DropdownMenuItem(value: 'allow', child: Text(tr('notif_allow_persistent'))),
+                      DropdownMenuItem(value: 'allow_minutes', child: Text(tr('notif_timed'))),
+                      DropdownMenuItem(value: 'deny', child: Text(tr('notif_deny_disconnect_when_backgrounded'))),
                     ],
                     onChanged: (v) async {
                       if (v == null) return;
@@ -105,24 +106,24 @@ class _NotifScreenState extends State<NotifScreen> {
                   ),
                 ),
                 const Divider(),
-                _section('后台权限（跳系统设置）'),
+                _section(tr('notif_background_permissions_system_settings')),
                 ListTile(
                   leading: const Icon(Icons.battery_charging_full, size: 20, color: AppColors.brandCyan),
-                  title: const Text('电池优化', style: TextStyle(fontSize: 14)),
-                  subtitle: const Text('请求忽略电池优化——保活关键', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                  title: Text(tr('notif_battery_optimization'), style: TextStyle(fontSize: 14)),
+                  subtitle: Text(tr('notif_request_ignoring_battery_optimization_key'), style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
                   trailing: const Icon(Icons.chevron_right, size: 18, color: AppColors.textSecondary),
                   onTap: () => _openBatterySettings(),
                 ),
                 ListTile(
                   leading: const Icon(Icons.power_settings_new, size: 20, color: AppColors.brandCyan),
-                  title: const Text('自启动', style: TextStyle(fontSize: 14)),
-                  subtitle: const Text('厂商自启动权限（MIUI 需引导设置）', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                  title: Text(tr('notif_auto_start'), style: TextStyle(fontSize: 14)),
+                  subtitle: Text(tr('notif_vendor_auto_start_permission_miui_needs'), style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
                   trailing: const Icon(Icons.chevron_right, size: 18, color: AppColors.textSecondary),
                   onTap: () => _openAutoStartSettings(),
                 ),
                 const SizedBox(height: 16),
-                const Text(
-                  '断线重连：指数退避 1s/2s/4s...上限30s（协议 v3 已定义）',
+                Text(
+                  tr('notif_reconnect_exponential_backoff_1s_2s_4s_max'),
                   style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
                 ),
               ],
@@ -132,13 +133,13 @@ class _NotifScreenState extends State<NotifScreen> {
 
   void _openBatterySettings() {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('请在系统设置中允许 LING OS 忽略电池优化（省电策略→无限制）')),
+      SnackBar(content: Text(tr('notif_please_allow_ling_os_to_ignore_battery'))),
     );
   }
 
   void _openAutoStartSettings() {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('请在系统设置中开启 LING OS 自启动权限（应用管理→自启动）')),
+      SnackBar(content: Text(tr('notif_please_enable_auto_start_for_ling_os_app'))),
     );
   }
 

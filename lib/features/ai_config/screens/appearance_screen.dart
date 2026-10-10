@@ -7,6 +7,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import '../../core/i18n/app_i18n.dart';
 
 import '../../../core/storage/app_store.dart';
 import '../../../core/theme/app_theme.dart';
@@ -56,24 +57,24 @@ class _AppearanceScreenState extends State<AppearanceScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('外观与偏好')),
+      appBar: AppBar(title: Text(tr('cfg_appearance_preferences'))),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : ListView(
               padding: const EdgeInsets.all(16),
               children: [
-                _section('外观'),
+                _section(tr('look_appearance')),
                 // 主题：深/浅/跟随系统
                 ListTile(
                   leading: const Icon(Icons.brightness_6_outlined, size: 20),
-                  title: const Text('主题'),
+                  title: Text(tr('look_theme')),
                   trailing: DropdownButton<String>(
                     value: _themeMode,
                     underline: const SizedBox.shrink(),
-                    items: const [
-                      DropdownMenuItem(value: 'system', child: Text('跟随系统')),
-                      DropdownMenuItem(value: 'light', child: Text('浅色')),
-                      DropdownMenuItem(value: 'dark', child: Text('深色')),
+                    items: [
+                      DropdownMenuItem(value: 'system', child: Text(tr('look_follow_system'))),
+                      DropdownMenuItem(value: 'light', child: Text(tr('look_light'))),
+                      DropdownMenuItem(value: 'dark', child: Text(tr('look_dark'))),
                     ],
                     onChanged: (v) async {
                       if (v == null) return;
@@ -89,45 +90,45 @@ class _AppearanceScreenState extends State<AppearanceScreen> {
                     setState(() => _accentDynamic = v);
                     await _store.saveAccentDynamic(v);
                   },
-                  title: const Text('强调色动态取色'),
-                  subtitle: const Text('跟随系统动态色（Material You）——关闭时使用品牌红',
+                  title: Text(tr('look_dynamic_accent_color')),
+                  subtitle: Text(tr('look_follow_system_dynamic_color_material_you'),
                       style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
                 ),
                 const Divider(),
-                _section('消息偏好（默认全开）'),
-                _prefSwitch('思考过程显示', 'thinking', 'AI 推理过程灰色流式显示'),
-                _prefSwitch('工具调用显示', 'tool', '工具调用与结果展示'),
-                _prefSwitch('流式打字动画', 'streaming', '逐字渲染回复'),
-                _prefSwitch('代码高亮', 'codeHighlight', 'Markdown 代码块着色'),
+                _section(tr('look_message_preferences_all_on_by_default')),
+                _prefSwitch(tr('look_show_thinking_process'), 'thinking', tr('look_stream_ai_reasoning_in_gray')),
+                _prefSwitch(tr('look_show_tool_calls'), 'tool', tr('look_show_tool_calls_and_results')),
+                _prefSwitch(tr('look_streaming_typewriter_animation'), 'streaming', tr('look_render_replies_character_by_character')),
+                _prefSwitch(tr('look_code_highlighting'), 'codeHighlight', tr('look_colorize_markdown_code_blocks')),
                 // 【0.2.1 #5】流式思考展开思考链——控制思考链默认展开/收缩
-                _prefSwitch('流式思考展开思考链', 'thinkExpand', '思考块默认展开（关=默认收缩，点击展开）'),
+                _prefSwitch(tr('look_expand_thinking_chain_while_streaming'), 'thinkExpand', tr('look_thinking_blocks_expanded_by_default_off')),
                 // 【0.2.1 #4】工具块默认展开
-                _prefSwitch('工具块默认展开', 'toolExpand', '工具块默认展开（关=默认收缩，点击展开查看参数/结果）'),
+                _prefSwitch(tr('look_tool_blocks_expanded_by_default'), 'toolExpand', tr('look_tool_blocks_expanded_by_default_off')),
                 const Divider(),
                 // 【0.2.1 #7】开局显示设置——三选项平铺
-                _section('启动显示'),
-                const Text('启动应用后首先显示',
+                _section(tr('look_startup_screen')),
+                Text(tr('look_show_first_when_the_app_starts'),
                     style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
                 const SizedBox(height: 8),
                 Wrap(
                   spacing: 8,
                   children: [
-                    _startScreenChip('last', '上一次的会话', Icons.history),
-                    _startScreenChip('sessions', '会话列表', Icons.forum_outlined),
-                    _startScreenChip('dashboard', '仪表盘', Icons.dashboard_outlined),
+                    _startScreenChip('last', tr('look_last_session'), Icons.history),
+                    _startScreenChip('sessions', tr('look_session_list'), Icons.forum_outlined),
+                    _startScreenChip('dashboard', tr('nav_dashboard'), Icons.dashboard_outlined),
                   ],
                 ),
                 const Divider(),
-                _section('语言'),
+                _section(tr('look_language')),
                 ListTile(
                   leading: const Icon(Icons.language_outlined, size: 20),
-                  title: const Text('App 语言'),
+                  title: Text(tr('look_app_language')),
                   trailing: DropdownButton<String>(
                     value: _language,
                     underline: const SizedBox.shrink(),
-                    items: const [
-                      DropdownMenuItem(value: 'system', child: Text('跟随系统')),
-                      DropdownMenuItem(value: 'zh', child: Text('中文')),
+                    items: [
+                      DropdownMenuItem(value: 'system', child: Text(tr('look_follow_system'))),
+                      DropdownMenuItem(value: 'zh', child: Text(tr('look_chinese'))),
                       DropdownMenuItem(value: 'en', child: Text('English')),
                     ],
                     onChanged: (v) async {
@@ -138,20 +139,20 @@ class _AppearanceScreenState extends State<AppearanceScreen> {
                   ),
                 ),
                 const Divider(),
-                _section('隐私与数据'),
+                _section(tr('look_privacy_data')),
                 SwitchListTile(
                   value: _analytics,
                   onChanged: (v) async {
                     setState(() => _analytics = v);
                     await _store.saveAnalytics(v);
                   },
-                  title: const Text('匿名统计'),
-                  subtitle: const Text('默认关闭——隐私第一（数据仅存主机、加密）',
+                  title: Text(tr('look_anonymous_analytics')),
+                  subtitle: Text(tr('look_off_by_default_privacy_first_data_stays_on'),
                       style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
                 ),
                 const SizedBox(height: 24),
-                const Text(
-                  '语言联动：服务端 lang 列表将同步至此（后续批次——当前支持中/英/系统）',
+                Text(
+                  tr('look_language_sync_the_server_lang_list_will'),
                   style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
                 ),
               ],

@@ -4,6 +4,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import '../../core/i18n/app_i18n.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -76,14 +77,14 @@ class _LogsScreenState extends ConsumerState<LogsScreen> {
       if (!mounted) return;
       if (resp == null) {
         setState(() {
-          _serverErr = '未连接主机或请求超时——连接后重试';
+          _serverErr = tr('log_host_not_connected_or_request_timed_out');
           _serverLoading = false;
         });
         return;
       }
       if (resp['status'] != 'ok') {
         setState(() {
-          _serverErr = '读取失败：${resp['msg'] ?? resp['status']}';
+          _serverErr = trp('log_read_failed', {'p0': resp['msg'] ?? resp['status']});
           _serverLoading = false;
         });
         return;
@@ -99,7 +100,7 @@ class _LogsScreenState extends ConsumerState<LogsScreen> {
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _serverErr = '读取异常：$e';
+        _serverErr = trp('log_read_error', {'p0': '$e'});
         _serverLoading = false;
       });
     }
@@ -111,22 +112,22 @@ class _LogsScreenState extends ConsumerState<LogsScreen> {
       length: 2,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('日志'),
-          bottom: const TabBar(
+          title: Text(tr('cfg_logs')),
+          bottom: TabBar(
             tabs: [
-              Tab(text: 'App 日志', height: 40),
-              Tab(text: '服务端日志', height: 40),
+              Tab(text: tr('log_app_logs'), height: 40),
+              Tab(text: tr('log_server_logs'), height: 40),
             ],
           ),
           actions: [
             IconButton(
               icon: const Icon(Icons.copy, size: 20),
-              tooltip: '导出日志',
+              tooltip: tr('log_export_logs'),
               onPressed: _copyLogs,
             ),
             IconButton(
               icon: const Icon(Icons.delete_outline, size: 20),
-              tooltip: '清空（App 日志）',
+              tooltip: tr('log_clear_app_logs'),
               onPressed: () {
                 _logger.clear();
                 setState(() {});
@@ -152,31 +153,31 @@ class _LogsScreenState extends ConsumerState<LogsScreen> {
           dense: true,
           value: _enabled,
           onChanged: _toggle,
-          title: const Text('记录日志', style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
-          subtitle: const Text('关闭后不再记录新日志（连接/WS/命令）',
+          title: Text(tr('log_logging'), style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+          subtitle: Text(tr('log_when_off_no_new_logs_are_recorded_connect'),
               style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
         ),
         SwitchListTile(
           dense: true,
           value: _saveToFile,
           onChanged: _toggleSave,
-          title: const Text('保存到文件', style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
-          subtitle: const Text('默认关=仅导出落盘；开=保留全部日志到文件',
+          title: Text(tr('log_save_to_file'), style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+          subtitle: Text(tr('log_off_by_default_only_exports_are_written_on'),
               style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
         ),
         Container(
           width: double.infinity,
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           color: AppColors.surface,
-          child: const Text(
-            '显示最近 100 行——导出时落盘',
+          child: Text(
+            tr('log_shows_the_last_100_lines_written_to_disk_on'),
             style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
           ),
         ),
         Expanded(
           child: _logger.recentLogs.isEmpty
-              ? const Center(
-                  child: Text('暂无日志——连接后自动记录', style: TextStyle(color: AppColors.textSecondary)),
+              ? Center(
+                  child: Text(tr('log_no_logs_yet_recording_starts_after'), style: TextStyle(color: AppColors.textSecondary)),
                 )
               : ListView.builder(
                   padding: const EdgeInsets.all(12),
@@ -217,7 +218,7 @@ class _LogsScreenState extends ConsumerState<LogsScreen> {
             children: [
               Expanded(
                 child: Text(
-                  connected ? '主机日志 /LINGOS/log/lingos.log · 最近 120 行' : '未连接主机——连接后拉取服务端日志',
+                  connected ? tr('log_host_logs_lingos_log_lingos_log_last_120') : tr('log_host_not_connected_server_logs_are_fetched'),
                   style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
                 ),
               ),
@@ -226,7 +227,7 @@ class _LogsScreenState extends ConsumerState<LogsScreen> {
                     ? const SizedBox(
                         width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
                     : const Icon(Icons.refresh, size: 18),
-                tooltip: '刷新服务端日志',
+                tooltip: tr('log_refresh_server_logs'),
                 onPressed: _serverLoading ? null : _loadServerLog,
               ),
             ],
@@ -247,13 +248,13 @@ class _LogsScreenState extends ConsumerState<LogsScreen> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Text('尚未拉取——点右上刷新按钮读取服务端日志',
+                          Text(tr('log_not_fetched_yet_tap_refresh_to_read_server'),
                               style: TextStyle(color: AppColors.textSecondary, fontSize: 12)),
                           const SizedBox(height: 12),
                           FilledButton.icon(
                             onPressed: _loadServerLog,
                             icon: const Icon(Icons.download, size: 16),
-                            label: const Text('拉取服务端日志'),
+                            label: Text(tr('log_fetch_server_logs')),
                           ),
                         ],
                       ),
@@ -291,6 +292,6 @@ class _LogsScreenState extends ConsumerState<LogsScreen> {
   Future<void> _copyLogs() async {
     await Clipboard.setData(ClipboardData(text: _logger.exportText()));
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('日志已导出——可粘贴分享')));
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('log_logs_exported_ready_to_paste_and_share'))));
   }
 }

@@ -4,20 +4,22 @@
 library;
 
 import 'dart:async';
+import '../../core/i18n/app_i18n.dart';
 
 import 'package:flutter/material.dart';
 
 import '../../../core/storage/app_store.dart';
 import '../../../core/theme/app_theme.dart';
 
-const kDistros = [
-  {'id': 'alpine', 'name': 'Alpine', 'desc': '轻量 ~50MB——快速启动', 'icon': Icons.landscape_outlined,
+/// 【i18n】改为 getter：发行版描述经 tr() 后需在每次访问时求值
+List<Map<String, Object>> get kDistros => [
+  {'id': 'alpine', 'name': 'Alpine', 'desc': tr('rootfs_lightweight_50mb_fast_start'), 'icon': Icons.landscape_outlined,
    'url': 'https://mirrors.aliyun.com/alpine/latest-stable/releases/aarch64/alpine-minirootfs-3.24.0-aarch64.tar.gz',
    'size': '~3MB'},
-  {'id': 'ubuntu', 'name': 'Ubuntu', 'desc': '通用 apt——生态完整', 'icon': Icons.circle_outlined,
-   'url': 'https://mirrors.aliyun.com/ubuntu-cloud-images/', 'size': '~400MB（需选版本）'},
-  {'id': 'debian', 'name': 'Debian', 'desc': '稳定源——服务器常用', 'icon': Icons.hexagon_outlined,
-   'url': 'https://mirrors.aliyun.com/debian-cd/', 'size': '~350MB（需选版本）'},
+  {'id': 'ubuntu', 'name': 'Ubuntu', 'desc': tr('rootfs_general_purpose_apt_full_ecosystem'), 'icon': Icons.circle_outlined,
+   'url': 'https://mirrors.aliyun.com/ubuntu-cloud-images/', 'size': tr('rootfs_400mb_pick_a_version')},
+  {'id': 'debian', 'name': 'Debian', 'desc': tr('rootfs_stable_repos_common_on_servers'), 'icon': Icons.hexagon_outlined,
+   'url': 'https://mirrors.aliyun.com/debian-cd/', 'size': tr('rootfs_350mb_pick_a_version')},
 ];
 
 class RootfsScreen extends StatefulWidget {
@@ -60,18 +62,13 @@ class _RootfsScreenState extends State<RootfsScreen> {
     await showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text('${distro['name']} · 安装引擎开发中'),
-        content: const Text(
-          'rootfs 下载与解压引擎尚未实现——本页暂不支持真实安装。\n\n'
-          '为避免「假安装」误导，此处不做任何模拟：\n'
-          '· 不会写入假的安装记录\n'
-          '· 不会伪造下载进度\n\n'
-          '当前如已在系统中手动部署 rootfs（如 Termux/proot 环境），\n'
-          '可在下方直接填写 proot 路径与 rootfs 目录进行登记。',
+        title: Text(trp('rootfs_engine_in_development', {'p0': distro['name']})),
+        content: Text(
+          tr('rootfs_the_rootfs_download_extract_engine_is_not'),
           style: TextStyle(fontSize: 13, height: 1.6),
         ),
         actions: [
-          FilledButton(onPressed: () => Navigator.pop(ctx), child: const Text('知道了')),
+          FilledButton(onPressed: () => Navigator.pop(ctx), child: Text(tr('rootfs_got_it'))),
         ],
       ),
     );
@@ -82,7 +79,7 @@ class _RootfsScreenState extends State<RootfsScreen> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('proot 二进制路径'),
+        title: Text(tr('rootfs_proot_binary_path')),
         content: TextField(
           controller: ctrl,
           style: const TextStyle(fontSize: 13),
@@ -92,8 +89,8 @@ class _RootfsScreenState extends State<RootfsScreen> {
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('取消')),
-          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('保存')),
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr('cancel'))),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(tr('save'))),
         ],
       ),
     );
@@ -107,11 +104,11 @@ class _RootfsScreenState extends State<RootfsScreen> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('卸载沙箱'),
-        content: const Text('删除 rootfs（保留配置）。确认卸载？'),
+        title: Text(tr('rootfs_uninstall_sandbox')),
+        content: Text(tr('rootfs_delete_the_rootfs_config_kept_uninstall')),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('取消')),
-          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('卸载')),
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr('cancel'))),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(tr('rootfs_uninstall'))),
         ],
       ),
     );
@@ -125,7 +122,7 @@ class _RootfsScreenState extends State<RootfsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Rootfs 本地沙箱管理')),
+      appBar: AppBar(title: Text(tr('rootfs_rootfs_sandbox_management'))),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : _rootfs == null
@@ -141,15 +138,15 @@ class _RootfsScreenState extends State<RootfsScreen> {
         children: [
           const Icon(Icons.developer_board_outlined, size: 56, color: AppColors.textSecondary),
           const SizedBox(height: 16),
-          const Text('未安装沙箱——选择发行版安装', style: TextStyle(color: AppColors.textSecondary)),
+          Text(tr('rootfs_no_sandbox_installed_pick_a_distro_to'), style: TextStyle(color: AppColors.textSecondary)),
           const SizedBox(height: 16),
           FilledButton.icon(
             onPressed: _installFlow,
             icon: const Icon(Icons.construction, size: 18),
-            label: const Text('安装沙箱（开发中）'),
+            label: Text(tr('rootfs_install_sandbox_in_development')),
           ),
           const SizedBox(height: 24),
-          const Text('技术：PRoot（无需 root）——与 RikkaHub 同源\n特殊场景：主机下线时可作备用主机/运行服务端',
+          Text(tr('rootfs_technical_proot_no_root_same_lineage_as'),
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 11, color: AppColors.textSecondary, height: 1.6)),
         ],
@@ -177,15 +174,15 @@ class _RootfsScreenState extends State<RootfsScreen> {
                 children: [
                   const Icon(Icons.check_circle, size: 20, color: Colors.green),
                   const SizedBox(width: 8),
-                  Text('${r['name']} 已安装',
+                  Text(trp('rootfs_distro_installed', {'p0': r['name']}),
                       style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
                 ],
               ),
               const SizedBox(height: 12),
-              _info('rootfs 路径', r['path']?.toString() ?? ''),
-              _info('大小', r['size']?.toString() ?? ''),
-              _info('proot 路径', r['prootPath']?.toString() ?? '未配置'),
-              _info('安装时间',
+              _info(tr('rootfs_rootfs_path'), r['path']?.toString() ?? ''),
+              _info(tr('rootfs_size'), r['size']?.toString() ?? ''),
+              _info(tr('rootfs_proot_path'), r['prootPath']?.toString() ?? tr('rootfs_not_configured')),
+              _info(tr('rootfs_installed_at'),
                   r['installedAt'] != null
                       ? DateTime.fromMillisecondsSinceEpoch((r['installedAt'] as num).toInt())
                           .toString()
@@ -198,25 +195,25 @@ class _RootfsScreenState extends State<RootfsScreen> {
         // 配置
         ListTile(
           leading: const Icon(Icons.settings_outlined, size: 20, color: AppColors.brandCyan),
-          title: const Text('proot 路径', style: TextStyle(fontSize: 14)),
-          subtitle: Text(r['prootPath']?.toString() ?? '未配置——点击设置',
+          title: Text(tr('rootfs_proot_path'), style: TextStyle(fontSize: 14)),
+          subtitle: Text(r['prootPath']?.toString() ?? tr('rootfs_not_configured_tap_to_set'),
               style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
           onTap: _editProotPath,
         ),
-        const ListTile(
+        ListTile(
           leading: Icon(Icons.memory, size: 20, color: AppColors.textSecondary),
-          title: Text('CPU 限制', style: TextStyle(fontSize: 14)),
-          trailing: Text('默认（全部）', style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+          title: Text(tr('rootfs_cpu_limit'), style: TextStyle(fontSize: 14)),
+          trailing: Text(tr('rootfs_default_all'), style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
         ),
-        const ListTile(
+        ListTile(
           leading: Icon(Icons.speed, size: 20, color: AppColors.textSecondary),
-          title: Text('内存上限', style: TextStyle(fontSize: 14)),
-          trailing: Text('默认', style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+          title: Text(tr('rootfs_memory_limit'), style: TextStyle(fontSize: 14)),
+          trailing: Text(tr('rootfs_default'), style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
         ),
-        const ListTile(
+        ListTile(
           leading: Icon(Icons.shield_outlined, size: 20, color: AppColors.textSecondary),
-          title: Text('seccomp 策略', style: TextStyle(fontSize: 14)),
-          trailing: Text('标准', style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+          title: Text(tr('rootfs_seccomp_policy'), style: TextStyle(fontSize: 14)),
+          trailing: Text(tr('rootfs_standard'), style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
         ),
         const SizedBox(height: 12),
         // 操作
@@ -226,11 +223,11 @@ class _RootfsScreenState extends State<RootfsScreen> {
               child: FilledButton.icon(
                 onPressed: () {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('沙箱启动需 proot 二进制——配置路径后启用（本批为界面+引擎）')),
+                    SnackBar(content: Text(tr('rootfs_starting_the_sandbox_needs_the_proot_binary'))),
                   );
                 },
                 icon: const Icon(Icons.play_arrow, size: 18),
-                label: const Text('启动'),
+                label: Text(tr('rootfs_start')),
               ),
             ),
             const SizedBox(width: 8),
@@ -238,13 +235,13 @@ class _RootfsScreenState extends State<RootfsScreen> {
               child: OutlinedButton.icon(
                 onPressed: _uninstall,
                 icon: const Icon(Icons.delete_outline, size: 18),
-                label: const Text('卸载'),
+                label: Text(tr('rootfs_uninstall')),
               ),
             ),
           ],
         ),
         const SizedBox(height: 16),
-        const Text('运行中应用列表——引擎接入后显示\n（本批完成：安装向导/状态/配置/rootfs 下载——proot 运行引擎下一批对接先生环境 Termux）',
+        Text(tr('rootfs_running_app_list_appears_once_the_engine_is'),
             style: TextStyle(fontSize: 11, color: AppColors.textSecondary, height: 1.6)),
       ],
     );
@@ -274,7 +271,7 @@ class _DistroSelectScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('选择发行版')),
+      appBar: AppBar(title: Text(tr('rootfs_choose_a_distro'))),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -291,8 +288,8 @@ class _DistroSelectScreen extends StatelessWidget {
               ),
             ),
           const SizedBox(height: 12),
-          const Text(
-            'Ubuntu/Debian 需选版本镜像（安装向导将展开版本列表）——本批 Alpine 可直接下载',
+          Text(
+            tr('rootfs_ubuntu_debian_need_a_version_image_the'),
             style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
           ),
         ],

@@ -3,6 +3,7 @@
 library;
 
 import 'dart:async';
+import '../../core/i18n/app_i18n.dart';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -73,7 +74,7 @@ class _HaScreenState extends ConsumerState<HaScreen> {
                 Expanded(
                   child: TextField(
                     controller: _queryCtrl,
-                    decoration: const InputDecoration(hintText: '搜索 HA 事件（如 温度/灯/设备）'),
+                    decoration: InputDecoration(hintText: tr('ha_search_ha_events_e_g_temperature_light')),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -88,7 +89,7 @@ class _HaScreenState extends ConsumerState<HaScreen> {
             child: _loading
                 ? const Center(child: CircularProgressIndicator())
                 : _events.isEmpty
-                    ? const Center(child: Text('无事件——输入关键词搜索', style: TextStyle(color: AppColors.textSecondary)))
+                    ? Center(child: Text(tr('ha_no_events_enter_a_keyword_to_search'), style: TextStyle(color: AppColors.textSecondary)))
                     : ListView.builder(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         itemCount: _events.length,
@@ -98,7 +99,7 @@ class _HaScreenState extends ConsumerState<HaScreen> {
                             margin: const EdgeInsets.only(bottom: 8),
                             child: ListTile(
                               leading: const Icon(Icons.home_work_outlined, size: 20, color: AppColors.brandCyan),
-                              title: Text(e['title']?.toString() ?? e['type']?.toString() ?? '事件'),
+                              title: Text(e['title']?.toString() ?? e['type']?.toString() ?? tr('ha_events')),
                               subtitle: Text(e['content']?.toString() ?? e['summary']?.toString() ?? ''),
                               trailing: Text(e['time']?.toString() ?? e['ts']?.toString() ?? '',
                                   style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),

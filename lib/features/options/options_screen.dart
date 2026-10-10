@@ -6,6 +6,7 @@
 library;
 
 import 'dart:async';
+import '../../core/i18n/app_i18n.dart';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -28,7 +29,8 @@ class _OptionsScreenState extends ConsumerState<OptionsScreen> {
   String? _error;
   StreamSubscription? _sub;
 
-  static const _groups = ['安全', '隐私', '功能', '界面', '语音', 'AI', '数据', '连接'];
+  /// 【i18n】改为 getter：分组名经 tr() 后需在每次 build 求值（index→显示名，纯展示）
+  static List<String> get _groups => [tr('grp_security'), tr('grp_privacy'), tr('grp_feature'), tr('grp_ui'), tr('grp_voice'), 'AI', tr('grp_data'), tr('grp_conn')];
 
   @override
   void initState() {
@@ -97,18 +99,18 @@ class _OptionsScreenState extends ConsumerState<OptionsScreen> {
         context: context,
         builder: (ctx) => AlertDialog(
           backgroundColor: AppColors.surface,
-          title: const Row(children: [
+          title: Row(children: [
             Icon(Icons.warning_amber_rounded, color: AppColors.brandRed, size: 20),
             SizedBox(width: 8),
-            Text('危险操作', style: TextStyle(fontSize: 15)),
+            Text(tr('optx_dangerous_action'), style: TextStyle(fontSize: 15)),
           ]),
-          content: Text('「${o['name_zh']}」是危险开关，关闭会降低安全性。确定继续？',
+          content: Text(trp('optx_danger_confirm_dyn', {'p0': o['name_zh']}),
               style: const TextStyle(fontSize: 12)),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('取消')),
+            TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr('cancel'))),
             TextButton(
               onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('确定', style: TextStyle(color: AppColors.brandRed)),
+              child: Text(tr('ok'), style: TextStyle(color: AppColors.brandRed)),
             ),
           ],
         ),
@@ -135,7 +137,7 @@ class _OptionsScreenState extends ConsumerState<OptionsScreen> {
     final connected = ref.watch(connectionProvider).isConnected;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('可选项'),
+        title: Text(tr('nav_options')),
         actions: [
           IconButton(icon: const Icon(Icons.refresh, size: 20), onPressed: _refresh),
         ],
@@ -157,13 +159,13 @@ class _OptionsScreenState extends ConsumerState<OptionsScreen> {
     );
   }
 
-  Widget _offline() => const Center(
+  Widget _offline() => Center(
         child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
           Icon(Icons.cloud_off_outlined, size: 40, color: AppColors.dim),
           SizedBox(height: 10),
-          Text('未连接主机', style: TextStyle(color: AppColors.textSecondary)),
+          Text(tr('not_connected'), style: TextStyle(color: AppColors.textSecondary)),
           SizedBox(height: 4),
-          Text('可选项需从主机读取', style: TextStyle(fontSize: 11, color: AppColors.dim)),
+          Text(tr('optx_options_must_be_read_from_the_host'), style: TextStyle(fontSize: 11, color: AppColors.dim)),
         ]),
       );
 
@@ -171,9 +173,9 @@ class _OptionsScreenState extends ConsumerState<OptionsScreen> {
         child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
           const Icon(Icons.error_outline, size: 40, color: AppColors.brandRed),
           const SizedBox(height: 10),
-          Text(_error ?? '加载失败', style: const TextStyle(color: AppColors.textSecondary)),
+          Text(_error ?? tr('optx_load_failed'), style: const TextStyle(color: AppColors.textSecondary)),
           const SizedBox(height: 10),
-          TextButton(onPressed: _refresh, child: const Text('重试')),
+          TextButton(onPressed: _refresh, child: Text(tr('retry'))),
         ]),
       );
 
@@ -192,30 +194,30 @@ class _OptionsScreenState extends ConsumerState<OptionsScreen> {
               size: 18,
               color: _privacyMode ? AppColors.brandGreen : AppColors.textSecondary),
           const SizedBox(width: 8),
-          const Text('隐私保护模式',
+          Text(tr('opt_privacy_mode'),
               style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
           const Spacer(),
-          Text(_privacyMode ? '已启用' : '未启用',
+          Text(_privacyMode ? tr('opt_enabled') : tr('opt_disabled'),
               style: TextStyle(
                   fontSize: 11,
                   color: _privacyMode ? AppColors.brandGreen : AppColors.dim)),
         ]),
         const SizedBox(height: 6),
-        const Text('一次性开启全部安全增强 + 隐私技术',
+        Text(tr('opt_privacy_desc'),
             style: TextStyle(fontSize: 10, color: AppColors.dim)),
         const SizedBox(height: 10),
         Row(children: [
           Expanded(
             child: OutlinedButton(
               onPressed: () => _privacyModeApply(true),
-              child: const Text('启用（最严）', style: TextStyle(fontSize: 11)),
+              child: Text(tr('opt_enable_strictest'), style: TextStyle(fontSize: 11)),
             ),
           ),
           const SizedBox(width: 8),
           Expanded(
             child: OutlinedButton(
               onPressed: () => _privacyModeApply(false),
-              child: const Text('恢复默认', style: TextStyle(fontSize: 11)),
+              child: Text(tr('opt_restore_default'), style: TextStyle(fontSize: 11)),
             ),
           ),
         ]),
@@ -293,9 +295,9 @@ class _OptionsScreenState extends ConsumerState<OptionsScreen> {
                         size: 13, color: AppColors.brandRed),
                   ),
                 if (needsCond)
-                  const Padding(
+                  Padding(
                     padding: EdgeInsets.only(left: 5),
-                    child: Text('需条件',
+                    child: Text(tr('opt_needs_condition'),
                         style: TextStyle(fontSize: 9, color: AppColors.brandAmber)),
                   ),
               ]),
@@ -307,7 +309,7 @@ class _OptionsScreenState extends ConsumerState<OptionsScreen> {
             ]),
           ),
           const SizedBox(width: 8),
-          Text(locked ? '底线' : (value ? '开' : '关'),
+          Text(locked ? tr('opt_locked') : (value ? tr('opt_on') : tr('opt_off')),
               style: TextStyle(
                   fontSize: 11,
                   color: locked

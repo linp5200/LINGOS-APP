@@ -5,6 +5,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import '../../core/i18n/app_i18n.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/providers.dart';
@@ -66,11 +67,11 @@ class _ConnSettingsScreenState extends ConsumerState<ConnSettingsScreen> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('退出登录'),
-        content: const Text('将清除本地 token 并吊销服务端会话，需重新认证。确认退出？'),
+        title: Text(tr('cset_log_out')),
+        content: Text(tr('cset_this_clears_the_local_token_and_revokes_the')),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('取消')),
-          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('退出')),
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr('cancel'))),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(tr('cset_exit'))),
         ],
       ),
     );
@@ -89,34 +90,34 @@ class _ConnSettingsScreenState extends ConsumerState<ConnSettingsScreen> {
     final mgr = ref.watch(connectionProvider);
     final connected = mgr.state == ConnState.authenticated;
     return Scaffold(
-      appBar: AppBar(title: const Text('连接与设置')),
+      appBar: AppBar(title: Text(tr('cset_connection_settings'))),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : ListView(
               padding: const EdgeInsets.all(16),
               children: [
-                _section('主机'),
+                _section(tr('home_host')),
                 // 【定案】主机IP 纯显示——不允许点击
                 ListTile(
                   leading: const Icon(Icons.dns_outlined, size: 20),
-                  title: const Text('主机IP'),
+                  title: Text(tr('cset_host_ip')),
                   subtitle: Text('$_host${_port != null ? ':$_port' : ''}',
                       style: const TextStyle(color: AppColors.textSecondary)),
                   enabled: false,
                 ),
                 ListTile(
                   leading: const Icon(Icons.vpn_key, size: 20),
-                  title: const Text('连接密钥'),
+                  title: Text(tr('cset_connection_key')),
                   subtitle: Text(
                       _token != null && _token!.isNotEmpty
                           ? '${_token!.substring(0, _token!.length > 8 ? 8 : _token!.length)}...'
-                          : '未认证',
+                          : tr('cset_not_authenticated'),
                       style: const TextStyle(color: AppColors.textSecondary)),
                 ),
                 ListTile(
                   leading: Icon(Icons.circle,
                       size: 14, color: connected ? Colors.green : AppColors.brandRed),
-                  title: const Text('连接状态'),
+                  title: Text(tr('cset_connection_status')),
                   subtitle: Text(mgr.state.name,
                       style: const TextStyle(color: AppColors.textSecondary)),
                 ),
@@ -125,8 +126,8 @@ class _ConnSettingsScreenState extends ConsumerState<ConnSettingsScreen> {
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
                   child: DropdownButtonFormField<String>(
                     initialValue: _connectionModeId,
-                    decoration: const InputDecoration(
-                      labelText: '连接方式',
+                    decoration: InputDecoration(
+                      labelText: tr('cset_connection_mode'),
                       border: OutlineInputBorder(),
                       isDense: true,
                     ),
@@ -152,9 +153,9 @@ class _ConnSettingsScreenState extends ConsumerState<ConnSettingsScreen> {
                     setState(() => _allowPlaintext = v);
                     await _store.saveAllowPlaintext(v);
                   },
-                  title: const Text('加密'),
-                  subtitle: const Text(
-                    '加密模式默认（wss://）——本地服务端无 TLS 时需开启明文（ws://）',
+                  title: Text(tr('conn_encrypted')),
+                  subtitle: Text(
+                    tr('cset_encrypted_by_default_wss_enable_plaintext'),
                     style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
                   ),
                 ),
@@ -165,9 +166,9 @@ class _ConnSettingsScreenState extends ConsumerState<ConnSettingsScreen> {
                     setState(() => _voiceProxy = v);
                     await _store.saveVoiceProxy(v);
                   },
-                  title: const Text('音频提供商使用服务端代理'),
-                  subtitle: const Text(
-                    '开：语音经主机端合成/识别（密钥存主机，词组机可用）\n关：App 本地直连提供商（密钥存本机）',
+                  title: Text(tr('cset_audio_providers_via_server_proxy')),
+                  subtitle: Text(
+                    tr('cset_on_speech_synthesized_recognized_on_the'),
                     style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
                   ),
                 ),
@@ -178,9 +179,9 @@ class _ConnSettingsScreenState extends ConsumerState<ConnSettingsScreen> {
                     setState(() => _autoRead = v);
                     await _store.saveAutoRead(v);
                   },
-                  title: const Text('自动朗读'),
-                  subtitle: const Text(
-                    'AI 回复完成后自动语音朗读（默认关）',
+                  title: Text(tr('cset_auto_read_aloud')),
+                  subtitle: Text(
+                    tr('cset_read_ai_replies_aloud_automatically_off_by'),
                     style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
                   ),
                 ),
@@ -191,9 +192,9 @@ class _ConnSettingsScreenState extends ConsumerState<ConnSettingsScreen> {
                     setState(() => _continuousChat = v);
                     await _store.saveContinuousChat(v);
                   },
-                  title: const Text('连续对话'),
-                  subtitle: const Text(
-                    '家居等语音场景默认连续对话（免按持续交互）；关 = 一次性交互',
+                  title: Text(tr('cset_continuous_chat')),
+                  subtitle: Text(
+                    tr('cset_continuous_chat_by_default_in_home_voice'),
                     style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
                   ),
                 ),
@@ -202,8 +203,8 @@ class _ConnSettingsScreenState extends ConsumerState<ConnSettingsScreen> {
                 // 【定案】退出登录——本页底部（红色）
                 ListTile(
                   leading: const Icon(Icons.logout, size: 20, color: AppColors.brandRed),
-                  title: const Text('退出登录', style: TextStyle(color: AppColors.brandRed)),
-                  subtitle: const Text('清除 token（加密存储）+ 吊销 + 设备解绑',
+                  title: Text(tr('cset_log_out'), style: TextStyle(color: AppColors.brandRed)),
+                  subtitle: Text(tr('cset_clear_token_encrypted_revoke_unbind_device'),
                       style: TextStyle(color: AppColors.textSecondary)),
                   onTap: _logout,
                 ),

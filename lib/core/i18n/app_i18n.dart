@@ -46,6 +46,16 @@ final appLangProvider =
 /// ★ 主用：无需 context 的取字符串
 String tr(String key) => AppStrings.get(key, AppLangState.current);
 
+/// 带占位符的取字符串（表中写 {p0}/{p1}，调用处传值）
+///   trp('chat_model_switched', {'p0': '$selected'})
+///   · 用于含插值的整句（避免把句子切成多段拼接、语序被写死）
+///   · 未知占位符保持原样（不抛异常，便于发现遗漏）
+String trp(String key, Map<String, String> vars) {
+  var s = tr(key);
+  vars.forEach((k, v) => s = s.replaceAll('{' + k + '}', v));
+  return s;
+}
+
 /// 上下文版（按 Localizations 精确判定）
 String trCtx(BuildContext context, String key) {
   final code = Localizations.localeOf(context).languageCode;

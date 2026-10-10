@@ -3,6 +3,7 @@
 library;
 
 import 'dart:async';
+import '../../core/i18n/app_i18n.dart';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -96,7 +97,7 @@ class _McpScreenState extends ConsumerState<McpScreen> {
 
   Future<void> _test(String name, String url) async {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('测试连接 $name（$url）——结果将在刷新后显示')),
+      SnackBar(content: Text(trp('mcp_testing_connection_to_result_appears_after', {'p0': '$name', 'p1': '$url'}))),
     );
     ref.read(connectionProvider).sendCommand({'cmd': 'mcp_test', 'name': name});
   }
@@ -110,7 +111,7 @@ class _McpScreenState extends ConsumerState<McpScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('额外的 MCP'),
+        title: Text(tr('mcp_extra_mcp')),
         actions: [
           IconButton(icon: const Icon(Icons.add, size: 22), onPressed: _add),
           IconButton(icon: const Icon(Icons.refresh, size: 20), onPressed: _loading ? null : _load),
@@ -125,7 +126,7 @@ class _McpScreenState extends ConsumerState<McpScreen> {
                     children: [
                       Text(_error!, style: const TextStyle(color: AppColors.brandRed)),
                       const SizedBox(height: 12),
-                      TextButton(onPressed: _load, child: const Text('重试')),
+                      TextButton(onPressed: _load, child: Text(tr('retry'))),
                     ],
                   ),
                 )
@@ -136,10 +137,10 @@ class _McpScreenState extends ConsumerState<McpScreen> {
                         children: [
                           const Icon(Icons.dns_outlined, size: 48, color: AppColors.textSecondary),
                           const SizedBox(height: 12),
-                          const Text('未配置 MCP 服务器——点击 + 添加',
+                          Text(tr('mcp_no_mcp_servers_configured_tap_to_add'),
                               style: TextStyle(color: AppColors.textSecondary)),
                           const SizedBox(height: 12),
-                          TextButton(onPressed: _add, child: const Text('添加 MCP')),
+                          TextButton(onPressed: _add, child: Text(tr('mcp_add_mcp'))),
                         ],
                       ),
                     )
@@ -153,8 +154,8 @@ class _McpScreenState extends ConsumerState<McpScreen> {
                             borderRadius: BorderRadius.circular(10),
                             border: Border.all(color: AppColors.divider),
                           ),
-                          child: const Text(
-                            'MCP（Model Context Protocol）：连接主机以外的外部工具服务器——工具注册为独立"MCP"技能组，AI 可调用。认证可选。',
+                          child: Text(
+                            tr('mcp_mcp_model_context_protocol_connect_external'),
                             style: TextStyle(fontSize: 11, color: AppColors.textSecondary, height: 1.5),
                           ),
                         ),
@@ -188,7 +189,7 @@ class _McpScreenState extends ConsumerState<McpScreen> {
                   child: Text(name,
                       style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
                 ),
-                Text(connected ? '已连接' : (status == 'failed' ? '连接失败' : '未连接'),
+                Text(connected ? tr('conn_connected') : (status == 'failed' ? tr('mcp_connection_failed') : tr('chat_not_connected')),
                     style: TextStyle(
                         fontSize: 11,
                         color: connected ? Colors.green : (status == 'failed' ? AppColors.brandRed : AppColors.textSecondary))),
@@ -196,7 +197,7 @@ class _McpScreenState extends ConsumerState<McpScreen> {
             ),
             const SizedBox(height: 4),
             Text(url, style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
-            Text('认证: ${auth == 'none' ? '无' : auth}',
+            Text(trp('mcp_auth', {'p0': auth == 'none' ? tr('mcp_no_auth') : auth}),
                 style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
             if (tools.isNotEmpty) ...[
               const SizedBox(height: 6),
@@ -223,7 +224,7 @@ class _McpScreenState extends ConsumerState<McpScreen> {
                 TextButton.icon(
                   onPressed: () => _test(name, url),
                   icon: const Icon(Icons.wifi_tethering, size: 14),
-                  label: const Text('测试', style: TextStyle(fontSize: 12)),
+                  label: Text(tr('mcp_test'), style: TextStyle(fontSize: 12)),
                 ),
                 const Spacer(),
                 IconButton(
@@ -255,15 +256,15 @@ class _McpAddScreenState extends State<_McpAddScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('添加 MCP')),
+      appBar: AppBar(title: Text(tr('mcp_add_mcp'))),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
           TextField(
             controller: _nameCtrl,
             style: const TextStyle(fontSize: 14),
-            decoration: const InputDecoration(
-              labelText: '名称（如 本地NAS）',
+            decoration: InputDecoration(
+              labelText: tr('mcp_name_e_g_home_nas'),
               border: OutlineInputBorder(),
               isDense: true,
             ),
@@ -272,21 +273,21 @@ class _McpAddScreenState extends State<_McpAddScreen> {
           TextField(
             controller: _urlCtrl,
             style: const TextStyle(fontSize: 14),
-            decoration: const InputDecoration(
-              labelText: '服务器 URL（http://...）',
+            decoration: InputDecoration(
+              labelText: tr('mcp_server_url_http'),
               hintText: 'http://192.168.1.100:3000/mcp',
               border: OutlineInputBorder(),
               isDense: true,
             ),
           ),
           const SizedBox(height: 16),
-          const Text('认证方式', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+          Text(tr('mcp_auth_method'), style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,
             children: [
               ChoiceChip(
-                label: const Text('无认证', style: TextStyle(fontSize: 12)),
+                label: Text(tr('mcp_no_auth'), style: TextStyle(fontSize: 12)),
                 selected: _authType == 'none',
                 onSelected: (_) => setState(() => _authType = 'none'),
               ),
@@ -325,10 +326,10 @@ class _McpAddScreenState extends State<_McpAddScreen> {
                       'auth_type': _authType,
                       'auth_token': _tokenCtrl.text.trim(),
                     }),
-            child: const Text('保存'),
+            child: Text(tr('save')),
           ),
           const SizedBox(height: 12),
-          const Text('MCP 工具将注册为独立"MCP"技能组——AI 对话中可直接调用',
+          Text(tr('mcp_mcp_tools_register_as_a_separate_mcp_skill'),
               style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
         ],
       ),

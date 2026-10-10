@@ -4,6 +4,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import '../../core/i18n/app_i18n.dart';
 
 import '../../core/theme/app_theme.dart';
 import '../connect/connect_screen.dart';
@@ -43,45 +44,47 @@ class _Category {
   const _Category(this.title, this.icon, this.items);
 }
 
-const List<_Category> _categories = [
-  _Category('连接与服务器', Icons.settings_ethernet_outlined, [
-    _CatItem('连接设置', Icons.link_outlined, ConnSettingsScreen()),
-    _CatItem('主机（认证）', Icons.dns_outlined, ConnectScreen()),
-    _CatItem('Rootfs 本地沙箱', Icons.developer_board_outlined, RootfsScreen()),
-    _CatItem('服务器模式', Icons.dns_outlined, ServerModeScreen()),   // 【0.7.0】远程开启/停止服务器
+/// 【i18n】改为 getter：文案用 tr() 后需在每次 build 求值（语言切换即时生效）
+List<_Category> get _categories => [
+
+  _Category(tr('cfg_connection_server'), Icons.settings_ethernet_outlined, [
+    _CatItem(tr('cfg_connection_settings'), Icons.link_outlined, ConnSettingsScreen()),
+    _CatItem(tr('cfg_host_authentication'), Icons.dns_outlined, ConnectScreen()),
+    _CatItem(tr('cfg_rootfs_local_sandbox'), Icons.developer_board_outlined, RootfsScreen()),
+    _CatItem(tr('cfg_server_mode'), Icons.dns_outlined, ServerModeScreen()),   // 【0.7.0】远程开启/停止服务器
   ]),
-  _Category('对话与 AI', Icons.smart_toy_outlined, [
-    _CatItem('模型提供商', Icons.add_circle_outline, ProvidersScreen()),
-    _CatItem('Token 用量', Icons.data_usage_outlined, TokenUsageScreen()),
-    _CatItem('人格', Icons.person_outline, PersonalityScreen()),
-    _CatItem('技能', Icons.extension_outlined, SkillsScreen()),
-    _CatItem('记忆管理', Icons.psychology_outlined, MemoryScreen()),
+  _Category(tr('cfg_chat_ai'), Icons.smart_toy_outlined, [
+    _CatItem(tr('cfg_model_providers'), Icons.add_circle_outline, ProvidersScreen()),
+    _CatItem(tr('cfg_token_usage'), Icons.data_usage_outlined, TokenUsageScreen()),
+    _CatItem(tr('cfg_personality'), Icons.person_outline, PersonalityScreen()),
+    _CatItem(tr('cfg_skills'), Icons.extension_outlined, SkillsScreen()),
+    _CatItem(tr('cfg_memory'), Icons.psychology_outlined, MemoryScreen()),
   ]),
-  _Category('语音', Icons.record_voice_over_outlined, [
-    _CatItem('语音提供商与测试', Icons.voice_over_off_outlined, ProvidersScreen()),
+  _Category(tr('grp_voice'), Icons.record_voice_over_outlined, [
+    _CatItem(tr('cfg_voice_providers_test'), Icons.voice_over_off_outlined, ProvidersScreen()),
   ]),
-  _Category('通知与后台', Icons.notifications_active_outlined, [
-    _CatItem('通知与后台', Icons.notifications_active_outlined, NotifScreen()),
-    _CatItem('特权（Shizuku）', Icons.security_outlined, PrivilegeScreen()),
+  _Category(tr('cfg_notifications_background'), Icons.notifications_active_outlined, [
+    _CatItem(tr('cfg_notifications_background'), Icons.notifications_active_outlined, NotifScreen()),
+    _CatItem(tr('cfg_privileges_shizuku'), Icons.security_outlined, PrivilegeScreen()),
   ]),
-  _Category('外观与主题', Icons.palette_outlined, [
-    _CatItem('外观与偏好', Icons.palette_outlined, AppearanceScreen()),
+  _Category(tr('cfg_appearance_theme'), Icons.palette_outlined, [
+    _CatItem(tr('cfg_appearance_preferences'), Icons.palette_outlined, AppearanceScreen()),
   ]),
-  _Category('会话与同步', Icons.sync_outlined, [
-    _CatItem('同步设置', Icons.sync_outlined, SyncSettingsScreen()),
-    _CatItem('会话管理', Icons.forum_outlined, SessionsScreen()),
+  _Category(tr('cfg_sessions_sync'), Icons.sync_outlined, [
+    _CatItem(tr('cfg_sync_settings'), Icons.sync_outlined, SyncSettingsScreen()),
+    _CatItem(tr('cfg_session_manager'), Icons.forum_outlined, SessionsScreen()),
   ]),
-  _Category('隐私与安全', Icons.lock_outline, [
-    _CatItem('权限管理', Icons.admin_panel_settings_outlined, PermissionScreen()),
-    _CatItem('挂载外部文件', Icons.folder_special_outlined, MountScreen()),
+  _Category(tr('cfg_privacy_security'), Icons.lock_outline, [
+    _CatItem(tr('cfg_permissions'), Icons.admin_panel_settings_outlined, PermissionScreen()),
+    _CatItem(tr('cfg_mount_external_files'), Icons.folder_special_outlined, MountScreen()),
   ]),
-  _Category('系统与日志', Icons.settings_suggest_outlined, [
-    _CatItem('日志', Icons.article_outlined, LogsScreen()),
-    _CatItem('管理服务端文件', Icons.folder_special_outlined, ServerFilesScreen()),
+  _Category(tr('cfg_system_logs'), Icons.settings_suggest_outlined, [
+    _CatItem(tr('cfg_logs'), Icons.article_outlined, LogsScreen()),
+    _CatItem(tr('cfg_server_files'), Icons.folder_special_outlined, ServerFilesScreen()),
     _CatItem('MCP', Icons.dns_outlined, McpScreen()),
   ]),
-  _Category('关于', Icons.info_outline, [
-    _CatItem('版本与信息', Icons.info_outline, AboutScreen()),
+  _Category(tr('about'), Icons.info_outline, [
+    _CatItem(tr('cfg_version_info'), Icons.info_outline, AboutScreen()),
   ]),
 ];
 
@@ -91,7 +94,7 @@ class AiConfigScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('设置')),
+      appBar: AppBar(title: Text(tr('settings'))),
       body: ListView.separated(
         padding: const EdgeInsets.symmetric(vertical: 6),
         itemCount: _categories.length,
@@ -107,7 +110,7 @@ class AiConfigScreen extends StatelessWidget {
                     color: AppColors.white,
                     letterSpacing: 1,
                     fontWeight: FontWeight.w700)),
-            subtitle: Text('${c.items.length} 项',
+            subtitle: Text(trp('cfg_items', {'p0': '${c.items.length}'}),
                 style: const TextStyle(fontSize: 9, color: AppColors.dim)),
             trailing: const Icon(Icons.chevron_right, size: 18, color: AppColors.dim),
             onTap: () => Navigator.push(context,
@@ -129,7 +132,7 @@ class _SubMenuScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         // 路径标题：设置 / 分类
-        title: Text('设置 / ${category.title}',
+        title: Text(trp('cfg_settings', {'p0': '${category.title}'}),
             style: const TextStyle(fontSize: 15, letterSpacing: 1)),
       ),
       body: ListView.separated(

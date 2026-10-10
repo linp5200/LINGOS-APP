@@ -9,6 +9,7 @@
 library;
 
 import 'dart:async';
+import '../../core/i18n/app_i18n.dart';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -96,15 +97,15 @@ class _HomeExtScreenState extends ConsumerState<HomeExtScreen>
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.surface,
-        title: const Text('新建场景', style: TextStyle(fontSize: 15)),
+        title: Text(tr('home_create_scene'), style: TextStyle(fontSize: 15)),
         content: TextField(
           controller: c,
           style: const TextStyle(fontSize: 13),
-          decoration: const InputDecoration(hintText: '场景名称', hintStyle: TextStyle(fontSize: 12)),
+          decoration: InputDecoration(hintText: tr('ext_scene_name'), hintStyle: TextStyle(fontSize: 12)),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('取消')),
-          TextButton(onPressed: () => Navigator.pop(ctx, c.text), child: const Text('创建')),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(tr('cancel'))),
+          TextButton(onPressed: () => Navigator.pop(ctx, c.text), child: Text(tr('sess_create'))),
         ],
       ),
     );
@@ -119,24 +120,24 @@ class _HomeExtScreenState extends ConsumerState<HomeExtScreen>
   Widget build(BuildContext context) {
     final connected = ref.watch(connectionProvider).isConnected;
     return Scaffold(
-      appBar: AppBar(title: const Text('智能家居'), actions: [
+      appBar: AppBar(title: Text(tr('nav_home')), actions: [
         IconButton(icon: const Icon(Icons.search, size: 20), onPressed: () {
           extSend('discovery_scan');
         }),
         IconButton(icon: const Icon(Icons.refresh, size: 20), onPressed: _refresh),
       ]),
       body: !connected
-          ? const Center(child: Text('未连接主机', style: TextStyle(color: AppColors.textSecondary)))
+          ? Center(child: Text(tr('not_connected'), style: TextStyle(color: AppColors.textSecondary)))
           : ListView(padding: const EdgeInsets.all(14), children: [
               _statRow(),
               const SizedBox(height: 12),
-              _section('场景', extData['scene_list'], Icons.movie_filter_outlined,
+              _section(tr('home_scene'), extData['scene_list'], Icons.movie_filter_outlined,
                   onAdd: _createScene),
-              _section('区域', extData['area_list'], Icons.meeting_room_outlined),
-              _section('地理围栏', extData['zone_list'], Icons.place_outlined),
-              _section('自动化', extData['automation_list'], Icons.auto_mode_outlined),
+              _section(tr('home_area'), extData['area_list'], Icons.meeting_room_outlined),
+              _section(tr('home_zone'), extData['zone_list'], Icons.place_outlined),
+              _section(tr('home_automation'), extData['automation_list'], Icons.auto_mode_outlined),
               _energyCard(),
-              _section('发现的设备', extData['discovery_list'], Icons.devices_other_outlined),
+              _section(tr('home_discovered'), extData['discovery_list'], Icons.devices_other_outlined),
             ]),
     );
   }
@@ -145,10 +146,10 @@ class _HomeExtScreenState extends ConsumerState<HomeExtScreen>
     final ov = extData['home_overview'];
     final d = (ov is Map) ? ov : const {};
     final items = [
-      ['场景', d['scenes']],
-      ['区域', d['areas']],
-      ['围栏', d['zones']],
-      ['自动化', d['automations']],
+      [tr('home_scene'), d['scenes']],
+      [tr('home_area'), d['areas']],
+      [tr('ext_zones'), d['zones']],
+      [tr('home_automation'), d['automations']],
     ];
     return Row(
       children: items.map((it) {
@@ -193,12 +194,12 @@ class _HomeExtScreenState extends ConsumerState<HomeExtScreen>
             Text(title, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
             const Spacer(),
             if (onAdd != null)
-              InkWell(onTap: onAdd, child: const Text('＋ 新建',
+              InkWell(onTap: onAdd, child: Text(tr('ext_new'),
                   style: TextStyle(fontSize: 10, color: AppColors.brandGreen))),
           ]),
           const SizedBox(height: 6),
           if (items.isEmpty)
-            const Text('暂无（显示 -- 不模拟）',
+            Text(tr('ext_none_showing_not_simulated'),
                 style: TextStyle(fontSize: 10, color: AppColors.dim))
           else
             ...items.take(8).map<Widget>((e) {
@@ -239,16 +240,16 @@ class _HomeExtScreenState extends ConsumerState<HomeExtScreen>
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        const Row(children: [
+        Row(children: [
           Icon(Icons.bolt_outlined, size: 15, color: AppColors.brandAmber),
           SizedBox(width: 6),
-          Text('能源（24h）', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+          Text(tr('home_energy'), style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
         ]),
         const SizedBox(height: 8),
         Row(children: [
-          _metric('用电', m['total_energy_kwh'], 'kWh'),
-          _metric('费用', m['total_cost'], '${m['currency'] ?? ''}'),
-          _metric('电价', m['tariff'], ''),
+          _metric(tr('home_energy_kwh'), m['total_energy_kwh'], 'kWh'),
+          _metric(tr('home_energy_cost'), m['total_cost'], '${m['currency'] ?? ''}'),
+          _metric(tr('home_energy_tariff'), m['tariff'], ''),
         ]),
       ]),
     );
@@ -304,11 +305,11 @@ class _TimelineScreenState extends ConsumerState<TimelineScreen>
     final ovm = (ov is Map) ? ov : const {};
 
     return Scaffold(
-      appBar: AppBar(title: const Text('监控时间线'), actions: [
+      appBar: AppBar(title: Text(tr('nav_timeline')), actions: [
         IconButton(icon: const Icon(Icons.refresh, size: 20), onPressed: _refresh),
       ]),
       body: !connected
-          ? const Center(child: Text('未连接主机', style: TextStyle(color: AppColors.textSecondary)))
+          ? Center(child: Text(tr('not_connected'), style: TextStyle(color: AppColors.textSecondary)))
           : ListView(padding: const EdgeInsets.all(14), children: [
               Container(
                 padding: const EdgeInsets.all(12),
@@ -318,14 +319,14 @@ class _TimelineScreenState extends ConsumerState<TimelineScreen>
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text('24 小时事件  ·  ${ovm['timeline_events'] ?? '--'} 条',
+                  Text(trp('ext_tl_events_24h', {'p0': ovm['timeline_events'] ?? '--'}),
                       style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
                   const SizedBox(height: 8),
                   SizedBox(
                     height: 62,
                     child: segs.isEmpty
-                        ? const Center(
-                            child: Text('无事件（显示 -- 不模拟）',
+                        ? Center(
+                            child: Text(tr('ext_no_events_showing_not_simulated'),
                                 style: TextStyle(fontSize: 10, color: AppColors.dim)))
                         : Row(
                             crossAxisAlignment: CrossAxisAlignment.end,
@@ -354,7 +355,7 @@ class _TimelineScreenState extends ConsumerState<TimelineScreen>
                           ),
                   ),
                   const SizedBox(height: 4),
-                  const Text('每柱=1 小时 · 绿=移动 · 蓝=对象',
+                  Text(tr('ext_each_bar_1h_green_motion_blue_object'),
                       style: TextStyle(fontSize: 8, color: AppColors.dim)),
                 ]),
               ),
@@ -367,20 +368,20 @@ class _TimelineScreenState extends ConsumerState<TimelineScreen>
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  const Text('存储',
+                  Text(tr('tl_storage'),
                       style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
                   const SizedBox(height: 6),
-                  Text('已用 ${stm['used_gb'] ?? '--'} GB / 上限 ${stm['limit_gb'] ?? '--'} GB',
+                  Text(trp('ext_tl_storage_used', {'p0': stm['used_gb'] ?? '--', 'p1': stm['limit_gb'] ?? '--'}),
                       style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
-                  Text('录像 ${stm['recordings'] ?? '--'} 段 · 含对象 ${stm['object_recordings'] ?? '--'} 段',
+                  Text(trp('ext_tl_recordings', {'p0': stm['recordings'] ?? '--', 'p1': stm['object_recordings'] ?? '--'}),
                       style: const TextStyle(fontSize: 10, color: AppColors.dim)),
                 ]),
               ),
               const SizedBox(height: 12),
-              const Text('事件列表', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+              Text(tr('tl_event_list'), style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
               const SizedBox(height: 6),
               if (items.isEmpty)
-                const Text('暂无事件', style: TextStyle(fontSize: 10, color: AppColors.dim))
+                Text(tr('tl_no_events'), style: TextStyle(fontSize: 10, color: AppColors.dim))
               else
                 ...items.reversed.take(30).map<Widget>((e) {
                   final m = (e is Map) ? e : const {};
@@ -437,11 +438,11 @@ class _NotifyCenterScreenState extends ConsumerState<NotifyCenterScreen>
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('通知中心'),
+        title: Text(tr('nav_notify')),
         actions: [
           IconButton(
               icon: const Icon(Icons.done_all, size: 20),
-              tooltip: '全部已读',
+              tooltip: tr('nt_mark_all_read'),
               onPressed: () {
                 extSend('notify_mark_read', {'all_items': true});
                 Future.delayed(const Duration(milliseconds: 300), _refresh);
@@ -449,7 +450,7 @@ class _NotifyCenterScreenState extends ConsumerState<NotifyCenterScreen>
           IconButton(
               icon: Icon(m['dnd'] == true ? Icons.do_not_disturb_on : Icons.do_not_disturb_off,
                   size: 20),
-              tooltip: '免打扰',
+              tooltip: tr('nt_dnd'),
               onPressed: () {
                 extSend('notify_dnd', {'enabled': m['dnd'] != true});
                 Future.delayed(const Duration(milliseconds: 300), _refresh);
@@ -458,23 +459,23 @@ class _NotifyCenterScreenState extends ConsumerState<NotifyCenterScreen>
         ],
       ),
       body: !connected
-          ? const Center(child: Text('未连接主机', style: TextStyle(color: AppColors.textSecondary)))
+          ? Center(child: Text(tr('not_connected'), style: TextStyle(color: AppColors.textSecondary)))
           : Column(children: [
               Padding(
                 padding: const EdgeInsets.fromLTRB(14, 10, 14, 6),
                 child: Row(children: [
-                  Text('共 ${m['total'] ?? '--'} · 未读 ${m['unread'] ?? '--'}',
+                  Text(trp('ext_nt_total_unread', {'p0': m['total'] ?? '--', 'p1': m['unread'] ?? '--'}),
                       style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
                   const Spacer(),
                   if (m['dnd'] == true)
-                    const Text('免打扰中（critical 仍推送）',
+                    Text(tr('nt_dnd_hint'),
                         style: TextStyle(fontSize: 10, color: AppColors.brandAmber)),
                 ]),
               ),
               Expanded(
                 child: items.isEmpty
-                    ? const Center(
-                        child: Text('暂无通知', style: TextStyle(color: AppColors.dim)))
+                    ? Center(
+                        child: Text(tr('nt_empty'), style: TextStyle(color: AppColors.dim)))
                     : ListView.builder(
                         padding: const EdgeInsets.symmetric(horizontal: 14),
                         itemCount: items.length,
@@ -515,7 +516,7 @@ class _NotifyCenterScreenState extends ConsumerState<NotifyCenterScreen>
                                             fontSize: 12, fontWeight: FontWeight.w600)),
                                   ),
                                   if (mm['silenced'] == true)
-                                    const Text('静默',
+                                    Text(tr('nt_silenced'),
                                         style: TextStyle(fontSize: 9, color: AppColors.dim)),
                                 ]),
                                 if ((mm['body'] ?? '').toString().isNotEmpty)
@@ -567,17 +568,17 @@ class _MediaScreenState extends ConsumerState<MediaScreen>
     final list = (l is List) ? l : const [];
 
     return Scaffold(
-      appBar: AppBar(title: const Text('媒体控制'), actions: [
+      appBar: AppBar(title: Text(tr('nav_media')), actions: [
         IconButton(icon: const Icon(Icons.refresh, size: 20), onPressed: _refresh),
       ]),
       body: !connected
-          ? const Center(child: Text('未连接主机', style: TextStyle(color: AppColors.textSecondary)))
+          ? Center(child: Text(tr('not_connected'), style: TextStyle(color: AppColors.textSecondary)))
           : list.isEmpty
-              ? const Center(
+              ? Center(
                   child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
                   Icon(Icons.music_off_outlined, size: 40, color: AppColors.dim),
                   SizedBox(height: 10),
-                  Text('无媒体设备', style: TextStyle(color: AppColors.textSecondary)),
+                  Text(tr('md_no_player'), style: TextStyle(color: AppColors.textSecondary)),
                 ]))
               : ListView(
                   padding: const EdgeInsets.all(14),
@@ -679,11 +680,11 @@ class _KbScreenState extends ConsumerState<KbScreen> with _ExtMixin<KbScreen> {
     final docs = (m['docs'] is List) ? (m['docs'] as List) : const [];
 
     return Scaffold(
-      appBar: AppBar(title: const Text('知识库'), actions: [
+      appBar: AppBar(title: Text(tr('nav_kb')), actions: [
         IconButton(icon: const Icon(Icons.refresh, size: 20), onPressed: _refresh),
       ]),
       body: !connected
-          ? const Center(child: Text('未连接主机', style: TextStyle(color: AppColors.textSecondary)))
+          ? Center(child: Text(tr('not_connected'), style: TextStyle(color: AppColors.textSecondary)))
           : ListView(padding: const EdgeInsets.all(14), children: [
               Container(
                 padding: const EdgeInsets.all(12),
@@ -693,7 +694,7 @@ class _KbScreenState extends ConsumerState<KbScreen> with _ExtMixin<KbScreen> {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text('文档 ${docs.length} 篇 · 分块 ${m['total_chunks'] ?? '--'}',
+                  Text(trp('ext_kb_docs_chunks', {'p0': '${docs.length}', 'p1': m['total_chunks'] ?? '--'}),
                       style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
                   const SizedBox(height: 8),
                   Row(children: [
@@ -717,7 +718,7 @@ class _KbScreenState extends ConsumerState<KbScreen> with _ExtMixin<KbScreen> {
                         extSend('kb_upload', {'path': p});
                         Future.delayed(const Duration(milliseconds: 800), _refresh);
                       },
-                      child: const Text('上传', style: TextStyle(fontSize: 11)),
+                      child: Text(tr('kb_upload'), style: TextStyle(fontSize: 11)),
                     ),
                   ]),
                 ]),
@@ -728,9 +729,9 @@ class _KbScreenState extends ConsumerState<KbScreen> with _ExtMixin<KbScreen> {
                   child: TextField(
                     controller: _queryCtl,
                     style: const TextStyle(fontSize: 12),
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       isDense: true,
-                      hintText: '输入问题检索知识库…',
+                      hintText: tr('kb_query_hint'),
                       hintStyle: TextStyle(fontSize: 11),
                       border: OutlineInputBorder(),
                     ),
@@ -754,12 +755,12 @@ class _KbScreenState extends ConsumerState<KbScreen> with _ExtMixin<KbScreen> {
                       }
                     });
                   },
-                  child: const Text('检索', style: TextStyle(fontSize: 11)),
+                  child: Text(tr('kb_ask'), style: TextStyle(fontSize: 11)),
                 ),
               ]),
               if (_hits.isNotEmpty) ...[
                 const SizedBox(height: 14),
-                const Text('检索结果', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                Text(tr('kb_results'), style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
                 const SizedBox(height: 6),
                 ..._hits.map<Widget>((h) => Container(
                       margin: const EdgeInsets.only(bottom: 6),
@@ -786,10 +787,10 @@ class _KbScreenState extends ConsumerState<KbScreen> with _ExtMixin<KbScreen> {
                     )),
               ],
               const SizedBox(height: 14),
-              const Text('文档列表', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+              Text(tr('kb_doc_list'), style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
               const SizedBox(height: 6),
               if (docs.isEmpty)
-                const Text('知识库为空（显示 -- 不模拟）',
+                Text(tr('ext_knowledge_base_is_empty_showing_not'),
                     style: TextStyle(fontSize: 10, color: AppColors.dim))
               else
                 ...docs.map<Widget>((doc) {
@@ -802,7 +803,7 @@ class _KbScreenState extends ConsumerState<KbScreen> with _ExtMixin<KbScreen> {
                         size: 16,
                         color: AppColors.brandGreen),
                     title: Text('${dm['name'] ?? ''}', style: const TextStyle(fontSize: 11)),
-                    subtitle: Text('${dm['chunks'] ?? 0} 块 · ${dm['chars'] ?? 0} 字符',
+                    subtitle: Text(trp('ext_kb_doc_meta', {'p0': '${dm['chunks'] ?? 0}', 'p1': '${dm['chars'] ?? 0}'}),
                         style: const TextStyle(fontSize: 9)),
                   );
                 }),

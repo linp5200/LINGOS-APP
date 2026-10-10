@@ -126,7 +126,7 @@ class _WeatherScreenState extends ConsumerState<WeatherScreen> {
           // 【0.7.0 P3】城市管理（服务端 weather_set_city——添加/切换城市）
           IconButton(
               icon: const Icon(Icons.location_city, size: 20),
-              tooltip: '城市管理',
+              tooltip: tr('wc_city_management'),
               onPressed: _loading ? null : _showCityDialog),
           IconButton(
               icon: const Icon(Icons.refresh, size: 20),
@@ -171,27 +171,27 @@ class _WeatherScreenState extends ConsumerState<WeatherScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.surface,
-        title: const Text('城市管理', style: TextStyle(fontSize: 16)),
+        title: Text(tr('wc_city_management'), style: TextStyle(fontSize: 16)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('输入城市名（中文/英文均可，如：上海 / Shanghai）',
+            Text(tr('wc_enter_a_city_name_chinese_or_english_e_g'),
                 style: TextStyle(fontSize: 11, color: AppColors.dim)),
             const SizedBox(height: 10),
             TextField(
               controller: ctrl,
               autofocus: true,
-              decoration: const InputDecoration(
-                labelText: '城市',
+              decoration: InputDecoration(
+                labelText: tr('wc_city'),
                 prefixIcon: Icon(Icons.location_city, size: 20),
               ),
             ),
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('取消')),
-          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('设置')),
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr('cancel'))),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(tr('settings'))),
         ],
       ),
     );
@@ -204,9 +204,9 @@ class _WeatherScreenState extends ConsumerState<WeatherScreen> {
         timeout: const Duration(seconds: 10));
     if (!mounted) return;
     final st = resp?['data'];
-    final err = (st is Map && st['status'] == 'error') ? (st['msg']?.toString() ?? '设置失败') : null;
+    final err = (st is Map && st['status'] == 'error') ? (st['msg']?.toString() ?? tr('wc_failed_to_set')) : null;
     ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(err ?? '城市已设置：$city（正在刷新…）')));
+        SnackBar(content: Text(err ?? trp('wc_city_set_refreshing', {'p0': '$city'}))));
     if (err == null) _refresh();
   }
 

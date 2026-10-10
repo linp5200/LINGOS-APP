@@ -3,6 +3,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import '../../core/i18n/app_i18n.dart';
 
 import '../../../core/storage/app_store.dart';
 import '../../../core/theme/app_theme.dart';
@@ -55,7 +56,7 @@ class _MountScreenState extends State<MountScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('挂载外部文件'),
+        title: Text(tr('cfg_mount_external_files')),
         actions: [
           IconButton(icon: const Icon(Icons.add, size: 22), onPressed: _add),
         ],
@@ -63,13 +64,13 @@ class _MountScreenState extends State<MountScreen> {
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : _mounts.isEmpty
-              ? const Center(
+              ? Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(Icons.link_off, size: 48, color: AppColors.textSecondary),
                       SizedBox(height: 12),
-                      Text('暂无挂载——点击 + 添加',
+                      Text(tr('mnt_no_mounts_tap_to_add'),
                           style: TextStyle(color: AppColors.textSecondary)),
                     ],
                   ),
@@ -119,16 +120,16 @@ class _MountEditScreenState extends State<_MountEditScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('添加挂载')),
+      appBar: AppBar(title: Text(tr('mnt_add_mount'))),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          const Text('来源类型', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+          Text(tr('mnt_source_type'), style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
           const SizedBox(height: 8),
           Row(
             children: [
               ChoiceChip(
-                label: const Text('Android 外部存储', style: TextStyle(fontSize: 12)),
+                label: Text(tr('mnt_android_external_storage'), style: TextStyle(fontSize: 12)),
                 selected: _sourceType == 'android',
                 onSelected: (_) => setState(() {
                   _sourceType = 'android';
@@ -137,7 +138,7 @@ class _MountEditScreenState extends State<_MountEditScreen> {
               ),
               const SizedBox(width: 8),
               ChoiceChip(
-                label: const Text('服务端 /LINGOS', style: TextStyle(fontSize: 12)),
+                label: Text(tr('mnt_server_lingos'), style: TextStyle(fontSize: 12)),
                 selected: _sourceType == 'server',
                 onSelected: (_) => setState(() {
                   _sourceType = 'server';
@@ -150,8 +151,8 @@ class _MountEditScreenState extends State<_MountEditScreen> {
           TextField(
             controller: _sourceCtrl,
             style: const TextStyle(fontSize: 14),
-            decoration: const InputDecoration(
-              labelText: '来源路径',
+            decoration: InputDecoration(
+              labelText: tr('mnt_source_path'),
               border: OutlineInputBorder(),
               isDense: true,
             ),
@@ -160,8 +161,8 @@ class _MountEditScreenState extends State<_MountEditScreen> {
           TextField(
             controller: _targetCtrl,
             style: const TextStyle(fontSize: 14),
-            decoration: const InputDecoration(
-              labelText: '挂载到（沙箱内路径）',
+            decoration: InputDecoration(
+              labelText: tr('mnt_mount_at_path_inside_the_sandbox'),
               border: OutlineInputBorder(),
               isDense: true,
             ),
@@ -170,12 +171,12 @@ class _MountEditScreenState extends State<_MountEditScreen> {
           SwitchListTile(
             value: _readonly,
             onChanged: (v) => setState(() => _readonly = v),
-            title: const Text('只读', style: TextStyle(fontSize: 14)),
+            title: Text(tr('mnt_read_only'), style: TextStyle(fontSize: 14)),
           ),
           SwitchListTile(
             value: _persist,
             onChanged: (v) => setState(() => _persist = v),
-            title: const Text('持久化（沙箱重启自动重挂）', style: TextStyle(fontSize: 14)),
+            title: Text(tr('mnt_persistent_remount_on_sandbox_restart'), style: TextStyle(fontSize: 14)),
           ),
           const SizedBox(height: 16),
           FilledButton(
@@ -187,11 +188,11 @@ class _MountEditScreenState extends State<_MountEditScreen> {
                       'readonly': _readonly,
                       'persist': _persist,
                     }),
-            child: const Text('保存'),
+            child: Text(tr('save')),
           ),
           const SizedBox(height: 12),
-          const Text(
-            '技术：proot -b 目录绑定（无需 root）——沙箱安装器就绪后自动生效',
+          Text(
+            tr('mnt_technical_proot_b_directory_binding_no_root'),
             style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
           ),
         ],

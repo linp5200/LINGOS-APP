@@ -220,11 +220,11 @@ class _BootScreenState extends ConsumerState<BootScreen>
 
   /// 自检日志（boot 动画期间逐行显现）
   Widget _buildBootLog() {
-    const lines = [
+    final lines = [
       'env_bootstrap   OK',
       'registry core   8 modules',
       'ui theme v2     FUI',
-      'host link       OFFLINE · 手动',
+      tr('bootx_host_link_offline_manual'),
     ];
     return Container(
       width: double.infinity,

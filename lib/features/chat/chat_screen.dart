@@ -3,6 +3,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import '../../core/i18n/app_i18n.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/providers.dart';
@@ -85,14 +86,14 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
   String _sessionTitle(String sessionId) {
     if (_sessionName != null && _sessionName!.isNotEmpty) return _sessionName!;
-    if (sessionId == 'default') return '默认会话';
+    if (sessionId == 'default') return tr('chat_default_session');
     return sessionId.length > 12 ? '…${sessionId.substring(sessionId.length - 12)}' : sessionId;
   }
 
   /// 【0.2.1 #6】模型下拉切换（切换提示：命中缓存将被重置）
   Widget _buildModelSwitcher(ChatState chat) {
     if (_serverModels.isEmpty) {
-      return Text(chat.model ?? '未连接',
+      return Text(chat.model ?? tr('chat_not_connected'),
           style: const TextStyle(fontSize: 11, color: AppColors.textSecondary));
     }
     final current = _activeModel.isNotEmpty ? _activeModel : (chat.model ?? '');
@@ -138,11 +139,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('切换模型'),
-        content: const Text('更改模型后命中缓存将被重置，确定切换？'),
+        title: Text(tr('chat_switch_model')),
+        content: Text(tr('chat_switching_the_model_resets_the_cache')),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('取消')),
-          TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('切换')),
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr('cancel'))),
+          TextButton(onPressed: () => Navigator.pop(ctx, true), child: Text(tr('chat_switch'))),
         ],
       ),
     );
@@ -152,11 +153,14 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     if (resp?['status']?.toString() == 'ok') {
       setState(() => _activeModel = selected);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('已切换模型：$selected'), duration: const Duration(seconds: 1)),
+        SnackBar(content: Text(trp('chat_model_switched', {'p0': '$selected'})), duration: const Duration(seconds: 1)),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('切换失败：${resp?['msg'] ?? '未知'}')),
+        SnackBar(
+            content: Text(trp('chat_switch_failed', {
+          'p0': resp?['msg'] ?? tr('dash_unknown_error'),
+        }))),
       );
     }
   }
@@ -185,22 +189,22 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       barrierDismissible: false,
       builder: (ctx) => AlertDialog(
         icon: const Icon(Icons.gpp_maybe, color: Colors.orange, size: 32),
-        title: const Text('高风险操作审批'),
+        title: Text(tr('chat_high_risk_action_approval')),
         content: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('工具：$tool', style: const TextStyle(fontWeight: FontWeight.w600)),
+              Text(trp('chat_tool', {'p0': '$tool'}), style: const TextStyle(fontWeight: FontWeight.w600)),
               const SizedBox(height: 6),
               if (args.isNotEmpty && args != '{}')
-                Text('参数：$args', style: const TextStyle(fontSize: 12)),
+                Text(trp('chat_arguments', {'p0': '$args'}), style: const TextStyle(fontSize: 12)),
               if (reason.isNotEmpty) ...[
                 const SizedBox(height: 6),
                 Text(reason, style: const TextStyle(fontSize: 12, color: Colors.grey)),
               ],
               const SizedBox(height: 6),
-              Text('时限：$timeout 秒（超时自动拒绝）',
+              Text(trp('chat_time_limit_s_auto_rejected_on_timeout', {'p0': '$timeout'}),
                   style: const TextStyle(fontSize: 11, color: Colors.grey)),
             ],
           ),
@@ -208,12 +212,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         actions: [
           // 【0.7.0-hf2】三态：拒绝 / 始终允许（记忆）/ 批准一次
           TextButton(
-              onPressed: () => Navigator.pop(ctx, 'reject'), child: const Text('拒绝')),
+              onPressed: () => Navigator.pop(ctx, 'reject'), child: Text(tr('chat_reject'))),
           OutlinedButton(
               onPressed: () => Navigator.pop(ctx, 'always'),
-              child: const Text('始终允许', style: TextStyle(fontSize: 12))),
+              child: Text(tr('chat_always_allow'), style: TextStyle(fontSize: 12))),
           FilledButton(
-              onPressed: () => Navigator.pop(ctx, 'approve'), child: const Text('批准')),
+              onPressed: () => Navigator.pop(ctx, 'approve'), child: Text(tr('chat_approve'))),
         ],
       ),
     );
@@ -285,13 +289,13 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       orElse: () => const ChatMsg(ChatMsgType.ai, ''),
     ).content.length;
     final parts = <String>[
-      chat.model ?? '未连接模型',
+      chat.model ?? tr('chat_no_model_connected'),
       '↑ ${chat.promptTokens}',
       '↓ ${chat.completionTokens}',
       if (_balance != null) '💰$_balance',   // 【0.2.2】余额（DeepSeek /user/balance——先生指示）
-      if (chat.cacheHit > 0) '缓存 ${chat.cacheHit}',
-      if (aiOut > 0) '输出 $aiOut 字',
-      if (chat.contextCompressed) '📋已压缩',
+      if (chat.cacheHit > 0) trp('chat_cache', {'p0': '${chat.cacheHit}'}),
+      if (aiOut > 0) trp('chat_output_chars', {'p0': '$aiOut'}),
+      if (chat.contextCompressed) tr('chat_compressed'),
     ];
     return Container(
       width: double.infinity,
@@ -322,7 +326,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           setState(() => _balance = '$total$cur');
         }
       } else if (d['is_available'] != null) {
-        setState(() => _balance = '可用');
+        setState(() => _balance = tr('chat_available'));
       }
     }
   }
@@ -380,12 +384,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(color: AppColors.divider),
                     ),
-                    child: const Row(
+                    child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(Icons.refresh, size: 14, color: AppColors.textSecondary),
                         SizedBox(width: 4),
-                        Text('已终止（继续）',
+                        Text(tr('chat_stopped_continue'),
                             style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
                       ],
                     ),
@@ -405,12 +409,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(color: AppColors.divider),
                     ),
-                    child: const Row(
+                    child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(Icons.volume_up_outlined, size: 14, color: AppColors.brandCyan),
                         SizedBox(width: 4),
-                        Text('朗读', style: TextStyle(fontSize: 12, color: AppColors.brandCyan)),
+                        Text(tr('chat_read_aloud'), style: TextStyle(fontSize: 12, color: AppColors.brandCyan)),
                       ],
                     ),
                   ),
@@ -420,7 +424,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         );
       case ChatMsgType.thinking:
         return _CollapsibleBlock(
-          title: '思考中...',
+          title: tr('chat_thinking'),
           content: msg.content,
           collapsed: !_thinkingExpanded,
           icon: Icons.psychology_outlined,
@@ -433,8 +437,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         return _CollapsibleBlock(
           title: '▸ ${msg.toolName ?? '工具'}${hasResult ? (ok ? ' ✓' : ' ✗') : ' …'}',
           content: [
-            if (msg.content.isNotEmpty && msg.content != '{}') '参数: ${msg.content}',
-            if (hasResult) '结果: ${msg.toolResult}',
+            if (msg.content.isNotEmpty && msg.content != '{}') trp('chat_args', {'p0': '${msg.content}'}),
+            if (hasResult) trp('chat_result', {'p0': '${msg.toolResult}'}),
           ].join('\n\n'),
           collapsed: !_toolExpanded,
           icon: Icons.build_outlined,
@@ -454,10 +458,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(children: const [
+              Row(children: [
                 Icon(Icons.help_outline, size: 14, color: AppColors.brandCyan),
                 SizedBox(width: 4),
-                Text('AI 提问', style: TextStyle(color: AppColors.brandCyan, fontSize: 12, fontWeight: FontWeight.bold)),
+                Text(tr('chat_ai_question'), style: TextStyle(color: AppColors.brandCyan, fontSize: 12, fontWeight: FontWeight.bold)),
               ]),
               const SizedBox(height: 7),
               Text(msg.content, style: const TextStyle(color: AppColors.textPrimary, fontSize: 13, height: 1.45)),
@@ -467,7 +471,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   const Icon(Icons.check_circle, size: 14, color: AppColors.brandGreen),
                   const SizedBox(width: 5),
                   Expanded(
-                    child: Text('已回答：\$answered',
+                    child: Text(tr('chat_answered_answered'),
                         style: const TextStyle(color: AppColors.textSecondary, fontSize: 12)),
                   ),
                 ])
@@ -490,7 +494,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   ),
                 const SizedBox(height: 6),
                 TextField(
-                  decoration: const InputDecoration(hintText: '或输入回答…', isDense: true),
+                  decoration: InputDecoration(hintText: tr('chat_or_type_an_answer'), isDense: true),
                   style: const TextStyle(fontSize: 12.5),
                   onSubmitted: (v) {
                     if (v.trim().isNotEmpty) _answerAsk(msg, v.trim());
@@ -567,7 +571,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               maxLines: 4,
               textInputAction: TextInputAction.send,
               onSubmitted: (_) => _send(),
-              decoration: const InputDecoration(hintText: '输入消息...', border: InputBorder.none, filled: false),
+              decoration: InputDecoration(hintText: tr('chat_type_a_message'), border: InputBorder.none, filled: false),
             ),
           ),
           const SizedBox(width: 8),
@@ -582,8 +586,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                     ? AppColors.brandRed
                     : (_recording ? AppColors.brandRed : AppColors.textSecondary)),
             tooltip: _voiceLoopActive
-                ? '连续对话中——点击停止'
-                : (_recording ? '停止录音并识别' : '语音输入（连续对话开启时循环）'),
+                ? tr('chat_continuous_chat_tap_to_stop')
+                : (_recording ? tr('chat_stop_recording_and_recognize') : tr('chat_voice_input_loops_while_continuous_chat_is')),
             onPressed: _toggleRecord,
           ),
           const SizedBox(width: 4),
@@ -596,7 +600,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   ),
                   onPressed: () => ref.read(chatControllerProvider.notifier).interrupt(),
                   icon: const Icon(Icons.stop_rounded, size: 22, color: Colors.white),
-                  tooltip: '中断',
+                  tooltip: tr('chat_interrupt'),
                 )
               : IconButton.filled(
                   onPressed: _send,
@@ -634,7 +638,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       }
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('连续对话已停止'), duration: Duration(seconds: 2)));
+            SnackBar(content: Text(tr('chat_continuous_chat_stopped')), duration: Duration(seconds: 2)));
       }
       return;
     }
@@ -657,7 +661,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         } else {
           if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('语音识别失败（服务端 STT 与设备本地均不可用）')),
+            SnackBar(content: Text(tr('chat_speech_recognition_failed_server_stt_and_on'))),
           );
         }
       }
@@ -666,7 +670,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       if (!ok) {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('需要麦克风权限才能语音输入')),
+          SnackBar(content: Text(tr('chat_microphone_permission_is_required_for_voice'))),
         );
         return;
       }
@@ -688,7 +692,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     }
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('连续对话已开始（再点麦克风停止）'), duration: Duration(seconds: 2)));
+          SnackBar(content: Text(tr('chat_continuous_chat_started_tap_the_mic_again')), duration: Duration(seconds: 2)));
     }
     int emptyRounds = 0;
     while (_voiceLoopActive && mounted) {
@@ -710,7 +714,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           _voiceLoopActive = false;
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('连续对话已停止（多次未识别到语音）')));
+                SnackBar(content: Text(tr('chat_continuous_chat_stopped_no_speech'))));
           }
           break;
         }
@@ -759,12 +763,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       final ok = await _voice.speak('', remoteFile: file);
       if (!ok && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('语音播放失败（音频下载失败）')),
+          SnackBar(content: Text(tr('chat_playback_failed_audio_download_failed'))),
         );
       }
     } else if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('语音合成失败——服务端无 TTS 提供商/引擎，App 将不朗读')),
+        SnackBar(content: Text(tr('chat_speech_synthesis_failed_no_tts_provider'))),
       );
     }
   }

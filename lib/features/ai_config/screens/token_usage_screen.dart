@@ -3,6 +3,7 @@
 library;
 
 import 'dart:async';
+import '../../core/i18n/app_i18n.dart';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -45,7 +46,9 @@ class _TokenUsageScreenState extends ConsumerState<TokenUsageScreen> {
           if (r['status'] != 'ok') {
             setState(() {
               _loading = false;
-              _error = '查询失败：${r['msg'] ?? '未知错误'}';
+              _error = trp('tku_query_failed', {
+                'p0': r['msg'] ?? tr('dash_unknown_error'),
+              });
             });
             return;
           }
@@ -99,7 +102,7 @@ class _TokenUsageScreenState extends ConsumerState<TokenUsageScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Token 完整用量'), actions: [
+      appBar: AppBar(title: Text(tr('tku_full_token_usage')), actions: [
         IconButton(icon: const Icon(Icons.refresh, size: 20), onPressed: _loading ? null : _load),
       ]),
       body: Column(
@@ -115,10 +118,10 @@ class _TokenUsageScreenState extends ConsumerState<TokenUsageScreen> {
                   child: Wrap(
                     spacing: 8,
                     children: [
-                      _chip('全部', 'all'),
-                      _chip('今天', 'today'),
-                      _chip('近7天', '7d'),
-                      _chip('近30天', '30d'),
+                      _chip(tr('skill_all'), 'all'),
+                      _chip(tr('tku_today'), 'today'),
+                      _chip(tr('tku_last_7_days'), '7d'),
+                      _chip(tr('tku_last_30_days'), '30d'),
                     ],
                   ),
                 ),
@@ -137,10 +140,10 @@ class _TokenUsageScreenState extends ConsumerState<TokenUsageScreen> {
                               children: [
                                 const Icon(Icons.data_usage, size: 48, color: AppColors.textSecondary),
                                 const SizedBox(height: 12),
-                                const Text('暂无用量数据——对话后生成',
+                                Text(tr('tku_no_usage_data_yet_generated_after_chatting'),
                                     style: TextStyle(color: AppColors.textSecondary)),
                                 const SizedBox(height: 12),
-                                TextButton(onPressed: _load, child: const Text('刷新')),
+                                TextButton(onPressed: _load, child: Text(tr('refresh'))),
                               ],
                             ),
                           )
@@ -185,22 +188,22 @@ class _TokenUsageScreenState extends ConsumerState<TokenUsageScreen> {
           ),
           child: Column(
             children: [
-              Text('总用量 ${_fmtTokens(total)}',
+              Text(trp('tku_total', {'p0': '${_fmtTokens(total)}'}),
                   style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
               const SizedBox(height: 8),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  _stat('请求次数', '$count'),
-                  _stat('输入', _fmtTokens(prompt)),
-                  _stat('输出', _fmtTokens(completion)),
+                  _stat(tr('tku_requests'), '$count'),
+                  _stat(tr('tku_input'), _fmtTokens(prompt)),
+                  _stat(tr('tku_output'), _fmtTokens(completion)),
                 ],
               ),
             ],
           ),
         ),
         const SizedBox(height: 16),
-        const Text('按模型', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
+        Text(tr('tku_by_model'), style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
         const SizedBox(height: 8),
         // 按模型分组
         for (final e in byModel.entries)
@@ -210,16 +213,20 @@ class _TokenUsageScreenState extends ConsumerState<TokenUsageScreen> {
               leading: const Icon(Icons.memory, size: 20, color: AppColors.brandCyan),
               title: Text(e.key, style: const TextStyle(fontSize: 14)),
               subtitle: Text(
-                  '${e.value['count'] ?? 0} 次 · 输入 ${_fmtTokens((e.value['prompt_tokens'] as num?)?.toInt() ?? 0)} · 输出 ${_fmtTokens((e.value['completion_tokens'] as num?)?.toInt() ?? 0)}',
+                  trp('tku_model_stats', {
+                    'p0': '${e.value['count'] ?? 0}',
+                    'p1': _fmtTokens((e.value['prompt_tokens'] as num?)?.toInt() ?? 0),
+                    'p2': _fmtTokens((e.value['completion_tokens'] as num?)?.toInt() ?? 0),
+                  }),
                   style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
               trailing: e.value['model'] == 'unknown'
-                  ? const Text('未知', style: TextStyle(fontSize: 11, color: AppColors.textSecondary))
+                  ? Text(tr('prov_unknown'), style: TextStyle(fontSize: 11, color: AppColors.textSecondary))
                   : null,
             ),
           ),
         const SizedBox(height: 12),
         // 明细（可展开）
-        Text('明细（最近 ${records.length} 条）',
+        Text(trp('tku_details_last', {'p0': '${records.length}'}),
             style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
         const SizedBox(height: 8),
         for (final r in records)

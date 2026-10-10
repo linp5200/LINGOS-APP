@@ -4,6 +4,7 @@
 library;
 
 import 'dart:async';
+import '../../core/i18n/app_i18n.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -92,7 +93,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           icon: const Icon(Icons.menu, size: 22),
           onPressed: widget.onOpenDrawer,
         ),
-        title: const Text('主控台'),
+        title: Text(tr('nav_console')),
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 14),
@@ -122,52 +123,52 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           children: [
             // 【0.7.0】连接态：server 真数据概览（此前只有"本地"纯占位）
             if (_connected) ...[
-              _section(context, '系统状态 · SERVER'),
+              _section(context, tr('home_system_status_server')),
               Row(children: [
-                Expanded(child: _card('服务器版本', AppInfo.serverInternalVersion ?? '--', 'LN')),
+                Expanded(child: _card(tr('home_server_version'), AppInfo.serverInternalVersion ?? '--', 'LN')),
                 const SizedBox(width: 8),
-                Expanded(child: _card('运行时间', _uptime(), 'UPTIME')),
+                Expanded(child: _card(tr('home_uptime'), _uptime(), 'UPTIME')),
               ]),
               const SizedBox(height: 8),
               Row(children: [
                 Expanded(child: _card('CPU', _num('cpu_usage', digits: 1, unit: '%'), 'LOAD')),
                 const SizedBox(width: 8),
-                Expanded(child: _card('内存空闲', _memFree(), 'RAM')),
+                Expanded(child: _card(tr('home_free_memory'), _memFree(), 'RAM')),
                 const SizedBox(width: 8),
-                Expanded(child: _card('磁盘', _num('disk_usage', digits: 1, unit: '%'), 'DISK')),
+                Expanded(child: _card(tr('dash_disk'), _num('disk_usage', digits: 1, unit: '%'), 'DISK')),
               ]),
               const SizedBox(height: 16),
             ] else ...[
-              _section(context, '系统状态 · 本地'),
+              _section(context, tr('home_system_status_local')),
               Row(children: [
-                Expanded(child: _card('主机', '--', '需连接', warn: true)),
+                Expanded(child: _card(tr('home_host'), '--', tr('home_needs_host'), warn: true)),
                 const SizedBox(width: 8),
-                Expanded(child: _card('App 版本', AppInfo.tag, '本地')),
+                Expanded(child: _card(tr('home_app_version'), AppInfo.tag, tr('home_local'))),
               ]),
               const SizedBox(height: 16),
             ],
-            _section(context, '服务入口'),
-            _item(context, Icons.chat_bubble_outline, '对话 AI',
-                _connected ? 'CHAT · 已连接' : 'CHAT · 需主机模型',
+            _section(context, tr('home_service_entry')),
+            _item(context, Icons.chat_bubble_outline, tr('home_chat_ai'),
+                _connected ? tr('home_chat_connected') : tr('home_chat_host_model_required'),
                 _connected ? AppColors.green : AppColors.gray,
-                () => _toast(context, _connected ? '请在底部「对话」标签使用' : '会话需连接主机后使用')),
-            _item(context, Icons.notifications_outlined, '预警', 'ALERT · 本地',
+                () => _toast(context, _connected ? tr('home_use_the_chat_tab_at_the_bottom') : tr('home_sessions_require_a_host_connection'))),
+            _item(context, Icons.notifications_outlined, tr('alert_generic'), tr('home_alert_local'),
                 AppColors.green, () => _push(context, const AlertsScreen())),
-            _item(context, Icons.forum_outlined, '会话', 'SESSIONS · 本地缓存',
+            _item(context, Icons.forum_outlined, tr('nav_sessions'), tr('home_sessions_local_cache'),
                 AppColors.gray, () => _push(context, SessionsScreen(onOpenDrawer: widget.onOpenDrawer))),
-            _item(context, Icons.link, '连接主机', 'CONNECT · 同步后可用全部功能',
+            _item(context, Icons.link, tr('connect_host'), tr('home_connect_all_features_after_sync'),
                 AppColors.green, () => _push(context, const ConnectScreen())),
-            _item(context, Icons.videocam_outlined, '摄像头',
-                _connected ? 'MONITOR · 在线' : 'MONITOR · 需连接主机',
+            _item(context, Icons.videocam_outlined, tr('nav_vision'),
+                _connected ? tr('home_monitor_online') : tr('home_monitor_host_required'),
                 _connected ? AppColors.green : AppColors.gray,
-                () => _toast(context, _connected ? '请在 设置→视觉 中查看' : '监控需连接主机')),
+                () => _toast(context, _connected ? tr('home_see_settings_vision') : tr('home_monitoring_requires_a_host_connection'))),
             const SizedBox(height: 20),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4),
               child: Text(
                   _connected
-                      ? '已连接：数据每 5 秒自动刷新（下拉可手动刷新）'
-                      : '连接后：此屏变为 server 真数据控制台（CPU/内存/磁盘实时）',
+                      ? tr('home_connected_data_refreshes_every_5s_pull_down')
+                      : tr('home_once_connected_this_screen_becomes_a_live'),
                   style: const TextStyle(
                       fontFamily: fuiMono, fontSize: 9, color: AppColors.dim, height: 1.8)),
             ),

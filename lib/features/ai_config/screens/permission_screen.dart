@@ -3,6 +3,7 @@
 library;
 
 import 'dart:async';
+import '../../core/i18n/app_i18n.dart';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -12,32 +13,33 @@ import 'package:permission_handler/permission_handler.dart'; // 【A4修复】�
 import '../../../core/providers.dart';
 import '../../../core/theme/app_theme.dart';
 
-const kPermLabels = {
-  'location': '定位',
-  'camera': '相机',
-  'record_audio': '录音',
-  'record_screen': '录屏',
-  'accelerometer': '加速度计',
-  'phone_state': '电话状态',
-  'installed_apps': '已装应用',
-  'external_storage': '外部存储',
-  'network_control': '网络控制',
-  'bluetooth_control': '蓝牙控制',
-  'scan_bluetooth': '扫描蓝牙',
-  'launch_app': '启动App',
-  'install_app': '安装App',
-  'jump_app': '跳转App',
-  'background_data': '后台数据',
-  'background_task': '后台任务',
-  'auto_start': '自启动',
+/// 【i18n】改为 getter：文案经 tr() 后需在每次访问时求值（语言切换即时生效）
+Map<String, String> get kPermLabels => {
+  'location': tr('perm_location'),
+  'camera': tr('perm_camera'),
+  'record_audio': tr('perm_audio_recording'),
+  'record_screen': tr('perm_screen_recording'),
+  'accelerometer': tr('perm_accelerometer'),
+  'phone_state': tr('perm_phone_state'),
+  'installed_apps': tr('perm_installed_apps'),
+  'external_storage': tr('perm_external_storage'),
+  'network_control': tr('perm_network_control'),
+  'bluetooth_control': tr('perm_bluetooth_control'),
+  'scan_bluetooth': tr('perm_bluetooth_scan'),
+  'launch_app': tr('perm_launch_app'),
+  'install_app': tr('perm_install_app'),
+  'jump_app': tr('perm_switch_to_app'),
+  'background_data': tr('perm_background_data'),
+  'background_task': tr('perm_background_tasks'),
+  'auto_start': tr('notif_auto_start'),
 };
 
-const kModeLabels = {
-  'deny': '拒绝',
-  'allow_once': '单次',
-  'allow_while': '使用中',
-  'allow_always': '始终',
-  'shadow': '影子',
+Map<String, String> get kModeLabels => {
+  'deny': tr('perm_mode_deny'),
+  'allow_once': tr('perm_once'),
+  'allow_while': tr('perm_while_in_use'),
+  'allow_always': tr('perm_always'),
+  'shadow': tr('perm_shadow'),
 };
 
 const kModeIcons = {
@@ -49,14 +51,14 @@ const kModeIcons = {
 };
 
 // 【A3修复】权限分组（同类可收放 + 类级统一授权）
-const kPermGroups = [
-  {'name': '设备', 'icon': Icons.devices_outlined, 'perms': ['location', 'camera', 'record_audio', 'record_screen', 'accelerometer']},
-  {'name': '存储', 'icon': Icons.storage_outlined, 'perms': ['external_storage']},
-  {'name': '网络', 'icon': Icons.wifi_outlined, 'perms': ['network_control', 'bluetooth_control', 'scan_bluetooth']},
-  {'name': '后台', 'icon': Icons.hourglass_bottom, 'perms': ['background_data', 'background_task', 'auto_start']},
-  {'name': '应用', 'icon': Icons.apps_outlined, 'perms': ['phone_state', 'installed_apps', 'launch_app', 'install_app', 'jump_app']},
+List<Map<String, Object>> get kPermGroups => [
+  {'name': tr('perm_devices'), 'icon': Icons.devices_outlined, 'perms': ['location', 'camera', 'record_audio', 'record_screen', 'accelerometer']},
+  {'name': tr('tl_storage'), 'icon': Icons.storage_outlined, 'perms': ['external_storage']},
+  {'name': tr('dash_net'), 'icon': Icons.wifi_outlined, 'perms': ['network_control', 'bluetooth_control', 'scan_bluetooth']},
+  {'name': tr('notif_background'), 'icon': Icons.hourglass_bottom, 'perms': ['background_data', 'background_task', 'auto_start']},
+  {'name': tr('perm_apps'), 'icon': Icons.apps_outlined, 'perms': ['phone_state', 'installed_apps', 'launch_app', 'install_app', 'jump_app']},
   // 【0.2.1 #8-1】智能家居组（ha_control——AI-AGENT#10 权限：默认直接执行，高风险强制确认）
-  {'name': '智能家居', 'icon': Icons.home_outlined, 'perms': ['ha_control']},
+  {'name': tr('nav_home'), 'icon': Icons.home_outlined, 'perms': ['ha_control']},
 ];
 
 class PermissionScreen extends ConsumerStatefulWidget {
@@ -142,7 +144,7 @@ class _PermissionScreenState extends ConsumerState<PermissionScreen> {
       if (!mounted) return;
       if (result.isGranted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('系统授权成功'), duration: Duration(seconds: 2)),
+          SnackBar(content: Text(tr('perm_system_permission_granted')), duration: Duration(seconds: 2)),
         );
         return;
       }
@@ -150,11 +152,11 @@ class _PermissionScreenState extends ConsumerState<PermissionScreen> {
       final goSettings = await showDialog<bool>(
         context: context,
         builder: (ctx) => AlertDialog(
-          title: const Text('需要系统授权'),
-          content: Text('「$perm」系统授权被拒绝，可前往系统设置手动开启（设置 → 应用 → 权限）'),
+          title: Text(tr('perm_system_permission_required')),
+          content: Text(trp('perm_permission_was_denied_you_can_enable_it', {'p0': '$perm'})),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('暂不')),
-            FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('去设置')),
+            TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr('perm_not_now'))),
+            FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(tr('perm_open_settings'))),
           ],
         ),
       );
@@ -200,7 +202,7 @@ class _PermissionScreenState extends ConsumerState<PermissionScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('权限管理'), actions: [
+      appBar: AppBar(title: Text(tr('cfg_permissions')), actions: [
         IconButton(icon: const Icon(Icons.refresh, size: 20), onPressed: _loading ? null : _load),
       ]),
       body: _loading
@@ -218,8 +220,8 @@ class _PermissionScreenState extends ConsumerState<PermissionScreen> {
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(color: AppColors.divider),
                       ),
-                      child: const Text(
-                        '影子模式：被影子化的权限返回空数据——防止 AI 获取敏感信息（隐私保护）',
+                      child: Text(
+                        tr('perm_shadow_mode_shadowed_permissions_return'),
                         style: TextStyle(fontSize: 11, color: AppColors.textSecondary, height: 1.5),
                       ),
                     ),
@@ -229,8 +231,8 @@ class _PermissionScreenState extends ConsumerState<PermissionScreen> {
                       _groupCard(g['name'] as String, g['icon'] as IconData,
                           (g['perms'] as List).map((e) => e.toString()).toList()),
                     const SizedBox(height: 16),
-                    const Text(
-                      '令牌权限管理（颁发/吊销）——批次4 提供（当前走终端 token 命令）',
+                    Text(
+                      tr('perm_token_permission_management_issue_revoke'),
                       style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
                     ),
                   ],
@@ -245,22 +247,22 @@ class _PermissionScreenState extends ConsumerState<PermissionScreen> {
       child: ExpansionTile(
         leading: Icon(icon, size: 20, color: AppColors.brandCyan),
         title: Text(groupName, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-        subtitle: Text('${perms.length} 项权限',
+        subtitle: Text(trp('perm_permissions', {'p0': '${perms.length}'}),
             style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
         childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
         children: [
           // 类级统一授权
-          const Row(
+          Row(
             children: [
-              Text('统一授权：', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+              Text(tr('perm_grant_all'), style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
               SizedBox(width: 4),
             ],
           ),
           Row(
             children: [
-              _groupAction('全部允许', 'allow_always', perms, AppColors.brandCyan),
+              _groupAction(tr('perm_allow_all'), 'allow_always', perms, AppColors.brandCyan),
               const SizedBox(width: 8),
-              _groupAction('全部拒绝', 'deny', perms, AppColors.brandRed),
+              _groupAction(tr('perm_deny_all'), 'deny', perms, AppColors.brandRed),
             ],
           ),
           const SizedBox(height: 8),
@@ -313,15 +315,15 @@ class _PermissionScreenState extends ConsumerState<PermissionScreen> {
   String _modeDesc(String mode) {
     switch (mode) {
       case 'deny':
-        return '拒绝访问';
+        return tr('perm_access_denied');
       case 'allow_once':
-        return '每次询问';
+        return tr('perm_ask_every_time');
       case 'allow_while':
-        return '使用期间允许';
+        return tr('perm_allow_while_in_use');
       case 'allow_always':
-        return '始终允许';
+        return tr('chat_always_allow');
       case 'shadow':
-        return '返回空数据';
+        return tr('perm_return_empty_data');
       default:
         return mode;
     }

@@ -9,6 +9,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import '../../core/i18n/app_i18n.dart';
 
 import '../../core/storage/app_store.dart';
 import '../../core/theme/app_theme.dart';
@@ -86,24 +87,24 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 children: [
                   TextButton(
                     onPressed: () => _finish(),
-                    child: const Text('跳过', style: TextStyle(color: AppColors.dim)),
+                    child: Text(tr('onb_skip'), style: TextStyle(color: AppColors.dim)),
                   ),
                   const Spacer(),
                   if (_page < 2)
                     FilledButton(
                       onPressed: () => _pageCtrl.nextPage(
                           duration: const Duration(milliseconds: 250), curve: Curves.easeOut),
-                      child: const Text('下一步'),
+                      child: Text(tr('onb_next')),
                     )
                   else ...[
                     OutlinedButton(
                       onPressed: () => _finish(goConnect: true),
-                      child: const Text('连接主机'),
+                      child: Text(tr('connect_host')),
                     ),
                     const SizedBox(width: 10),
                     FilledButton(
                       onPressed: () => _finish(),
-                      child: const Text('开始使用'),
+                      child: Text(tr('onb_get_started')),
                     ),
                   ],
                 ],
@@ -117,7 +118,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   Widget _welcome() {
-    return const Padding(
+    return Padding(
       padding: EdgeInsets.all(28),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -125,14 +126,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         children: [
           Icon(Icons.wb_twilight, size: 64, color: AppColors.brandGreen),
           SizedBox(height: 18),
-          Text('欢迎使用 LING OS',
+          Text(tr('onb_welcome_to_ling_os'),
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
           SizedBox(height: 14),
           Text(
-            '个人 / 家庭安防智能 AI 系统。\n\n'
-            '· 生命线：地震预警 / 台风 / 火灾 / 入侵——宁可误报不可漏报\n'
-            '· AI 对话 + 69 项技能（家庭自动化 / 监控 / 语音 / 记忆）\n'
-            '· 数据本地优先，安全与隐私高于一切',
+            tr('onb_a_personal_home_security_ai_system_n_n'),
             style: TextStyle(fontSize: 13, height: 1.7, color: AppColors.textSecondary),
           ),
         ],
@@ -141,7 +139,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   Widget _connectStep() {
-    return const Padding(
+    return Padding(
       padding: EdgeInsets.all(28),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -149,18 +147,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         children: [
           Icon(Icons.lan_outlined, size: 56, color: AppColors.brandGreen),
           SizedBox(height: 18),
-          Text('连接你的主机',
+          Text(tr('onb_connect_your_host'),
               style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
           SizedBox(height: 12),
           Text(
-            'LING OS 服务端运行在你的主机（Linux 设备）上。\n\n'
-            '· 同一局域网：连接页「搜索局域网主机」→ 一键填入\n'
-            '· 认证：终端验证码 → 连接码（两步）\n'
-            '· 也可以先跳过——本地模式可用，之后在 设置 → 连接设置 中连接',
+            tr('onb_the_ling_os_server_runs_on_your_host_a'),
             style: TextStyle(fontSize: 13, height: 1.7, color: AppColors.textSecondary),
           ),
           SizedBox(height: 18),
-          Text('提示：服务端启动后终端会显示验证码。',
+          Text(tr('onb_tip_the_terminal_shows_the_verification'),
               style: TextStyle(fontSize: 11, color: AppColors.dim)),
         ],
       ),
@@ -176,14 +171,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         children: [
           const Icon(Icons.checklist_rtl, size: 56, color: AppColors.brandGreen),
           const SizedBox(height: 18),
-          const Text('就绪检查',
+          Text(tr('onb_readiness_check'),
               style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
           const SizedBox(height: 14),
-          _checkLine('通知权限', '允许通知——危机/预警才能弹到你（设置时会请求）'),
-          _checkLine('后台保活', '建议开启（设置 → 通知与后台）——锁屏也能收危机推送'),
-          _checkLine('电池优化', '为本应用关闭电池限制（系统设置 → 应用 → 电池）'),
+          _checkLine(tr('onb_notification_permission'), tr('onb_allow_notifications_so_crises_alerts_can')),
+          _checkLine(tr('notif_keep_alive_in_background'), tr('onb_recommended_settings_notifications')),
+          _checkLine(tr('notif_battery_optimization'), tr('onb_disable_battery_restrictions_for_this_app')),
           const SizedBox(height: 16),
-          const Text('完成后即可开始。全部可稍后在「设置」中调整。',
+          Text(tr('onb_you_can_start_once_done_everything_can_be'),
               style: TextStyle(fontSize: 11, color: AppColors.dim)),
         ],
       ),
