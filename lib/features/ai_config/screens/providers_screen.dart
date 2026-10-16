@@ -4,7 +4,7 @@
 library;
 
 import 'package:flutter/material.dart';
-import '../../core/i18n/app_i18n.dart';
+import '../../../core/i18n/app_i18n.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/providers.dart';

@@ -3,7 +3,7 @@
 library;
 
 import 'package:flutter/material.dart';
-import '../../core/i18n/app_i18n.dart';
+import '../../../core/i18n/app_i18n.dart';
 import 'package:shizuku_api/shizuku_api.dart';
 
 import '../../../core/storage/app_store.dart';

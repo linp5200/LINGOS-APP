@@ -7,7 +7,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../core/i18n/app_i18n.dart';
+import '../../../core/i18n/app_i18n.dart';
 
 import '../../../core/providers.dart';
 import '../../../core/storage/app_store.dart';

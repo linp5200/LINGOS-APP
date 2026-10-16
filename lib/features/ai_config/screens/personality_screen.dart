@@ -2,7 +2,7 @@
 library;
 
 import 'dart:async';
-import '../../core/i18n/app_i18n.dart';
+import '../../../core/i18n/app_i18n.dart';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
