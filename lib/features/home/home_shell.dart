@@ -329,7 +329,12 @@ class _HomeShellState extends ConsumerState<HomeShell> {
                               : '✗';
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 2),
-                    Text(trp('shell_action_line', {'p0': '$tag', 'p1': '${m['desc'] ?? ''}', 'p2': '${m['detail'] ?? st}'}),
+                    child: Text(
+                        trp('shell_action_line', {
+                          'p0': '$tag',
+                          'p1': '${m['desc'] ?? ''}',
+                          'p2': '${m['detail'] ?? st}'
+                        }),
                         style: const TextStyle(color: Colors.white70, fontSize: 12)),
                   );
                 }),

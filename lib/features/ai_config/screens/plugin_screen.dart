@@ -171,7 +171,7 @@ class _PluginScreenState extends ConsumerState<PluginScreen> {
                 const SizedBox(height: 10),
                 _listCard(tr('plg_skills'), _skills, Icons.psychology_outlined),
                 const SizedBox(height: 10),
-                _listCard(tr('plg_commands'), _commands, Icons.terminal_2),
+                _listCard(tr('plg_commands'), _commands, Icons.terminal),
                 const SizedBox(height: 14),
                 FilledButton.icon(
                   onPressed: _busy ? null : _reload,

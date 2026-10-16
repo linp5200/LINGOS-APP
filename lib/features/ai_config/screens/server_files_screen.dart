@@ -110,7 +110,10 @@ class _ServerFilesScreenState extends ConsumerState<ServerFilesScreen> {
                     margin: const EdgeInsets.only(bottom: 8),
                     child: ListTile(
                       leading: Icon(d['icon'] as IconData, size: 22, color: AppColors.brandCyan),
-                      title: Text(trp('srvf_dir_title', {'p0': d['name'], 'p1': d['path']}), style: const TextStyle(fontSize: 14)),
+                      title: Text(
+                          trp('srvf_dir_title',
+                              {'p0': '${d['name']}', 'p1': '${d['path']}'}),
+                          style: const TextStyle(fontSize: 14)),
                       subtitle: Text(d['desc'] as String,
                           style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
                       trailing: const Icon(Icons.chevron_right, size: 18, color: AppColors.textSecondary),
