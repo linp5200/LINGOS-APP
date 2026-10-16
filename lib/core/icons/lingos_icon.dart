@@ -100,6 +100,7 @@ class LingIcon extends StatelessWidget {
     this.wan = false,            // 右上 W
     this.status = LingStatus.none,
     this.badgeScale = 0.82,      // 角标字号 / 图标尺寸（先生：字号22 / 图标52 ≈ 0.42）
+    this.animation,              // 【第6期】可选旋转动画（只作用于基础图形，角标保持静止）
   });
 
   final IconData icon;
@@ -110,6 +111,8 @@ class LingIcon extends StatelessWidget {
   final bool wan;               // W 右上
   final LingStatus status;
   final double badgeScale;
+  /// 【第6期】基础图形的旋转动画（null = 静止；角标恒不随动——H/S/AI/W/I/⇅/E 需可读）
+  final Animation<double>? animation;
 
   @override
   Widget build(BuildContext context) {
@@ -154,7 +157,14 @@ class LingIcon extends StatelessWidget {
       child: Stack(
         clipBehavior: Clip.none,
         children: [
-          Center(child: Icon(icon, size: size, color: c)),
+          Center(
+            child: animation == null
+                ? Icon(icon, size: size, color: c)
+                : RotationTransition(
+                    turns: animation!,
+                    child: Icon(icon, size: size, color: c),
+                  ),
+          ),
           if (tlText.isNotEmpty)
             Positioned(left: -fs * 0.35, top: -fs * 0.3, child: badge(tlText)),
           if (wan)
@@ -170,8 +180,10 @@ class LingIcon extends StatelessWidget {
 // ============================================================
 // 3. 时长/PING 指示（启动动画的静态版 —— 先生动画待定稿）
 // ============================================================
-/// 静态「同步」图标（动画版待先生确认效果后接入）
-class LingSyncIndicator extends StatelessWidget {
+/// 【第6期】同步/启动动画指示（active 时基础图形匀速旋转——旋转 1 圈 1.4s，线性）
+///   角标 ⇅ 保持静止（先生定稿：角标不随动，语义可读优先）
+///   非 active 时完全静止且不持有动画资源（省电——后台 5s 轮询场景）
+class LingSyncIndicator extends StatefulWidget {
   const LingSyncIndicator({super.key, this.size = 24, this.color, this.active = false});
 
   final double size;
@@ -179,9 +191,45 @@ class LingSyncIndicator extends StatelessWidget {
   final bool active;
 
   @override
+  State<LingSyncIndicator> createState() => _LingSyncIndicatorState();
+}
+
+class _LingSyncIndicatorState extends State<LingSyncIndicator>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _ctrl;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 1400));
+    if (widget.active) _ctrl.repeat();
+  }
+
+  @override
+  void didUpdateWidget(covariant LingSyncIndicator oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.active && !_ctrl.isAnimating) {
+      _ctrl.repeat();
+    } else if (!widget.active && _ctrl.isAnimating) {
+      _ctrl.stop();
+      _ctrl.value = 0;
+    }
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return LingIcon(LingIcons.sync,
-        size: size, color: color, status: active ? LingStatus.syncing : LingStatus.none);
+        size: widget.size,
+        color: widget.color,
+        status: widget.active ? LingStatus.syncing : LingStatus.none,
+        animation: widget.active ? _ctrl : null);
   }
 }
 

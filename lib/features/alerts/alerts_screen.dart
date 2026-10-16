@@ -12,6 +12,45 @@ import '../../core/i18n/app_i18n.dart';
 import '../../core/providers.dart';
 import '../../core/theme/app_theme.dart';
 
+// ============================================================
+// 【追加·先生已批】预警级别口径（与三端逐值对齐，2026-10-16）
+//   C 端   src/alert/alert_utils.c:alert_level_label → 0=info，1..5=L1..L5
+//   Python alert_store.py / cmd_alert_query          → 同口径（旧历史文件为整数 level）
+//   WebUI  webui/index.html normLevel()/lvHigh()     → 同口径（L0=urgent 通道）
+//   高危 = L0 紧急 / L3 橙 / L4 红 / L5 危急（最高）——必须醒目，不得降级显示
+// ============================================================
+class _AlertLevel {
+  _AlertLevel._();
+
+  /// 归一：''/0/'info' → 'info'；1..5（整数或字符串）→ 'L1'..'L5'；其余原样大写
+  static String norm(dynamic raw) {
+    final s = (raw ?? '').toString().trim().toUpperCase();
+    if (s.isEmpty || s == 'INFO' || s == '0') return 'info';
+    if (s.length == 1 && s.codeUnitAt(0) >= 0x31 && s.codeUnitAt(0) <= 0x35) {
+      return 'L' + s; // 旧数据：整数级别 1..5
+    }
+    return s;
+  }
+
+  /// 高危判定（保留旧英文取值 high/critical/emergency，不丢既有行为）
+  static bool isHigh(String key) {
+    if (key == 'L0' || key == 'L3' || key == 'L4' || key == 'L5') return true;
+    return key.contains('HIGH') || key.contains('CRITICAL') || key.contains('EMERG');
+  }
+
+  /// 配色（与 WebUI lvColor 同色系：红=最高/橙=高危起点/琥珀=注意/蓝=提示/灰=信息）
+  static Color color(String key) {
+    if (key == 'L0' || key == 'L4' || key == 'L5') return AppColors.brandRed;
+    if (key == 'L3') return const Color(0xFFFF9F45);
+    if (key == 'L2') return AppColors.amber;
+    if (key == 'L1') return AppColors.blue;
+    return AppColors.dim;
+  }
+
+  /// 展示标签：info 走 i18n，L0..L5 原样（与 WebUI 标签一致）
+  static String label(String key) => key == 'info' ? tr('alert_level_info') : key;
+}
+
 class AlertsScreen extends ConsumerStatefulWidget {
   const AlertsScreen({super.key});
 
@@ -88,8 +127,10 @@ class _AlertsScreenState extends ConsumerState<AlertsScreen> {
     final title = a['title']?.toString() ??
         a['description']?.toString() ??
         tr('alert_new');
-    final level = a['level']?.toString() ?? '';
-    final isHigh = level.contains('high') || level.contains('critical') || level == 'L3';
+    // 【追加】三端口径归一（原实现只认 'L3'，L0/L4/L5 与整数级别都被当普通预警）
+    final levelKey = _AlertLevel.norm(a['level']);
+    final isHigh = _AlertLevel.isHigh(levelKey);
+    final shown = isHigh ? '[' + _AlertLevel.label(levelKey) + '] ' + title : title;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         backgroundColor: isHigh ? AppColors.brandRed : AppColors.surfaceHigh,
@@ -98,7 +139,7 @@ class _AlertsScreenState extends ConsumerState<AlertsScreen> {
               size: 18, color: isHigh ? Colors.white : AppColors.brandGreen),
           const SizedBox(width: 10),
           Expanded(
-            child: Text(title,
+            child: Text(shown,
                 style: TextStyle(
                     fontSize: 12,
                     color: isHigh ? Colors.white : AppColors.textPrimary)),
@@ -140,30 +181,68 @@ class _AlertsScreenState extends ConsumerState<AlertsScreen> {
                   itemCount: _alerts.length,
                   itemBuilder: (ctx, i) {
                     final a = _alerts[i];
-                    final level = a['level']?.toString() ?? 'info';
-                    final color = level.contains('high') || level.contains('critical')
-                        ? AppColors.brandRed
-                        : level.contains('medium') || level.contains('warn')
-                            ? Colors.orange
-                            : AppColors.brandCyan;
+                    // 【追加】级别口径与三端一致：info/L0–L5（原实现只按 high/medium 英文子串，
+                    //   L3/L4/L5 一律显示成 brandCyan"信息色"——红级预警最不显眼）
+                    final levelKey = _AlertLevel.norm(a['level']);
+                    final high = _AlertLevel.isHigh(levelKey);
+                    final color = _AlertLevel.color(levelKey);
+                    final ts = a['timestamp'];
+                    final timeText = a['time']?.toString() ??
+                        (ts is num
+                            ? DateTime.fromMillisecondsSinceEpoch(ts.toInt() * 1000)
+                                .toString()
+                                .substring(5, 16)
+                            : '');
                     return Card(
                       margin: const EdgeInsets.only(bottom: 8),
+                      // 高危：卡片描边同色（与 WebUI 的左边框/加粗同风格）
+                      shape: high
+                          ? RoundedRectangleBorder(
+                              side: BorderSide(color: color, width: 1.2),
+                              borderRadius: BorderRadius.circular(8))
+                          : null,
                       child: ListTile(
-                        leading: Icon(Icons.warning_amber_rounded, color: color, size: 22),
+                        leading: Icon(
+                            high
+                                ? Icons.warning_amber_rounded
+                                : Icons.notifications_active_outlined,
+                            color: color,
+                            size: 22),
                         title: Text(
                             a['title']?.toString() ??
                                 a['description']?.toString() ??
                                 tr('alert_generic'),
-                            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                            style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: high ? color : null)),
                         subtitle: Text([
                           if (a['location']?.toString().isNotEmpty ?? false) a['location'].toString(),
                           if (a['source']?.toString().isNotEmpty ?? false) '${tr('alert_source')}${a['source']}',
                           if (a['type']?.toString().isNotEmpty ?? false) '${tr('alert_type')}${a['type']}',
                         ].join(' · ')),
-                        trailing: Text(
-                            a['time']?.toString() ??
-                                (a['timestamp'] != null ? DateTime.fromMillisecondsSinceEpoch((a['timestamp'] as num).toInt() * 1000).toString().substring(5, 16) : ''),
-                            style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                        trailing: Row(mainAxisSize: MainAxisSize.min, children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: color),
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                            child: Text(_AlertLevel.label(levelKey),
+                                style: TextStyle(
+                                    fontFamily: fuiMono,
+                                    fontSize: 10,
+                                    color: color,
+                                    fontWeight:
+                                        high ? FontWeight.w700 : FontWeight.w400)),
+                          ),
+                          if (timeText.isNotEmpty) ...[
+                            const SizedBox(width: 8),
+                            Text(timeText,
+                                style: const TextStyle(
+                                    fontSize: 11, color: AppColors.textSecondary)),
+                          ],
+                        ]),
                       ),
                     );
                   },

@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/app_info.dart';
+import '../../core/icons/lingos_icon.dart';   // 【第6期】图标体系接入（基础图形 + H/S 角标 + 状态角标）
 import '../../core/providers.dart';
 import '../../core/theme/app_theme.dart';
 import '../connect/connect_screen.dart';
@@ -27,6 +28,7 @@ class HomeScreen extends ConsumerStatefulWidget {
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   Timer? _timer;
   bool _connected = false;
+  bool _syncing = false;             // 【第6期】真实同步中态（system_info 请求在飞）
   Map<String, dynamic> _info = {};   // server system_info data
 
   @override
@@ -56,6 +58,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       }
       return;
     }
+    // 【第6期】同步态（驱动 LingSyncIndicator 动画——真实在飞请求，非装饰）
+    if (mounted && !_syncing) setState(() => _syncing = true);
     try {
       final resp = await cm.requestJson({'cmd': 'system_info'},
           timeout: const Duration(seconds: 6));
@@ -69,10 +73,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       if (!mounted) return;
       setState(() {
         _connected = true;
+        _syncing = false;
         if (inner != null) _info = inner;
       });
     } catch (_) {
-      if (mounted) setState(() => _connected = true);
+      if (mounted) {
+        setState(() {
+          _connected = true;
+          _syncing = false;
+        });
+      }
     }
   }
 
@@ -99,12 +109,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             padding: const EdgeInsets.only(right: 14),
             child: Row(
               children: [
-                Container(
-                    width: 7,
-                    height: 7,
-                    decoration: BoxDecoration(
-                        color: _connected ? AppColors.green : AppColors.amber,
-                        shape: BoxShape.circle)),
+                // 【第6期】图标体系接入：基础图形（wifi/wifi-off）+ H/S 域角标 + 状态角标（E 恒红最末）
+                LingStatusIcon(
+                  connected: _connected,
+                  isServer: true,
+                  error: false,
+                  size: 18,
+                ),
+                const SizedBox(width: 6),
+                // 【第6期】同步动画（真实在飞请求驱动；空闲时零动画开销）
+                LingSyncIndicator(size: 14, active: _syncing),
                 const SizedBox(width: 6),
                 Text(_connected ? 'ONLINE' : 'LOCAL',
                     style: TextStyle(

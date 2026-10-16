@@ -857,6 +857,64 @@ class AppStrings {
     'wc_failed_to_set': ['设置失败', 'Failed to set'],
     'wc_city_set_refreshing': ['城市已设置：{p0}（正在刷新…）', 'City set: {p0} (refreshing…)'],
     'bootx_host_link_offline_manual': ['host link       OFFLINE · 手动', 'host link       OFFLINE · manual'],
+
+    // ---------- 【追加】预警级别口径（alerts_screen.dart——与 C/Python/WebUI 三端一致） ----------
+    'alert_level_info': ['信息', 'Info'],
+
+    // ---------- 【第6期】启动自检行去伪（boot_screen.dart——原写死「registry core 8 modules」） ----------
+    'boot_app_shell_line': ['app shell       READY', 'app shell       READY'],
+    'boot_registry_line': ['registry core   --（连接后读真实注册表）', 'registry core   -- (read after connecting)'],
+
+    // ---------- 【第6期】升级屏（upgrade_screen.dart —— 对接服务端 update_check） ----------
+    'cfg_upgrade': ['升级更新', 'Upgrade & update'],
+    'upg_check_now': ['检查更新', 'Check for updates'],
+    'upg_checking': ['检查中…', 'Checking…'],
+    'upg_current_version': ['当前版本', 'Current version'],
+    'upg_latest_version': ['最新版本', 'Latest version'],
+    'upg_source': ['更新源', 'Update source'],
+    'upg_source_unset': ['未配置', 'Not configured'],
+    'upg_checked_at': ['检查时间', 'Checked at'],
+    'upg_never_checked': ['尚未检查', 'Not checked yet'],
+    'upg_update_available': ['发现新版本：{p0}', 'New version available: {p0}'],
+    'upg_up_to_date': ['已是最新版本（{p0}）', 'Already up to date ({p0})'],
+    'upg_host_not_connected': ['主机未连接 —— 显示 --（不模拟）', 'Host not connected — showing -- (not simulated)'],
+    'upg_note': [
+      '升级动作由服务端 lingos-upgrade 执行（签名校验 + 回滚）；App 只发起检查并呈现真实结果。',
+      'The upgrade itself runs server-side via lingos-upgrade (signature check + rollback); the App only triggers the check and shows the real result.'
+    ],
+
+    // ---------- 【第6期】插件屏（plugin_screen.dart —— 对接 plugin_list / plugin_reload） ----------
+    'cfg_plugins': ['插件', 'Plugins'],
+    'plg_loaded': ['已加载', 'Loaded'],
+    'plg_dir': ['插件目录', 'Plugin directory'],
+    'plg_plugins': ['插件', 'Plugins'],
+    'plg_skills': ['插件技能', 'Plugin skills'],
+    'plg_commands': ['插件命令', 'Plugin commands'],
+    'plg_reload': ['热重载', 'Hot reload'],
+    'plg_reloading': ['重载中…', 'Reloading…'],
+    'plg_reloaded': ['已重载 {p0} 个插件', 'Reloaded {p0} plugin(s)'],
+    'plg_reload_failed': ['热重载失败：{p0}', 'Hot reload failed: {p0}'],
+    'plg_empty': ['暂无（把 .py 放入插件目录后点热重载）', 'None yet (drop a .py into the plugin dir, then hot reload)'],
+    'plg_unavailable': ['插件层不可达 —— 显示 --（不模拟）', 'Plugin layer unreachable — showing -- (not simulated)'],
+    'plg_note': [
+      '列表来自服务端 plugin_loader 真实扫描（plugin_list）；不伪造插件名与数量。',
+      'The list comes from the server-side plugin_loader scan (plugin_list); plugin names and counts are never faked.'
+    ],
+
+    // ---------- 【第6期】通知渠道对接服务端（notif_screen.dart —— notify_list / notify_dnd） ----------
+    'notif_server_channel': ['服务端通知渠道', 'Server notification channels'],
+    'notif_server_dnd': ['服务端免打扰（notify_dnd）', 'Server do-not-disturb (notify_dnd)'],
+    'notif_server_dnd_sub': [
+      '开启后服务端只推 critical（其余静默，notify_push 记录仍保留）',
+      'When on, the server pushes only critical items (others are silenced but still recorded by notify_push)'
+    ],
+    'notif_server_unread': ['服务端未读', 'Server unread'],
+    'notif_server_total': ['服务端通知总数', 'Server notifications total'],
+    'notif_server_unreachable': ['服务端通知中心不可达 —— 显示 --（不模拟）', 'Server notification center unreachable — showing -- (not simulated)'],
+    'notif_local_note': [
+      '上方开关为本机通道（本地存储，通知桥据此决定是否弹系统通知）；下方为服务端渠道。',
+      'The switches above are on-device channels (stored locally; the notification bridge decides whether to raise a system notification); the section below is the server side.'
+    ],
 };
 
   /// 取字符串

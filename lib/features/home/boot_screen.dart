@@ -220,9 +220,11 @@ class _BootScreenState extends ConsumerState<BootScreen>
 
   /// 自检日志（boot 动画期间逐行显现）
   Widget _buildBootLog() {
+    // 【第6期】启动自检行改为「本机真实状态」——原 'registry core 8 modules' 是写死的服务端
+    //   注册表数量（连主机前无法得知，属伪造数据）；现一律不报未验证的服务端事实。
     final lines = [
-      'env_bootstrap   OK',
-      'registry core   8 modules',
+      tr('boot_app_shell_line'),
+      tr('boot_registry_line'),
       'ui theme v2     FUI',
       tr('bootx_host_link_offline_manual'),
     ];

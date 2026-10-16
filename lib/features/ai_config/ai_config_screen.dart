@@ -25,6 +25,8 @@ import 'screens/server_files_screen.dart';
 import 'screens/skills_screen.dart';
 import 'screens/sync_settings_screen.dart';
 import 'screens/token_usage_screen.dart';
+import 'screens/upgrade_screen.dart';   // 【第6期】升级屏（update_check 真数据）
+import 'screens/plugin_screen.dart';    // 【第6期】插件屏（plugin_list/plugin_reload 真数据）
 import '../logs/logs_screen.dart';
 import 'screens/about_screen.dart';
 
@@ -82,6 +84,9 @@ List<_Category> get _categories => [
     _CatItem(tr('cfg_logs'), Icons.article_outlined, LogsScreen()),
     _CatItem(tr('cfg_server_files'), Icons.folder_special_outlined, ServerFilesScreen()),
     _CatItem('MCP', Icons.dns_outlined, McpScreen()),
+    // 【第6期】升级屏/插件屏补齐（原 App 无入口——服务端 update_check/plugin_list 早已存在）
+    _CatItem(tr('cfg_upgrade'), Icons.sync_outlined, UpgradeScreen()),
+    _CatItem(tr('cfg_plugins'), Icons.extension_outlined, PluginScreen()),
   ]),
   _Category(tr('about'), Icons.info_outline, [
     _CatItem(tr('cfg_version_info'), Icons.info_outline, AboutScreen()),
