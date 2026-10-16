@@ -126,6 +126,9 @@ class _PluginScreenState extends ConsumerState<PluginScreen> {
   Widget build(BuildContext context) {
     final loadedTxt = _loaded == null ? '--' : _loaded.toString();
     final dirTxt = _dir.isEmpty ? '--' : _dir;
+    // 【CI】tr() 结果先落局部变量，再用插值拼接（避免 prefer_interpolation_to_compose_strings）
+    final loadedLabel = tr('plg_loaded');
+    final dirLabel = tr('plg_dir');
     return Scaffold(
       backgroundColor: AppColors.bg,
       appBar: AppBar(
@@ -153,14 +156,14 @@ class _PluginScreenState extends ConsumerState<PluginScreen> {
                     ),
                     title: Text(
                       _reachable
-                          ? tr('plg_loaded') + ': ' + loadedTxt
+                          ? '$loadedLabel: $loadedTxt'
                           : tr('plg_unavailable'),
                       style: TextStyle(
                           fontSize: 13,
                           color: _reachable ? AppColors.white : AppColors.amber),
                     ),
                     subtitle: Text(
-                      tr('plg_dir') + ': ' + dirTxt,
+                      '$dirLabel: $dirTxt',
                       style: const TextStyle(
                           fontFamily: fuiMono, fontSize: 11, color: AppColors.dim),
                     ),

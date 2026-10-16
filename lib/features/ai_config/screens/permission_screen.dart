@@ -144,7 +144,7 @@ class _PermissionScreenState extends ConsumerState<PermissionScreen> {
       if (!mounted) return;
       if (result.isGranted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(tr('perm_system_permission_granted')), duration: Duration(seconds: 2)),
+          SnackBar(content: Text(tr('perm_system_permission_granted')), duration: const Duration(seconds: 2)),
         );
         return;
       }
@@ -153,7 +153,7 @@ class _PermissionScreenState extends ConsumerState<PermissionScreen> {
         context: context,
         builder: (ctx) => AlertDialog(
           title: Text(tr('perm_system_permission_required')),
-          content: Text(trp('perm_permission_was_denied_you_can_enable_it', {'p0': '$perm'})),
+          content: Text(trp('perm_permission_was_denied_you_can_enable_it', {'p0': perm})),
           actions: [
             TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr('perm_not_now'))),
             FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(tr('perm_open_settings'))),
@@ -222,7 +222,7 @@ class _PermissionScreenState extends ConsumerState<PermissionScreen> {
                       ),
                       child: Text(
                         tr('perm_shadow_mode_shadowed_permissions_return'),
-                        style: TextStyle(fontSize: 11, color: AppColors.textSecondary, height: 1.5),
+                        style: const TextStyle(fontSize: 11, color: AppColors.textSecondary, height: 1.5),
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -233,7 +233,7 @@ class _PermissionScreenState extends ConsumerState<PermissionScreen> {
                     const SizedBox(height: 16),
                     Text(
                       tr('perm_token_permission_management_issue_revoke'),
-                      style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                      style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
                     ),
                   ],
                 ),
@@ -254,8 +254,8 @@ class _PermissionScreenState extends ConsumerState<PermissionScreen> {
           // 类级统一授权
           Row(
             children: [
-              Text(tr('perm_grant_all'), style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
-              SizedBox(width: 4),
+              Text(tr('perm_grant_all'), style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+              const SizedBox(width: 4),
             ],
           ),
           Row(

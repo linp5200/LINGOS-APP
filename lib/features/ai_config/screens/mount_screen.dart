@@ -68,10 +68,10 @@ class _MountScreenState extends State<MountScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.link_off, size: 48, color: AppColors.textSecondary),
-                      SizedBox(height: 12),
+                      const Icon(Icons.link_off, size: 48, color: AppColors.textSecondary),
+                      const SizedBox(height: 12),
                       Text(tr('mnt_no_mounts_tap_to_add'),
-                          style: TextStyle(color: AppColors.textSecondary)),
+                          style: const TextStyle(color: AppColors.textSecondary)),
                     ],
                   ),
                 )
@@ -124,12 +124,12 @@ class _MountEditScreenState extends State<_MountEditScreen> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Text(tr('mnt_source_type'), style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+          Text(tr('mnt_source_type'), style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
           const SizedBox(height: 8),
           Row(
             children: [
               ChoiceChip(
-                label: Text(tr('mnt_android_external_storage'), style: TextStyle(fontSize: 12)),
+                label: Text(tr('mnt_android_external_storage'), style: const TextStyle(fontSize: 12)),
                 selected: _sourceType == 'android',
                 onSelected: (_) => setState(() {
                   _sourceType = 'android';
@@ -138,7 +138,7 @@ class _MountEditScreenState extends State<_MountEditScreen> {
               ),
               const SizedBox(width: 8),
               ChoiceChip(
-                label: Text(tr('mnt_server_lingos'), style: TextStyle(fontSize: 12)),
+                label: Text(tr('mnt_server_lingos'), style: const TextStyle(fontSize: 12)),
                 selected: _sourceType == 'server',
                 onSelected: (_) => setState(() {
                   _sourceType = 'server';
@@ -153,7 +153,7 @@ class _MountEditScreenState extends State<_MountEditScreen> {
             style: const TextStyle(fontSize: 14),
             decoration: InputDecoration(
               labelText: tr('mnt_source_path'),
-              border: OutlineInputBorder(),
+              border: const OutlineInputBorder(),
               isDense: true,
             ),
           ),
@@ -163,7 +163,7 @@ class _MountEditScreenState extends State<_MountEditScreen> {
             style: const TextStyle(fontSize: 14),
             decoration: InputDecoration(
               labelText: tr('mnt_mount_at_path_inside_the_sandbox'),
-              border: OutlineInputBorder(),
+              border: const OutlineInputBorder(),
               isDense: true,
             ),
           ),
@@ -171,12 +171,12 @@ class _MountEditScreenState extends State<_MountEditScreen> {
           SwitchListTile(
             value: _readonly,
             onChanged: (v) => setState(() => _readonly = v),
-            title: Text(tr('mnt_read_only'), style: TextStyle(fontSize: 14)),
+            title: Text(tr('mnt_read_only'), style: const TextStyle(fontSize: 14)),
           ),
           SwitchListTile(
             value: _persist,
             onChanged: (v) => setState(() => _persist = v),
-            title: Text(tr('mnt_persistent_remount_on_sandbox_restart'), style: TextStyle(fontSize: 14)),
+            title: Text(tr('mnt_persistent_remount_on_sandbox_restart'), style: const TextStyle(fontSize: 14)),
           ),
           const SizedBox(height: 16),
           FilledButton(
@@ -193,7 +193,7 @@ class _MountEditScreenState extends State<_MountEditScreen> {
           const SizedBox(height: 12),
           Text(
             tr('mnt_technical_proot_b_directory_binding_no_root'),
-            style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
+            style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
           ),
         ],
       ),

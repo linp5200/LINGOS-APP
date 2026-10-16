@@ -127,16 +127,16 @@ class _HomeShellState extends ConsumerState<HomeShell> {
       barrierDismissible: false,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.surface,
-        title: Text(tr('shell_token_unusable'), style: TextStyle(color: AppColors.textPrimary)),
+        title: Text(tr('shell_token_unusable'), style: const TextStyle(color: AppColors.textPrimary)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(tr('shell_the_server_rejected_the_current_token_re'),
-                style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+                style: const TextStyle(color: AppColors.textSecondary, fontSize: 13)),
             const SizedBox(height: 6),
             Text(
               tr('shell_if_the_new_token_is_rejected_too_on_the'),
-              style: TextStyle(color: AppColors.textSecondary, fontSize: 11),
+              style: const TextStyle(color: AppColors.textSecondary, fontSize: 11),
             ),
             const SizedBox(height: 8),
             TextField(
@@ -144,7 +144,7 @@ class _HomeShellState extends ConsumerState<HomeShell> {
               style: const TextStyle(color: AppColors.textPrimary),
               decoration: InputDecoration(
                 labelText: tr('shell_host_side_code_token_login_again_code'),
-                border: OutlineInputBorder(),
+                border: const OutlineInputBorder(),
                 isDense: true,
               ),
             ),
@@ -209,7 +209,7 @@ class _HomeShellState extends ConsumerState<HomeShell> {
             leading: const LingIcon(LingIcons.connect, size: 20, color: AppColors.brandGreen),
             title: Text(trCtx(context, 'connect_host'),
                 style: const TextStyle(color: AppColors.brandGreen)),
-            subtitle: Text(tr('shell_chat_sync_remote_cameras_require_a'), style: TextStyle(fontSize: 10, color: AppColors.dim)),
+            subtitle: Text(tr('shell_chat_sync_remote_cameras_require_a'), style: const TextStyle(fontSize: 10, color: AppColors.dim)),
             onTap: _goConnect,
           ),
           // 【0.2.1 B1 改名】Help AI（帮助档案——原 HA 面板）
@@ -272,7 +272,7 @@ class _HomeShellState extends ConsumerState<HomeShell> {
             const Icon(Icons.warning_amber_rounded, color: Colors.white, size: 18),
             const SizedBox(width: 8),
             Expanded(
-              child: Text(trp('shell_handling_alert_tap_to_view', {'p0': '${c.name}'}),
+              child: Text(trp('shell_handling_alert_tap_to_view', {'p0': c.name}),
                   style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600)),
             ),
             if (!c.acked)
@@ -282,7 +282,7 @@ class _HomeShellState extends ConsumerState<HomeShell> {
                   color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Text(tr('shell_pending_confirmation'), style: TextStyle(color: Colors.white, fontSize: 11)),
+                child: Text(tr('shell_pending_confirmation'), style: const TextStyle(color: Colors.white, fontSize: 11)),
               ),
           ]),
         ),
@@ -301,7 +301,7 @@ class _HomeShellState extends ConsumerState<HomeShell> {
         child: AlertDialog(
           backgroundColor: const Color(0xFF2A0A0A),
           icon: const Icon(Icons.warning_amber_rounded, color: Color(0xFFFF5252), size: 42),
-          title: Text(trp('shell_alert', {'p0': '${c.name}'}),
+          title: Text(trp('shell_alert', {'p0': c.name}),
               style: const TextStyle(color: Color(0xFFFF8A80), fontWeight: FontWeight.bold)),
           content: SingleChildScrollView(
             child: Column(
@@ -309,13 +309,13 @@ class _HomeShellState extends ConsumerState<HomeShell> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 if (c.source.isNotEmpty)
-                  Text(trp('shell_trigger', {'p0': '${c.source}'}), style: const TextStyle(color: Colors.white70, fontSize: 12)),
+                  Text(trp('shell_trigger', {'p0': c.source}), style: const TextStyle(color: Colors.white70, fontSize: 12)),
                 if (c.detail.isNotEmpty) ...[
                   const SizedBox(height: 6),
                   Text(c.detail, style: const TextStyle(color: Colors.white, fontSize: 13)),
                 ],
                 const SizedBox(height: 10),
-                Text(tr('shell_category_actions_already_taken_by_the_system'), style: TextStyle(color: Colors.orangeAccent, fontSize: 12)),
+                Text(tr('shell_category_actions_already_taken_by_the_system'), style: const TextStyle(color: Colors.orangeAccent, fontSize: 12)),
                 const SizedBox(height: 4),
                 ...actions.take(8).map((a) {
                   final m = (a is Map) ? a : const {};
@@ -331,7 +331,7 @@ class _HomeShellState extends ConsumerState<HomeShell> {
                     padding: const EdgeInsets.only(bottom: 2),
                     child: Text(
                         trp('shell_action_line', {
-                          'p0': '$tag',
+                          'p0': tag,
                           'p1': '${m['desc'] ?? ''}',
                           'p2': '${m['detail'] ?? st}'
                         }),
@@ -340,7 +340,7 @@ class _HomeShellState extends ConsumerState<HomeShell> {
                 }),
                 const SizedBox(height: 8),
                 Text(tr('shell_the_ai_has_full_handling_authority_it_keeps'),
-                    style: TextStyle(color: Colors.white54, fontSize: 11)),
+                    style: const TextStyle(color: Colors.white54, fontSize: 11)),
                 const SizedBox(height: 6),
                 // 【0.7.0】生命线投递状态（server crisis_delivery——多通道并行+ACK）
                 FutureBuilder<Map<String, dynamic>?>(
@@ -407,10 +407,10 @@ class _HomeShellState extends ConsumerState<HomeShell> {
         selectedIndex: _index,
         onDestinationSelected: (i) => setState(() => _index = i),
         destinations: [
-          NavigationDestination(icon: Icon(Icons.home_outlined), selectedIcon: Icon(Icons.home), label: tr('nav_console')),
-          NavigationDestination(icon: Icon(Icons.chat_bubble_outline), selectedIcon: Icon(Icons.chat_bubble), label: tr('nav_chat')),
-          NavigationDestination(icon: Icon(Icons.forum_outlined), selectedIcon: Icon(Icons.forum), label: tr('nav_sessions')),
-          NavigationDestination(icon: Icon(Icons.dashboard_outlined), selectedIcon: Icon(Icons.dashboard), label: tr('nav_dashboard')),
+          NavigationDestination(icon: const Icon(Icons.home_outlined), selectedIcon: const Icon(Icons.home), label: tr('nav_console')),
+          NavigationDestination(icon: const Icon(Icons.chat_bubble_outline), selectedIcon: const Icon(Icons.chat_bubble), label: tr('nav_chat')),
+          NavigationDestination(icon: const Icon(Icons.forum_outlined), selectedIcon: const Icon(Icons.forum), label: tr('nav_sessions')),
+          NavigationDestination(icon: const Icon(Icons.dashboard_outlined), selectedIcon: const Icon(Icons.dashboard), label: tr('nav_dashboard')),
         ],
       ),
     );

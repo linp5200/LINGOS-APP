@@ -92,7 +92,7 @@ class _AppearanceScreenState extends State<AppearanceScreen> {
                   },
                   title: Text(tr('look_dynamic_accent_color')),
                   subtitle: Text(tr('look_follow_system_dynamic_color_material_you'),
-                      style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                      style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
                 ),
                 const Divider(),
                 _section(tr('look_message_preferences_all_on_by_default')),
@@ -108,7 +108,7 @@ class _AppearanceScreenState extends State<AppearanceScreen> {
                 // 【0.2.1 #7】开局显示设置——三选项平铺
                 _section(tr('look_startup_screen')),
                 Text(tr('look_show_first_when_the_app_starts'),
-                    style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+                    style: const TextStyle(fontSize: 13, color: AppColors.textSecondary)),
                 const SizedBox(height: 8),
                 Wrap(
                   spacing: 8,
@@ -129,7 +129,7 @@ class _AppearanceScreenState extends State<AppearanceScreen> {
                     items: [
                       DropdownMenuItem(value: 'system', child: Text(tr('look_follow_system'))),
                       DropdownMenuItem(value: 'zh', child: Text(tr('look_chinese'))),
-                      DropdownMenuItem(value: 'en', child: Text('English')),
+                      const DropdownMenuItem(value: 'en', child: Text('English')),
                     ],
                     onChanged: (v) async {
                       if (v == null) return;
@@ -148,12 +148,12 @@ class _AppearanceScreenState extends State<AppearanceScreen> {
                   },
                   title: Text(tr('look_anonymous_analytics')),
                   subtitle: Text(tr('look_off_by_default_privacy_first_data_stays_on'),
-                      style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                      style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
                 ),
                 const SizedBox(height: 24),
                 Text(
                   tr('look_language_sync_the_server_lang_list_will'),
-                  style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                  style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
                 ),
               ],
             ),

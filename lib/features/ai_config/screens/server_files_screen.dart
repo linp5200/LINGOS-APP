@@ -88,7 +88,7 @@ class _ServerFilesScreenState extends ConsumerState<ServerFilesScreen> {
     ref.read(connectionProvider).sendCommand({'cmd': 'file_read', 'path': path});
     // file_read 响应经 command_response 返回——简化：提示用浏览文件页
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(trp('srvf_viewing_use_the_browse_files_page_for_full', {'p0': '$path'}))),
+      SnackBar(content: Text(trp('srvf_viewing_use_the_browse_files_page_for_full', {'p0': path}))),
     );
   }
 
@@ -103,7 +103,7 @@ class _ServerFilesScreenState extends ConsumerState<ServerFilesScreen> {
           ? ListView(
               padding: const EdgeInsets.all(16),
               children: [
-                Text(tr('srvf_lingos_system_directories'), style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
+                Text(tr('srvf_lingos_system_directories'), style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
                 const SizedBox(height: 8),
                 for (final d in kSystemDirs)
                   Card(
@@ -122,7 +122,7 @@ class _ServerFilesScreenState extends ConsumerState<ServerFilesScreen> {
                   ),
                 const SizedBox(height: 12),
                 Text(tr('srvf_view_download_only_edit_on_the_browse_files'),
-                    style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                    style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
               ],
             )
           // 目录内文件列表
@@ -139,7 +139,7 @@ class _ServerFilesScreenState extends ConsumerState<ServerFilesScreen> {
                             margin: const EdgeInsets.only(bottom: 8),
                             child: ListTile(
                               leading: const Icon(Icons.arrow_upward, size: 20),
-                              title: Text(tr('srvf_go_up'), style: TextStyle(fontSize: 14)),
+                              title: Text(tr('srvf_go_up'), style: const TextStyle(fontSize: 14)),
                               onTap: () {
                                 final idx = _currentPath.lastIndexOf('/');
                                 _list(idx > 0 ? _currentPath.substring(0, idx) : '/LINGOS');

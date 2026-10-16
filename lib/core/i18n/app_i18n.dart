@@ -52,7 +52,7 @@ String tr(String key) => AppStrings.get(key, AppLangState.current);
 ///   · 未知占位符保持原样（不抛异常，便于发现遗漏）
 String trp(String key, Map<String, String> vars) {
   var s = tr(key);
-  vars.forEach((k, v) => s = s.replaceAll('{' + k + '}', v));
+  vars.forEach((k, v) => s = s.replaceAll('{$k}', v));
   return s;
 }
 

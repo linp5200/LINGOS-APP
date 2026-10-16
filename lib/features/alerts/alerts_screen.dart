@@ -27,7 +27,7 @@ class _AlertLevel {
     final s = (raw ?? '').toString().trim().toUpperCase();
     if (s.isEmpty || s == 'INFO' || s == '0') return 'info';
     if (s.length == 1 && s.codeUnitAt(0) >= 0x31 && s.codeUnitAt(0) <= 0x35) {
-      return 'L' + s; // 旧数据：整数级别 1..5
+      return 'L$s'; // 旧数据：整数级别 1..5
     }
     return s;
   }
@@ -130,7 +130,8 @@ class _AlertsScreenState extends ConsumerState<AlertsScreen> {
     // 【追加】三端口径归一（原实现只认 'L3'，L0/L4/L5 与整数级别都被当普通预警）
     final levelKey = _AlertLevel.norm(a['level']);
     final isHigh = _AlertLevel.isHigh(levelKey);
-    final shown = isHigh ? '[' + _AlertLevel.label(levelKey) + '] ' + title : title;
+    final shown =
+        isHigh ? '[${_AlertLevel.label(levelKey)}] $title' : title;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         backgroundColor: isHigh ? AppColors.brandRed : AppColors.surfaceHigh,

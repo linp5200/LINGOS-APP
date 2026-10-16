@@ -97,7 +97,7 @@ class _ProvidersScreenState extends ConsumerState<ProvidersScreen> {
     if (ok) {
       setState(() => _activeModel = modelId);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(trp('chat_model_switched', {'p0': '$modelId'})), duration: const Duration(seconds: 1)),
+        SnackBar(content: Text(trp('chat_model_switched', {'p0': modelId})), duration: const Duration(seconds: 1)),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -209,10 +209,10 @@ class _ProvidersScreenState extends ConsumerState<ProvidersScreen> {
                 const Icon(Icons.model_training, size: 16, color: AppColors.brandCyan),
                 const SizedBox(width: 6),
                 Text(tr('prov_host_side_models_tap_to_switch'),
-                    style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                    style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
                 const Spacer(),
                 if (_activeModel.isNotEmpty)
-                  Text(trp('prov_current', {'p0': '$_activeModel'}),
+                  Text(trp('prov_current', {'p0': _activeModel}),
                       style: const TextStyle(fontSize: 11, color: AppColors.brandCyan)),
               ],
             ),
@@ -261,7 +261,7 @@ class _ProvidersScreenState extends ConsumerState<ProvidersScreen> {
                     children: [
                       const Icon(Icons.cloud_outlined, size: 48, color: AppColors.textSecondary),
                       const SizedBox(height: 12),
-                      Text(tr('prov_no_providers_configured_yet'), style: TextStyle(color: AppColors.textSecondary)),
+                      Text(tr('prov_no_providers_configured_yet'), style: const TextStyle(color: AppColors.textSecondary)),
                       const SizedBox(height: 12),
                       TextButton(onPressed: _addFlow, child: Text(tr('prov_tap_in_the_top_right_to_add'))),
                     ],
@@ -431,7 +431,7 @@ class _ProviderConfigScreenState extends ConsumerState<_ProviderConfigScreen> {
     final p = widget.preset;
     final isVoice = p.category == '语音';
     return Scaffold(
-      appBar: AppBar(title: Text(trp('prov_configure', {'p0': '${p.name}'}))),
+      appBar: AppBar(title: Text(trp('prov_configure', {'p0': p.name}))),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -450,7 +450,7 @@ class _ProviderConfigScreenState extends ConsumerState<_ProviderConfigScreen> {
             style: const TextStyle(fontSize: 14),
             decoration: InputDecoration(
               labelText: tr('prov_base_url_prefilled'),
-              border: OutlineInputBorder(),
+              border: const OutlineInputBorder(),
               isDense: true,
             ),
           ),
@@ -462,7 +462,7 @@ class _ProviderConfigScreenState extends ConsumerState<_ProviderConfigScreen> {
               style: const TextStyle(fontSize: 14),
               decoration: InputDecoration(
                 labelText: tr('prov_model_optional_e_g_deepseek_v4_flash'),
-                border: OutlineInputBorder(),
+                border: const OutlineInputBorder(),
                 isDense: true,
               ),
             ),
@@ -475,7 +475,7 @@ class _ProviderConfigScreenState extends ConsumerState<_ProviderConfigScreen> {
                   icon: _loadingModels
                       ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2))
                       : const Icon(Icons.list_alt, size: 16),
-                  label: Text(tr('prov_fetch_model_list'), style: TextStyle(fontSize: 12)),
+                  label: Text(tr('prov_fetch_model_list'), style: const TextStyle(fontSize: 12)),
                 ),
                 if (_remoteModels.isNotEmpty) ...[
                   const SizedBox(width: 8),
@@ -485,7 +485,7 @@ class _ProviderConfigScreenState extends ConsumerState<_ProviderConfigScreen> {
                       isDense: true,
                       decoration: InputDecoration(
                         labelText: tr('prov_select_model'),
-                        border: OutlineInputBorder(),
+                        border: const OutlineInputBorder(),
                         isDense: true,
                       ),
                       items: _remoteModels
@@ -502,14 +502,14 @@ class _ProviderConfigScreenState extends ConsumerState<_ProviderConfigScreen> {
             SwitchListTile(
               value: _thinkingEnabled,
               onChanged: (v) => setState(() => _thinkingEnabled = v),
-              title: Text(tr('prov_thinking_mode'), style: TextStyle(fontSize: 14)),
+              title: Text(tr('prov_thinking_mode'), style: const TextStyle(fontSize: 14)),
               subtitle: Text(tr('prov_on_the_model_outputs_a_reasoning_chain'),
-                  style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                  style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
               contentPadding: EdgeInsets.zero,
             ),
             Row(
               children: [
-                Text(tr('prov_thinking_effort'), style: TextStyle(fontSize: 14)),
+                Text(tr('prov_thinking_effort'), style: const TextStyle(fontSize: 14)),
                 const Spacer(),
                 DropdownButton<String>(
                   value: _reasoningEffort,
@@ -551,7 +551,7 @@ class _ProviderConfigScreenState extends ConsumerState<_ProviderConfigScreen> {
           if (isVoice) ...[
             const SizedBox(height: 8),
             Text(tr('prov_voice_service_config_is_saved_on_this'),
-                style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
           ],
         ],
       ),

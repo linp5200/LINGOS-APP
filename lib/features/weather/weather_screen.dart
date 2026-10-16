@@ -171,20 +171,20 @@ class _WeatherScreenState extends ConsumerState<WeatherScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.surface,
-        title: Text(tr('wc_city_management'), style: TextStyle(fontSize: 16)),
+        title: Text(tr('wc_city_management'), style: const TextStyle(fontSize: 16)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(tr('wc_enter_a_city_name_chinese_or_english_e_g'),
-                style: TextStyle(fontSize: 11, color: AppColors.dim)),
+                style: const TextStyle(fontSize: 11, color: AppColors.dim)),
             const SizedBox(height: 10),
             TextField(
               controller: ctrl,
               autofocus: true,
               decoration: InputDecoration(
                 labelText: tr('wc_city'),
-                prefixIcon: Icon(Icons.location_city, size: 20),
+                prefixIcon: const Icon(Icons.location_city, size: 20),
               ),
             ),
           ],
@@ -206,7 +206,7 @@ class _WeatherScreenState extends ConsumerState<WeatherScreen> {
     final st = resp?['data'];
     final err = (st is Map && st['status'] == 'error') ? (st['msg']?.toString() ?? tr('wc_failed_to_set')) : null;
     ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(err ?? trp('wc_city_set_refreshing', {'p0': '$city'}))));
+        SnackBar(content: Text(err ?? trp('wc_city_set_refreshing', {'p0': city}))));
     if (err == null) _refresh();
   }
 

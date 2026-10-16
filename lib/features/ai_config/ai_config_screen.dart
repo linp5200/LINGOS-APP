@@ -50,46 +50,46 @@ class _Category {
 List<_Category> get _categories => [
 
   _Category(tr('cfg_connection_server'), Icons.settings_ethernet_outlined, [
-    _CatItem(tr('cfg_connection_settings'), Icons.link_outlined, ConnSettingsScreen()),
-    _CatItem(tr('cfg_host_authentication'), Icons.dns_outlined, ConnectScreen()),
-    _CatItem(tr('cfg_rootfs_local_sandbox'), Icons.developer_board_outlined, RootfsScreen()),
-    _CatItem(tr('cfg_server_mode'), Icons.dns_outlined, ServerModeScreen()),   // 【0.7.0】远程开启/停止服务器
+    _CatItem(tr('cfg_connection_settings'), Icons.link_outlined, const ConnSettingsScreen()),
+    _CatItem(tr('cfg_host_authentication'), Icons.dns_outlined, const ConnectScreen()),
+    _CatItem(tr('cfg_rootfs_local_sandbox'), Icons.developer_board_outlined, const RootfsScreen()),
+    _CatItem(tr('cfg_server_mode'), Icons.dns_outlined, const ServerModeScreen()),   // 【0.7.0】远程开启/停止服务器
   ]),
   _Category(tr('cfg_chat_ai'), Icons.smart_toy_outlined, [
-    _CatItem(tr('cfg_model_providers'), Icons.add_circle_outline, ProvidersScreen()),
-    _CatItem(tr('cfg_token_usage'), Icons.data_usage_outlined, TokenUsageScreen()),
-    _CatItem(tr('cfg_personality'), Icons.person_outline, PersonalityScreen()),
-    _CatItem(tr('cfg_skills'), Icons.extension_outlined, SkillsScreen()),
-    _CatItem(tr('cfg_memory'), Icons.psychology_outlined, MemoryScreen()),
+    _CatItem(tr('cfg_model_providers'), Icons.add_circle_outline, const ProvidersScreen()),
+    _CatItem(tr('cfg_token_usage'), Icons.data_usage_outlined, const TokenUsageScreen()),
+    _CatItem(tr('cfg_personality'), Icons.person_outline, const PersonalityScreen()),
+    _CatItem(tr('cfg_skills'), Icons.extension_outlined, const SkillsScreen()),
+    _CatItem(tr('cfg_memory'), Icons.psychology_outlined, const MemoryScreen()),
   ]),
   _Category(tr('grp_voice'), Icons.record_voice_over_outlined, [
-    _CatItem(tr('cfg_voice_providers_test'), Icons.voice_over_off_outlined, ProvidersScreen()),
+    _CatItem(tr('cfg_voice_providers_test'), Icons.voice_over_off_outlined, const ProvidersScreen()),
   ]),
   _Category(tr('cfg_notifications_background'), Icons.notifications_active_outlined, [
-    _CatItem(tr('cfg_notifications_background'), Icons.notifications_active_outlined, NotifScreen()),
-    _CatItem(tr('cfg_privileges_shizuku'), Icons.security_outlined, PrivilegeScreen()),
+    _CatItem(tr('cfg_notifications_background'), Icons.notifications_active_outlined, const NotifScreen()),
+    _CatItem(tr('cfg_privileges_shizuku'), Icons.security_outlined, const PrivilegeScreen()),
   ]),
   _Category(tr('cfg_appearance_theme'), Icons.palette_outlined, [
-    _CatItem(tr('cfg_appearance_preferences'), Icons.palette_outlined, AppearanceScreen()),
+    _CatItem(tr('cfg_appearance_preferences'), Icons.palette_outlined, const AppearanceScreen()),
   ]),
   _Category(tr('cfg_sessions_sync'), Icons.sync_outlined, [
-    _CatItem(tr('cfg_sync_settings'), Icons.sync_outlined, SyncSettingsScreen()),
-    _CatItem(tr('cfg_session_manager'), Icons.forum_outlined, SessionsScreen()),
+    _CatItem(tr('cfg_sync_settings'), Icons.sync_outlined, const SyncSettingsScreen()),
+    _CatItem(tr('cfg_session_manager'), Icons.forum_outlined, const SessionsScreen()),
   ]),
   _Category(tr('cfg_privacy_security'), Icons.lock_outline, [
-    _CatItem(tr('cfg_permissions'), Icons.admin_panel_settings_outlined, PermissionScreen()),
-    _CatItem(tr('cfg_mount_external_files'), Icons.folder_special_outlined, MountScreen()),
+    _CatItem(tr('cfg_permissions'), Icons.admin_panel_settings_outlined, const PermissionScreen()),
+    _CatItem(tr('cfg_mount_external_files'), Icons.folder_special_outlined, const MountScreen()),
   ]),
   _Category(tr('cfg_system_logs'), Icons.settings_suggest_outlined, [
-    _CatItem(tr('cfg_logs'), Icons.article_outlined, LogsScreen()),
-    _CatItem(tr('cfg_server_files'), Icons.folder_special_outlined, ServerFilesScreen()),
-    _CatItem('MCP', Icons.dns_outlined, McpScreen()),
+    _CatItem(tr('cfg_logs'), Icons.article_outlined, const LogsScreen()),
+    _CatItem(tr('cfg_server_files'), Icons.folder_special_outlined, const ServerFilesScreen()),
+    const _CatItem('MCP', Icons.dns_outlined, McpScreen()),
     // 【第6期】升级屏/插件屏补齐（原 App 无入口——服务端 update_check/plugin_list 早已存在）
-    _CatItem(tr('cfg_upgrade'), Icons.sync_outlined, UpgradeScreen()),
-    _CatItem(tr('cfg_plugins'), Icons.extension_outlined, PluginScreen()),
+    _CatItem(tr('cfg_upgrade'), Icons.sync_outlined, const UpgradeScreen()),
+    _CatItem(tr('cfg_plugins'), Icons.extension_outlined, const PluginScreen()),
   ]),
   _Category(tr('about'), Icons.info_outline, [
-    _CatItem(tr('cfg_version_info'), Icons.info_outline, AboutScreen()),
+    _CatItem(tr('cfg_version_info'), Icons.info_outline, const AboutScreen()),
   ]),
 ];
 
@@ -137,7 +137,7 @@ class _SubMenuScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         // 路径标题：设置 / 分类
-        title: Text(trp('cfg_settings', {'p0': '${category.title}'}),
+        title: Text(trp('cfg_settings', {'p0': category.title}),
             style: const TextStyle(fontSize: 15, letterSpacing: 1)),
       ),
       body: ListView.separated(

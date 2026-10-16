@@ -116,7 +116,7 @@ class _PersonalityScreenState extends ConsumerState<PersonalityScreen> {
                     for (final p in _kPersonalities) _personalityCard(p),
                     const SizedBox(height: 16),
                     Text(tr('pers_voice_field_links_to_speech_tts_channel'),
-                        style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                        style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
                   ],
                 ),
     );

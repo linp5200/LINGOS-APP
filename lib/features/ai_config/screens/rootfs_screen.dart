@@ -65,7 +65,7 @@ class _RootfsScreenState extends State<RootfsScreen> {
         title: Text(trp('rootfs_engine_in_development', {'p0': distro['name']})),
         content: Text(
           tr('rootfs_the_rootfs_download_extract_engine_is_not'),
-          style: TextStyle(fontSize: 13, height: 1.6),
+          style: const TextStyle(fontSize: 13, height: 1.6),
         ),
         actions: [
           FilledButton(onPressed: () => Navigator.pop(ctx), child: Text(tr('rootfs_got_it'))),
@@ -138,7 +138,7 @@ class _RootfsScreenState extends State<RootfsScreen> {
         children: [
           const Icon(Icons.developer_board_outlined, size: 56, color: AppColors.textSecondary),
           const SizedBox(height: 16),
-          Text(tr('rootfs_no_sandbox_installed_pick_a_distro_to'), style: TextStyle(color: AppColors.textSecondary)),
+          Text(tr('rootfs_no_sandbox_installed_pick_a_distro_to'), style: const TextStyle(color: AppColors.textSecondary)),
           const SizedBox(height: 16),
           FilledButton.icon(
             onPressed: _installFlow,
@@ -148,7 +148,7 @@ class _RootfsScreenState extends State<RootfsScreen> {
           const SizedBox(height: 24),
           Text(tr('rootfs_technical_proot_no_root_same_lineage_as'),
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 11, color: AppColors.textSecondary, height: 1.6)),
+              style: const TextStyle(fontSize: 11, color: AppColors.textSecondary, height: 1.6)),
         ],
       ),
     );
@@ -195,25 +195,25 @@ class _RootfsScreenState extends State<RootfsScreen> {
         // 配置
         ListTile(
           leading: const Icon(Icons.settings_outlined, size: 20, color: AppColors.brandCyan),
-          title: Text(tr('rootfs_proot_path'), style: TextStyle(fontSize: 14)),
+          title: Text(tr('rootfs_proot_path'), style: const TextStyle(fontSize: 14)),
           subtitle: Text(r['prootPath']?.toString() ?? tr('rootfs_not_configured_tap_to_set'),
               style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
           onTap: _editProotPath,
         ),
         ListTile(
-          leading: Icon(Icons.memory, size: 20, color: AppColors.textSecondary),
-          title: Text(tr('rootfs_cpu_limit'), style: TextStyle(fontSize: 14)),
-          trailing: Text(tr('rootfs_default_all'), style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+          leading: const Icon(Icons.memory, size: 20, color: AppColors.textSecondary),
+          title: Text(tr('rootfs_cpu_limit'), style: const TextStyle(fontSize: 14)),
+          trailing: Text(tr('rootfs_default_all'), style: const TextStyle(fontSize: 13, color: AppColors.textSecondary)),
         ),
         ListTile(
-          leading: Icon(Icons.speed, size: 20, color: AppColors.textSecondary),
-          title: Text(tr('rootfs_memory_limit'), style: TextStyle(fontSize: 14)),
-          trailing: Text(tr('rootfs_default'), style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+          leading: const Icon(Icons.speed, size: 20, color: AppColors.textSecondary),
+          title: Text(tr('rootfs_memory_limit'), style: const TextStyle(fontSize: 14)),
+          trailing: Text(tr('rootfs_default'), style: const TextStyle(fontSize: 13, color: AppColors.textSecondary)),
         ),
         ListTile(
-          leading: Icon(Icons.shield_outlined, size: 20, color: AppColors.textSecondary),
-          title: Text(tr('rootfs_seccomp_policy'), style: TextStyle(fontSize: 14)),
-          trailing: Text(tr('rootfs_standard'), style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+          leading: const Icon(Icons.shield_outlined, size: 20, color: AppColors.textSecondary),
+          title: Text(tr('rootfs_seccomp_policy'), style: const TextStyle(fontSize: 14)),
+          trailing: Text(tr('rootfs_standard'), style: const TextStyle(fontSize: 13, color: AppColors.textSecondary)),
         ),
         const SizedBox(height: 12),
         // 操作
@@ -242,7 +242,7 @@ class _RootfsScreenState extends State<RootfsScreen> {
         ),
         const SizedBox(height: 16),
         Text(tr('rootfs_running_app_list_appears_once_the_engine_is'),
-            style: TextStyle(fontSize: 11, color: AppColors.textSecondary, height: 1.6)),
+            style: const TextStyle(fontSize: 11, color: AppColors.textSecondary, height: 1.6)),
       ],
     );
   }
@@ -290,7 +290,7 @@ class _DistroSelectScreen extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             tr('rootfs_ubuntu_debian_need_a_version_image_the'),
-            style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
+            style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
           ),
         ],
       ),

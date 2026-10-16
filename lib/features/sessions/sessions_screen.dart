@@ -292,10 +292,10 @@ class _SessionsScreenState extends ConsumerState<SessionsScreen> {
                   color: AppColors.brandCyan.withValues(alpha: 0.15),
                   child: Row(
                     children: [
-                      Icon(Icons.cloud_off, size: 16, color: AppColors.brandCyan),
-                      SizedBox(width: 8),
+                      const Icon(Icons.cloud_off, size: 16, color: AppColors.brandCyan),
+                      const SizedBox(width: 8),
                       Text(tr('sess_offline_read_only_mode_showing_cached'),
-                          style: TextStyle(fontSize: 12, color: AppColors.brandCyan)),
+                          style: const TextStyle(fontSize: 12, color: AppColors.brandCyan)),
                     ],
                   ),
                 ),
@@ -310,7 +310,7 @@ class _SessionsScreenState extends ConsumerState<SessionsScreen> {
     return _loading
           ? const Center(child: CircularProgressIndicator())
           : _sessions.isEmpty
-              ? Center(child: Text(tr('sess_no_sessions'), style: TextStyle(color: AppColors.textSecondary)))
+              ? Center(child: Text(tr('sess_no_sessions'), style: const TextStyle(color: AppColors.textSecondary)))
               : ListView.builder(
                   padding: const EdgeInsets.all(16),
                   itemCount: _sessions.length,
@@ -336,7 +336,7 @@ class _SessionsScreenState extends ConsumerState<SessionsScreen> {
                         // 【0.2.1 9.1】会话占用显示（token 占用/消息数——服务端 session_list 已带 token_total）
                         subtitle: Text(
                             trp('sess_message_count', {
-                              'p0': '${s['message_count']?.toString() ?? '0'}',
+                              'p0': (s['message_count']?.toString() ?? '0'),
                               'p1': _fmtTokens(s['token_total']),
                               'p2': s['updated'] != null ? _fmtTime(s['updated']) : '',
                             }),

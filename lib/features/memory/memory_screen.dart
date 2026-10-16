@@ -155,9 +155,9 @@ class _MemoryScreenState extends ConsumerState<MemoryScreen> {
               await _store.saveAutoMemoryWrite(v);
             },
             title: Text(tr('mem_ai_memory_auto_write'),
-                style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+                style: const TextStyle(fontSize: 13, color: AppColors.textSecondary)),
             subtitle: Text(tr('mem_allow_the_ai_to_call_memory_write_on_its'),
-                style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
           ),
           Padding(
             padding: const EdgeInsets.all(16),
@@ -182,7 +182,7 @@ class _MemoryScreenState extends ConsumerState<MemoryScreen> {
             child: _loading
                 ? const Center(child: CircularProgressIndicator())
                 : _items.isEmpty
-                    ? Center(child: Text(tr('mem_no_memories_yet'), style: TextStyle(color: AppColors.textSecondary)))
+                    ? Center(child: Text(tr('mem_no_memories_yet'), style: const TextStyle(color: AppColors.textSecondary)))
                     : ListView.builder(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         itemCount: _items.length,

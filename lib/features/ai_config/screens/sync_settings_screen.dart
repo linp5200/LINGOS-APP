@@ -69,7 +69,7 @@ class _SyncSettingsScreenState extends ConsumerState<SyncSettingsScreen> {
     });
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Text(tr('sync_sync_complete')),
-      duration: Duration(seconds: 2),
+      duration: const Duration(seconds: 2),
     ));
   }
 
@@ -90,17 +90,17 @@ class _SyncSettingsScreenState extends ConsumerState<SyncSettingsScreen> {
           SwitchListTile(
             value: _allowCross,
             onChanged: _toggleCross,
-            title: Text(tr('sync_allow_other_devices_to_modify_sessions_of'), style: TextStyle(fontSize: 14)),
+            title: Text(tr('sync_allow_other_devices_to_modify_sessions_of'), style: const TextStyle(fontSize: 14)),
             subtitle: Text(
               tr('sync_off_only_the_session_creator_can_modify'),
-              style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
+              style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
             ),
           ),
           const Divider(),
           ListTile(
             leading: const Icon(Icons.sync, size: 20, color: AppColors.brandCyan),
             title: Text(_syncing ? tr('sync_syncing') : tr('sync_sync_now'), style: const TextStyle(fontSize: 14)),
-            subtitle: Text(trp('sync_last_sync', {'p0': '${_fmtLastSync(_lastSync)}'}),
+            subtitle: Text(trp('sync_last_sync', {'p0': _fmtLastSync(_lastSync)}),
                 style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
             trailing: _syncing
                 ? const SizedBox(
@@ -111,10 +111,10 @@ class _SyncSettingsScreenState extends ConsumerState<SyncSettingsScreen> {
           ),
           const Divider(),
           Padding(
-            padding: EdgeInsets.all(12),
+            padding: const EdgeInsets.all(12),
             child: Text(
               tr('sync_how_sync_works_n_first_connection_full_sync'),
-              style: TextStyle(fontSize: 11, color: AppColors.textSecondary, height: 1.6),
+              style: const TextStyle(fontSize: 11, color: AppColors.textSecondary, height: 1.6),
             ),
           ),
         ],

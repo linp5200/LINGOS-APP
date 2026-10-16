@@ -191,13 +191,13 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
                   if (!_waitingAuth && !_waitingConnCode) ...[
                     TextField(
                       controller: _hostCtrl,
-                      decoration: InputDecoration(labelText: tr('conn_host_address'), prefixIcon: Icon(Icons.dns_outlined, size: 20)),
+                      decoration: InputDecoration(labelText: tr('conn_host_address'), prefixIcon: const Icon(Icons.dns_outlined, size: 20)),
                     ),
                     const SizedBox(height: 12),
                     TextField(
                       controller: _portCtrl,
                       keyboardType: TextInputType.number,
-                      decoration: InputDecoration(labelText: tr('conn_port'), prefixIcon: Icon(Icons.numbers, size: 20)),
+                      decoration: InputDecoration(labelText: tr('conn_port'), prefixIcon: const Icon(Icons.numbers, size: 20)),
                     ),
                     // 【0.7.0 P3】自动发现（连接 2 步化——搜索 → 一键填入）
                     const SizedBox(height: 10),
@@ -221,7 +221,7 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
                             onPressed: () => setState(() {
                               _hostCtrl.text = h.ip;
                               _portCtrl.text = '${h.port}';
-                              _status = trp('conn_selected_tap_to_connect', {'p0': '${h.name}', 'p1': '${h.ip}'});
+                              _status = trp('conn_selected_tap_to_connect', {'p0': h.name, 'p1': h.ip});
                             }),
                           );
                         }).toList(),
@@ -267,7 +267,7 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
                       },
                       decoration: InputDecoration(
                         labelText: tr('conn_code_6_digits_shown_in_yellow_on_the'),
-                        prefixIcon: Icon(Icons.password, size: 20),
+                        prefixIcon: const Icon(Icons.password, size: 20),
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -289,7 +289,7 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
                       },
                       decoration: InputDecoration(
                         labelText: tr('conn_connection_code_xxxx_xxxx_xxxx'),
-                        prefixIcon: Icon(Icons.vpn_key, size: 20),
+                        prefixIcon: const Icon(Icons.vpn_key, size: 20),
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -302,7 +302,7 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
                   const SizedBox(height: 20),
                   TextButton(
                     onPressed: () => _mgr.disconnect(),
-                    child: Text(tr('disconnect'), style: TextStyle(color: AppColors.textSecondary)),
+                    child: Text(tr('disconnect'), style: const TextStyle(color: AppColors.textSecondary)),
                   ),
                 ],
               ),

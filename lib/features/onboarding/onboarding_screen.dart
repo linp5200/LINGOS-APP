@@ -87,7 +87,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 children: [
                   TextButton(
                     onPressed: () => _finish(),
-                    child: Text(tr('onb_skip'), style: TextStyle(color: AppColors.dim)),
+                    child: Text(tr('onb_skip'), style: const TextStyle(color: AppColors.dim)),
                   ),
                   const Spacer(),
                   if (_page < 2)
@@ -119,19 +119,19 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   Widget _welcome() {
     return Padding(
-      padding: EdgeInsets.all(28),
+      padding: const EdgeInsets.all(28),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.wb_twilight, size: 64, color: AppColors.brandGreen),
-          SizedBox(height: 18),
+          const Icon(Icons.wb_twilight, size: 64, color: AppColors.brandGreen),
+          const SizedBox(height: 18),
           Text(tr('onb_welcome_to_ling_os'),
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
-          SizedBox(height: 14),
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+          const SizedBox(height: 14),
           Text(
             tr('onb_a_personal_home_security_ai_system_n_n'),
-            style: TextStyle(fontSize: 13, height: 1.7, color: AppColors.textSecondary),
+            style: const TextStyle(fontSize: 13, height: 1.7, color: AppColors.textSecondary),
           ),
         ],
       ),
@@ -140,23 +140,23 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   Widget _connectStep() {
     return Padding(
-      padding: EdgeInsets.all(28),
+      padding: const EdgeInsets.all(28),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.lan_outlined, size: 56, color: AppColors.brandGreen),
-          SizedBox(height: 18),
+          const Icon(Icons.lan_outlined, size: 56, color: AppColors.brandGreen),
+          const SizedBox(height: 18),
           Text(tr('onb_connect_your_host'),
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
-          SizedBox(height: 12),
+              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+          const SizedBox(height: 12),
           Text(
             tr('onb_the_ling_os_server_runs_on_your_host_a'),
-            style: TextStyle(fontSize: 13, height: 1.7, color: AppColors.textSecondary),
+            style: const TextStyle(fontSize: 13, height: 1.7, color: AppColors.textSecondary),
           ),
-          SizedBox(height: 18),
+          const SizedBox(height: 18),
           Text(tr('onb_tip_the_terminal_shows_the_verification'),
-              style: TextStyle(fontSize: 11, color: AppColors.dim)),
+              style: const TextStyle(fontSize: 11, color: AppColors.dim)),
         ],
       ),
     );
@@ -172,14 +172,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           const Icon(Icons.checklist_rtl, size: 56, color: AppColors.brandGreen),
           const SizedBox(height: 18),
           Text(tr('onb_readiness_check'),
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
           const SizedBox(height: 14),
           _checkLine(tr('onb_notification_permission'), tr('onb_allow_notifications_so_crises_alerts_can')),
           _checkLine(tr('notif_keep_alive_in_background'), tr('onb_recommended_settings_notifications')),
           _checkLine(tr('notif_battery_optimization'), tr('onb_disable_battery_restrictions_for_this_app')),
           const SizedBox(height: 16),
           Text(tr('onb_you_can_start_once_done_everything_can_be'),
-              style: TextStyle(fontSize: 11, color: AppColors.dim)),
+              style: const TextStyle(fontSize: 11, color: AppColors.dim)),
         ],
       ),
     );

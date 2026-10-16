@@ -128,7 +128,7 @@ class _ConnSettingsScreenState extends ConsumerState<ConnSettingsScreen> {
                     initialValue: _connectionModeId,
                     decoration: InputDecoration(
                       labelText: tr('cset_connection_mode'),
-                      border: OutlineInputBorder(),
+                      border: const OutlineInputBorder(),
                       isDense: true,
                     ),
                     items: ConnectionMode.values
@@ -156,7 +156,7 @@ class _ConnSettingsScreenState extends ConsumerState<ConnSettingsScreen> {
                   title: Text(tr('conn_encrypted')),
                   subtitle: Text(
                     tr('cset_encrypted_by_default_wss_enable_plaintext'),
-                    style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                    style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
                   ),
                 ),
                 // 【0.2.0】音频提供商使用服务端代理（先生决策：本地直连/代理可选）
@@ -169,7 +169,7 @@ class _ConnSettingsScreenState extends ConsumerState<ConnSettingsScreen> {
                   title: Text(tr('cset_audio_providers_via_server_proxy')),
                   subtitle: Text(
                     tr('cset_on_speech_synthesized_recognized_on_the'),
-                    style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                    style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
                   ),
                 ),
                 // 【0.2.0】自动朗读（默认关——先生决策）
@@ -182,7 +182,7 @@ class _ConnSettingsScreenState extends ConsumerState<ConnSettingsScreen> {
                   title: Text(tr('cset_auto_read_aloud')),
                   subtitle: Text(
                     tr('cset_read_ai_replies_aloud_automatically_off_by'),
-                    style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                    style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
                   ),
                 ),
                 // 【0.2.0】连续对话（家居等情景默认开——先生决策）
@@ -195,7 +195,7 @@ class _ConnSettingsScreenState extends ConsumerState<ConnSettingsScreen> {
                   title: Text(tr('cset_continuous_chat')),
                   subtitle: Text(
                     tr('cset_continuous_chat_by_default_in_home_voice'),
-                    style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                    style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
                   ),
                 ),
                 const Divider(),
@@ -203,9 +203,9 @@ class _ConnSettingsScreenState extends ConsumerState<ConnSettingsScreen> {
                 // 【定案】退出登录——本页底部（红色）
                 ListTile(
                   leading: const Icon(Icons.logout, size: 20, color: AppColors.brandRed),
-                  title: Text(tr('cset_log_out'), style: TextStyle(color: AppColors.brandRed)),
+                  title: Text(tr('cset_log_out'), style: const TextStyle(color: AppColors.brandRed)),
                   subtitle: Text(tr('cset_clear_token_encrypted_revoke_unbind_device'),
-                      style: TextStyle(color: AppColors.textSecondary)),
+                      style: const TextStyle(color: AppColors.textSecondary)),
                   onTap: _logout,
                 ),
               ],

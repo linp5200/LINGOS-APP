@@ -141,7 +141,7 @@ class _TokenUsageScreenState extends ConsumerState<TokenUsageScreen> {
                                 const Icon(Icons.data_usage, size: 48, color: AppColors.textSecondary),
                                 const SizedBox(height: 12),
                                 Text(tr('tku_no_usage_data_yet_generated_after_chatting'),
-                                    style: TextStyle(color: AppColors.textSecondary)),
+                                    style: const TextStyle(color: AppColors.textSecondary)),
                                 const SizedBox(height: 12),
                                 TextButton(onPressed: _load, child: Text(tr('refresh'))),
                               ],
@@ -188,7 +188,7 @@ class _TokenUsageScreenState extends ConsumerState<TokenUsageScreen> {
           ),
           child: Column(
             children: [
-              Text(trp('tku_total', {'p0': '${_fmtTokens(total)}'}),
+              Text(trp('tku_total', {'p0': _fmtTokens(total)}),
                   style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
               const SizedBox(height: 8),
               Row(
@@ -203,7 +203,7 @@ class _TokenUsageScreenState extends ConsumerState<TokenUsageScreen> {
           ),
         ),
         const SizedBox(height: 16),
-        Text(tr('tku_by_model'), style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
+        Text(tr('tku_by_model'), style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
         const SizedBox(height: 8),
         // 按模型分组
         for (final e in byModel.entries)
@@ -220,7 +220,7 @@ class _TokenUsageScreenState extends ConsumerState<TokenUsageScreen> {
                   }),
                   style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
               trailing: e.value['model'] == 'unknown'
-                  ? Text(tr('prov_unknown'), style: TextStyle(fontSize: 11, color: AppColors.textSecondary))
+                  ? Text(tr('prov_unknown'), style: const TextStyle(fontSize: 11, color: AppColors.textSecondary))
                   : null,
             ),
           ),

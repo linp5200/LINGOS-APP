@@ -98,7 +98,7 @@ class _CommandPanelScreenState extends ConsumerState<CommandPanelScreen> {
                 style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
                 decoration: InputDecoration(
                   labelText: tr('cmd_arguments_json_allowed'),
-                  border: OutlineInputBorder(),
+                  border: const OutlineInputBorder(),
                 ),
               ),
             ],
@@ -126,7 +126,7 @@ class _CommandPanelScreenState extends ConsumerState<CommandPanelScreen> {
 
     if (mounted) {
       ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(trp('cmd_running', {'p0': '$name'}))));
+          .showSnackBar(SnackBar(content: Text(trp('cmd_running', {'p0': name}))));
     }
     final resp = await ref
         .read(connectionProvider)
@@ -191,9 +191,9 @@ class _CommandPanelScreenState extends ConsumerState<CommandPanelScreen> {
               onChanged: (v) => setState(() => _filter = v),
               decoration: InputDecoration(
                 hintText: tr('cmd_search_commands_name_description'),
-                prefixIcon: Icon(Icons.search, size: 20),
+                prefixIcon: const Icon(Icons.search, size: 20),
                 isDense: true,
-                border: OutlineInputBorder(),
+                border: const OutlineInputBorder(),
               ),
             ),
           ),
@@ -231,7 +231,7 @@ class _CommandPanelScreenState extends ConsumerState<CommandPanelScreen> {
                 : shown.isEmpty
                     ? Center(
                         child: Text(tr('cmd_no_matching_commands_or_host_not_connected'),
-                            style: TextStyle(color: AppColors.dim, fontSize: 12)))
+                            style: const TextStyle(color: AppColors.dim, fontSize: 12)))
                     : ListView.builder(
                         itemCount: shown.length,
                         itemBuilder: (ctx, i) {
@@ -247,7 +247,7 @@ class _CommandPanelScreenState extends ConsumerState<CommandPanelScreen> {
                                   trp('cmd_source', {'p0': c['source']}),
                                 if ((c['module']?.toString() ?? '').isNotEmpty)
                                   trp('cmd_module', {'p0': c['module']}),
-                                if (risk.isNotEmpty && risk != 'low') trp('cmd_risk', {'p0': '$risk'}),
+                                if (risk.isNotEmpty && risk != 'low') trp('cmd_risk', {'p0': risk}),
                                 if ((c['desc']?.toString() ?? '').isNotEmpty)
                                   c['desc'].toString(),
                               ].join(' · '),

@@ -100,9 +100,9 @@ class _OptionsScreenState extends ConsumerState<OptionsScreen> {
         builder: (ctx) => AlertDialog(
           backgroundColor: AppColors.surface,
           title: Row(children: [
-            Icon(Icons.warning_amber_rounded, color: AppColors.brandRed, size: 20),
-            SizedBox(width: 8),
-            Text(tr('optx_dangerous_action'), style: TextStyle(fontSize: 15)),
+            const Icon(Icons.warning_amber_rounded, color: AppColors.brandRed, size: 20),
+            const SizedBox(width: 8),
+            Text(tr('optx_dangerous_action'), style: const TextStyle(fontSize: 15)),
           ]),
           content: Text(trp('optx_danger_confirm_dyn', {'p0': o['name_zh']}),
               style: const TextStyle(fontSize: 12)),
@@ -110,7 +110,7 @@ class _OptionsScreenState extends ConsumerState<OptionsScreen> {
             TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr('cancel'))),
             TextButton(
               onPressed: () => Navigator.pop(ctx, true),
-              child: Text(tr('ok'), style: TextStyle(color: AppColors.brandRed)),
+              child: Text(tr('ok'), style: const TextStyle(color: AppColors.brandRed)),
             ),
           ],
         ),
@@ -161,11 +161,11 @@ class _OptionsScreenState extends ConsumerState<OptionsScreen> {
 
   Widget _offline() => Center(
         child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-          Icon(Icons.cloud_off_outlined, size: 40, color: AppColors.dim),
-          SizedBox(height: 10),
-          Text(tr('not_connected'), style: TextStyle(color: AppColors.textSecondary)),
-          SizedBox(height: 4),
-          Text(tr('optx_options_must_be_read_from_the_host'), style: TextStyle(fontSize: 11, color: AppColors.dim)),
+          const Icon(Icons.cloud_off_outlined, size: 40, color: AppColors.dim),
+          const SizedBox(height: 10),
+          Text(tr('not_connected'), style: const TextStyle(color: AppColors.textSecondary)),
+          const SizedBox(height: 4),
+          Text(tr('optx_options_must_be_read_from_the_host'), style: const TextStyle(fontSize: 11, color: AppColors.dim)),
         ]),
       );
 
@@ -195,7 +195,7 @@ class _OptionsScreenState extends ConsumerState<OptionsScreen> {
               color: _privacyMode ? AppColors.brandGreen : AppColors.textSecondary),
           const SizedBox(width: 8),
           Text(tr('opt_privacy_mode'),
-              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
           const Spacer(),
           Text(_privacyMode ? tr('opt_enabled') : tr('opt_disabled'),
               style: TextStyle(
@@ -204,20 +204,20 @@ class _OptionsScreenState extends ConsumerState<OptionsScreen> {
         ]),
         const SizedBox(height: 6),
         Text(tr('opt_privacy_desc'),
-            style: TextStyle(fontSize: 10, color: AppColors.dim)),
+            style: const TextStyle(fontSize: 10, color: AppColors.dim)),
         const SizedBox(height: 10),
         Row(children: [
           Expanded(
             child: OutlinedButton(
               onPressed: () => _privacyModeApply(true),
-              child: Text(tr('opt_enable_strictest'), style: TextStyle(fontSize: 11)),
+              child: Text(tr('opt_enable_strictest'), style: const TextStyle(fontSize: 11)),
             ),
           ),
           const SizedBox(width: 8),
           Expanded(
             child: OutlinedButton(
               onPressed: () => _privacyModeApply(false),
-              child: Text(tr('opt_restore_default'), style: TextStyle(fontSize: 11)),
+              child: Text(tr('opt_restore_default'), style: const TextStyle(fontSize: 11)),
             ),
           ),
         ]),
@@ -296,9 +296,9 @@ class _OptionsScreenState extends ConsumerState<OptionsScreen> {
                   ),
                 if (needsCond)
                   Padding(
-                    padding: EdgeInsets.only(left: 5),
+                    padding: const EdgeInsets.only(left: 5),
                     child: Text(tr('opt_needs_condition'),
-                        style: TextStyle(fontSize: 9, color: AppColors.brandAmber)),
+                        style: const TextStyle(fontSize: 9, color: AppColors.brandAmber)),
                   ),
               ]),
               if (desc.isNotEmpty)

@@ -153,7 +153,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     if (resp?['status']?.toString() == 'ok') {
       setState(() => _activeModel = selected);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(trp('chat_model_switched', {'p0': '$selected'})), duration: const Duration(seconds: 1)),
+        SnackBar(content: Text(trp('chat_model_switched', {'p0': selected})), duration: const Duration(seconds: 1)),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -195,10 +195,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(trp('chat_tool', {'p0': '$tool'}), style: const TextStyle(fontWeight: FontWeight.w600)),
+              Text(trp('chat_tool', {'p0': tool}), style: const TextStyle(fontWeight: FontWeight.w600)),
               const SizedBox(height: 6),
               if (args.isNotEmpty && args != '{}')
-                Text(trp('chat_arguments', {'p0': '$args'}), style: const TextStyle(fontSize: 12)),
+                Text(trp('chat_arguments', {'p0': args}), style: const TextStyle(fontSize: 12)),
               if (reason.isNotEmpty) ...[
                 const SizedBox(height: 6),
                 Text(reason, style: const TextStyle(fontSize: 12, color: Colors.grey)),
@@ -215,7 +215,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               onPressed: () => Navigator.pop(ctx, 'reject'), child: Text(tr('chat_reject'))),
           OutlinedButton(
               onPressed: () => Navigator.pop(ctx, 'always'),
-              child: Text(tr('chat_always_allow'), style: TextStyle(fontSize: 12))),
+              child: Text(tr('chat_always_allow'), style: const TextStyle(fontSize: 12))),
           FilledButton(
               onPressed: () => Navigator.pop(ctx, 'approve'), child: Text(tr('chat_approve'))),
         ],
@@ -387,10 +387,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.refresh, size: 14, color: AppColors.textSecondary),
-                        SizedBox(width: 4),
+                        const Icon(Icons.refresh, size: 14, color: AppColors.textSecondary),
+                        const SizedBox(width: 4),
                         Text(tr('chat_stopped_continue'),
-                            style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                            style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
                       ],
                     ),
                   ),
@@ -412,9 +412,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.volume_up_outlined, size: 14, color: AppColors.brandCyan),
-                        SizedBox(width: 4),
-                        Text(tr('chat_read_aloud'), style: TextStyle(fontSize: 12, color: AppColors.brandCyan)),
+                        const Icon(Icons.volume_up_outlined, size: 14, color: AppColors.brandCyan),
+                        const SizedBox(width: 4),
+                        Text(tr('chat_read_aloud'), style: const TextStyle(fontSize: 12, color: AppColors.brandCyan)),
                       ],
                     ),
                   ),
@@ -437,7 +437,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         return _CollapsibleBlock(
           title: '▸ ${msg.toolName ?? '工具'}${hasResult ? (ok ? ' ✓' : ' ✗') : ' …'}',
           content: [
-            if (msg.content.isNotEmpty && msg.content != '{}') trp('chat_args', {'p0': '${msg.content}'}),
+            if (msg.content.isNotEmpty && msg.content != '{}') trp('chat_args', {'p0': msg.content}),
             if (hasResult) trp('chat_result', {'p0': '${msg.toolResult}'}),
           ].join('\n\n'),
           collapsed: !_toolExpanded,
@@ -459,9 +459,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(children: [
-                Icon(Icons.help_outline, size: 14, color: AppColors.brandCyan),
-                SizedBox(width: 4),
-                Text(tr('chat_ai_question'), style: TextStyle(color: AppColors.brandCyan, fontSize: 12, fontWeight: FontWeight.bold)),
+                const Icon(Icons.help_outline, size: 14, color: AppColors.brandCyan),
+                const SizedBox(width: 4),
+                Text(tr('chat_ai_question'), style: const TextStyle(color: AppColors.brandCyan, fontSize: 12, fontWeight: FontWeight.bold)),
               ]),
               const SizedBox(height: 7),
               Text(msg.content, style: const TextStyle(color: AppColors.textPrimary, fontSize: 13, height: 1.45)),
@@ -638,7 +638,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       }
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(tr('chat_continuous_chat_stopped')), duration: Duration(seconds: 2)));
+            SnackBar(content: Text(tr('chat_continuous_chat_stopped')), duration: const Duration(seconds: 2)));
       }
       return;
     }
@@ -692,7 +692,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     }
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(tr('chat_continuous_chat_started_tap_the_mic_again')), duration: Duration(seconds: 2)));
+          SnackBar(content: Text(tr('chat_continuous_chat_started_tap_the_mic_again')), duration: const Duration(seconds: 2)));
     }
     int emptyRounds = 0;
     while (_voiceLoopActive && mounted) {

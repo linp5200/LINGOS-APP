@@ -97,7 +97,7 @@ class _McpScreenState extends ConsumerState<McpScreen> {
 
   Future<void> _test(String name, String url) async {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(trp('mcp_testing_connection_to_result_appears_after', {'p0': '$name', 'p1': '$url'}))),
+      SnackBar(content: Text(trp('mcp_testing_connection_to_result_appears_after', {'p0': name, 'p1': url}))),
     );
     ref.read(connectionProvider).sendCommand({'cmd': 'mcp_test', 'name': name});
   }
@@ -138,7 +138,7 @@ class _McpScreenState extends ConsumerState<McpScreen> {
                           const Icon(Icons.dns_outlined, size: 48, color: AppColors.textSecondary),
                           const SizedBox(height: 12),
                           Text(tr('mcp_no_mcp_servers_configured_tap_to_add'),
-                              style: TextStyle(color: AppColors.textSecondary)),
+                              style: const TextStyle(color: AppColors.textSecondary)),
                           const SizedBox(height: 12),
                           TextButton(onPressed: _add, child: Text(tr('mcp_add_mcp'))),
                         ],
@@ -156,7 +156,7 @@ class _McpScreenState extends ConsumerState<McpScreen> {
                           ),
                           child: Text(
                             tr('mcp_mcp_model_context_protocol_connect_external'),
-                            style: TextStyle(fontSize: 11, color: AppColors.textSecondary, height: 1.5),
+                            style: const TextStyle(fontSize: 11, color: AppColors.textSecondary, height: 1.5),
                           ),
                         ),
                         const SizedBox(height: 12),
@@ -224,7 +224,7 @@ class _McpScreenState extends ConsumerState<McpScreen> {
                 TextButton.icon(
                   onPressed: () => _test(name, url),
                   icon: const Icon(Icons.wifi_tethering, size: 14),
-                  label: Text(tr('mcp_test'), style: TextStyle(fontSize: 12)),
+                  label: Text(tr('mcp_test'), style: const TextStyle(fontSize: 12)),
                 ),
                 const Spacer(),
                 IconButton(
@@ -265,7 +265,7 @@ class _McpAddScreenState extends State<_McpAddScreen> {
             style: const TextStyle(fontSize: 14),
             decoration: InputDecoration(
               labelText: tr('mcp_name_e_g_home_nas'),
-              border: OutlineInputBorder(),
+              border: const OutlineInputBorder(),
               isDense: true,
             ),
           ),
@@ -276,18 +276,18 @@ class _McpAddScreenState extends State<_McpAddScreen> {
             decoration: InputDecoration(
               labelText: tr('mcp_server_url_http'),
               hintText: 'http://192.168.1.100:3000/mcp',
-              border: OutlineInputBorder(),
+              border: const OutlineInputBorder(),
               isDense: true,
             ),
           ),
           const SizedBox(height: 16),
-          Text(tr('mcp_auth_method'), style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+          Text(tr('mcp_auth_method'), style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,
             children: [
               ChoiceChip(
-                label: Text(tr('mcp_no_auth'), style: TextStyle(fontSize: 12)),
+                label: Text(tr('mcp_no_auth'), style: const TextStyle(fontSize: 12)),
                 selected: _authType == 'none',
                 onSelected: (_) => setState(() => _authType = 'none'),
               ),
@@ -330,7 +330,7 @@ class _McpAddScreenState extends State<_McpAddScreen> {
           ),
           const SizedBox(height: 12),
           Text(tr('mcp_mcp_tools_register_as_a_separate_mcp_skill'),
-              style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+              style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
         ],
       ),
     );

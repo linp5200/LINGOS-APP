@@ -162,14 +162,14 @@ class ChatController extends StateNotifier<ChatState> {
       // 【0.6.0】GUI 交互链修复——6 事件全处理（此前仅 notify 有处理）
       case EvtType.guiAsk:
         // 【2026-10-02 · B2 先生定稿】内联卡片渲染（替代弹窗——误关不丢失）
-        final _q = evt.data['question']?.toString() ?? '';
-        final _opts = (evt.data['options'] is List)
+        final q = evt.data['question']?.toString() ?? '';
+        final opts = (evt.data['options'] is List)
             ? (evt.data['options'] as List).map((e) => e.toString()).toList()
             : <String>[];
-        _appendAsk(_q, _opts);
+        _appendAsk(q, opts);
         state = state.copyWith(pendingGuiAsk: {
-          'question': _q,
-          'options': _opts,
+          'question': q,
+          'options': opts,
           'req_id': evt.data['req_id']?.toString() ?? '',
         });
       case EvtType.guiOpenUrl:
@@ -196,7 +196,7 @@ class ChatController extends StateNotifier<ChatState> {
       case EvtType.context:
         if ((evt.data['action']?.toString() ?? '') == 'summarized') {
           final removed = evt.data['removed']?.toString() ?? '?';
-          _appendSystem(trp('chatc_context_compressed_old_messages_removed', {'p0': '$removed'}));
+          _appendSystem(trp('chatc_context_compressed_old_messages_removed', {'p0': removed}));
           state = state.copyWith(contextCompressed: true);
         }
       // 【0.2.0】工具错误卡片（先生决策：17 类详细说明）
@@ -401,8 +401,8 @@ class ChatController extends StateNotifier<ChatState> {
       });
       _appendSystem(
           always
-              ? trp('chatc_set_to_always_allow_similar_actions_auto', {'p0': '$tool'})
-              : (approve ? trp('chatc_approved', {'p0': '$tool'}) : trp('chatc_rejected', {'p0': '$tool'})));
+              ? trp('chatc_set_to_always_allow_similar_actions_auto', {'p0': tool})
+              : (approve ? trp('chatc_approved', {'p0': tool}) : trp('chatc_rejected', {'p0': tool})));
     } catch (e) {
       _appendSystem(trp('chatc_failed_to_send_approval_receipt', {'p0': '$e'}));
     }

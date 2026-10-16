@@ -122,7 +122,7 @@ class _FilesScreenState extends ConsumerState<FilesScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(tr('delete')),
-        content: Text(trp('file_delete', {'p0': '$name'})),
+        content: Text(trp('file_delete', {'p0': name})),
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr('cancel'))),
           FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(tr('delete'))),

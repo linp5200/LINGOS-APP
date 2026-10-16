@@ -204,7 +204,7 @@ class _VisionScreenState extends ConsumerState<VisionScreen> {
                   const SizedBox(height: 6),
                   Row(
                     children: [
-                      Text(tr('vis_preview'), style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                      Text(tr('vis_preview'), style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
                       Text('http://$host:$_httpPort/stream',
                           style: const TextStyle(fontSize: 12, color: AppColors.brandCyan, fontFamily: 'monospace')),
                     ],
@@ -236,7 +236,7 @@ class _VisionScreenState extends ConsumerState<VisionScreen> {
                 child: OutlinedButton.icon(
                   onPressed: _busy ? null : _snapshot,
                   icon: const Icon(Icons.camera_alt_outlined, size: 16),
-                  label: Text(tr('vis_capture'), style: TextStyle(fontSize: 12)),
+                  label: Text(tr('vis_capture'), style: const TextStyle(fontSize: 12)),
                 ),
               ),
               const SizedBox(width: 8),
@@ -246,7 +246,7 @@ class _VisionScreenState extends ConsumerState<VisionScreen> {
                   icon: _busy
                       ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2))
                       : const Icon(Icons.center_focus_strong, size: 16),
-                  label: Text(tr('vis_ai_detect'), style: TextStyle(fontSize: 12)),
+                  label: Text(tr('vis_ai_detect'), style: const TextStyle(fontSize: 12)),
                 ),
               ),
             ],
@@ -265,18 +265,18 @@ class _VisionScreenState extends ConsumerState<VisionScreen> {
                     fit: BoxFit.contain,
                     errorBuilder: (_, __, ___) => Center(
                       child: Text(tr('vis_preview_unavailable_make_sure_rtsp_streamer'),
-                          style: TextStyle(color: Colors.white54, fontSize: 12)),
+                          style: const TextStyle(color: Colors.white54, fontSize: 12)),
                     ),
                   )
                 : Center(
                     child: Text(tr('vis_v4l2_local_camera_preview_goes_through_the'),
-                        style: TextStyle(color: Colors.white54, fontSize: 12)),
+                        style: const TextStyle(color: Colors.white54, fontSize: 12)),
                   ),
           ),
           const SizedBox(height: 16),
           // 检测结果
           if (_detections.isNotEmpty) ...[
-            Text(tr('vis_object_detection'), style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+            Text(tr('vis_object_detection'), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
             const SizedBox(height: 6),
             ..._detections.map((d) => Container(
                   margin: const EdgeInsets.only(bottom: 4),
@@ -296,7 +296,7 @@ class _VisionScreenState extends ConsumerState<VisionScreen> {
           ],
           // OCR 结果
           if (_ocrs.isNotEmpty) ...[
-            Text(tr('vis_text_recognition_ocr'), style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+            Text(tr('vis_text_recognition_ocr'), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
             const SizedBox(height: 6),
             ..._ocrs.map((o) => Container(
                   margin: const EdgeInsets.only(bottom: 4),
@@ -315,10 +315,10 @@ class _VisionScreenState extends ConsumerState<VisionScreen> {
           ],
           if (_detections.isEmpty && _ocrs.isEmpty)
             Padding(
-              padding: EdgeInsets.symmetric(vertical: 12),
+              padding: const EdgeInsets.symmetric(vertical: 12),
               child: Center(
                 child: Text(tr('vis_no_detection_results_yet_waiting_for'),
-                    style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                    style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
               ),
             ),
         ],

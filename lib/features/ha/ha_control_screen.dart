@@ -179,7 +179,7 @@ class _HaControlScreenState extends ConsumerState<HaControlScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(tr('hac_connection_config'), style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                  Text(tr('hac_connection_config'), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
                   const SizedBox(height: 12),
                   TextField(
                     controller: _hostCtrl,
@@ -187,7 +187,7 @@ class _HaControlScreenState extends ConsumerState<HaControlScreen> {
                       labelText: tr('hac_ha_host_address_ip_or_domain'),
                       hintText: '192.168.1.10',
                       isDense: true,
-                      border: OutlineInputBorder(),
+                      border: const OutlineInputBorder(),
                     ),
                   ),
                   const SizedBox(height: 10),
@@ -198,7 +198,7 @@ class _HaControlScreenState extends ConsumerState<HaControlScreen> {
                       labelText: tr('hac_long_lived_access_token'),
                       hintText: tr('hac_generated_on_the_ha_profile_page'),
                       isDense: true,
-                      border: OutlineInputBorder(),
+                      border: const OutlineInputBorder(),
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -228,7 +228,7 @@ class _HaControlScreenState extends ConsumerState<HaControlScreen> {
           const SizedBox(height: 16),
           // 实体列表
           if (_entities.isNotEmpty) ...[
-            Text(tr('hac_device_entities_first_100'), style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+            Text(tr('hac_device_entities_first_100'), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
             const SizedBox(height: 8),
             ..._entities.map((e) {
               final entityId = e['entity_id']?.toString() ?? '';
@@ -273,16 +273,16 @@ class _HaControlScreenState extends ConsumerState<HaControlScreen> {
             }),
           ] else if (!_loading)
             Padding(
-              padding: EdgeInsets.symmetric(vertical: 20),
+              padding: const EdgeInsets.symmetric(vertical: 20),
               child: Center(
                 child: Text(tr('hac_not_configured_or_no_controllable_entities'),
-                    style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                    style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
               ),
             ),
           // 实时事件流
           if (_events.isNotEmpty) ...[
             const SizedBox(height: 12),
-            Text(tr('hac_live_events_state_changed'), style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+            Text(tr('hac_live_events_state_changed'), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
             const SizedBox(height: 4),
             ..._events.take(20).map((evt) {
               final friendly = evt['friendly']?.toString() ?? evt['entity']?.toString() ?? '';

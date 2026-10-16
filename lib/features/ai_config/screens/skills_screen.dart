@@ -162,7 +162,7 @@ class _SkillsScreenState extends ConsumerState<SkillsScreen> {
                       ),
                       child: Text(
                         tr('skill_enabled_permitted_inside_a_proot_rootfs'),
-                        style: TextStyle(fontSize: 11, color: AppColors.textSecondary, height: 1.5),
+                        style: const TextStyle(fontSize: 11, color: AppColors.textSecondary, height: 1.5),
                       ),
                     ),
                     Expanded(
@@ -185,7 +185,7 @@ class _SkillsScreenState extends ConsumerState<SkillsScreen> {
       children: [
         Padding(
           padding: const EdgeInsets.only(top: 10, bottom: 4),
-          child: Text(trp('skill_text', {'p0': '$group', 'p1': '${items.length}'}),
+          child: Text(trp('skill_text', {'p0': group, 'p1': '${items.length}'}),
               style: const TextStyle(
                   fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
         ),

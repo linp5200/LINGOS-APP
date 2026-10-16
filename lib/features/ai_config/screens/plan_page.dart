@@ -28,10 +28,10 @@ class PlanPage extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.construction, size: 18, color: AppColors.brandCyan),
-              SizedBox(width: 8),
+              const Icon(Icons.construction, size: 18, color: AppColors.brandCyan),
+              const SizedBox(width: 8),
               Text(tr('plan_planned_feature_enabled_once_the_server'),
-                  style: TextStyle(fontSize: 12, color: AppColors.brandCyan)),
+                  style: const TextStyle(fontSize: 12, color: AppColors.brandCyan)),
             ],
           ),
           const SizedBox(height: 16),

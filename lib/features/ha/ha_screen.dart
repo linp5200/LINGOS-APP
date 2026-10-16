@@ -89,7 +89,7 @@ class _HaScreenState extends ConsumerState<HaScreen> {
             child: _loading
                 ? const Center(child: CircularProgressIndicator())
                 : _events.isEmpty
-                    ? Center(child: Text(tr('ha_no_events_enter_a_keyword_to_search'), style: TextStyle(color: AppColors.textSecondary)))
+                    ? Center(child: Text(tr('ha_no_events_enter_a_keyword_to_search'), style: const TextStyle(color: AppColors.textSecondary)))
                     : ListView.builder(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         itemCount: _events.length,
