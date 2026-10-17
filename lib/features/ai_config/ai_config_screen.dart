@@ -17,6 +17,7 @@ import 'screens/mcp_screen.dart';
 import 'screens/mount_screen.dart';
 import 'screens/notif_screen.dart';
 import 'screens/permission_screen.dart';
+import 'screens/users_screen.dart';
 import 'screens/personality_screen.dart';
 import 'screens/privilege_screen.dart';
 import 'screens/providers_screen.dart';
@@ -78,6 +79,7 @@ List<_Category> get _categories => [
   ]),
   _Category(tr('cfg_privacy_security'), Icons.lock_outline, [
     _CatItem(tr('cfg_permissions'), Icons.admin_panel_settings_outlined, const PermissionScreen()),
+    _CatItem('用户管理', Icons.people_outline, const UsersScreen()),
     _CatItem(tr('cfg_mount_external_files'), Icons.folder_special_outlined, const MountScreen()),
   ]),
   _Category(tr('cfg_system_logs'), Icons.settings_suggest_outlined, [
