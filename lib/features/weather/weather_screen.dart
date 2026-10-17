@@ -155,11 +155,11 @@ class _WeatherScreenState extends ConsumerState<WeatherScreen> {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(children: [
-                  const Icon(Icons.cloud_off_outlined, size: 18, color: AppColors.brandRed),
+                   Icon(Icons.cloud_off_outlined, size: 18, color: AppColors.brandRed),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(_error ?? tr('weather_unreachable'),
-                        style: const TextStyle(fontSize: 12, color: AppColors.brandRed)),
+                        style:  TextStyle(fontSize: 12, color: AppColors.brandRed)),
                   ),
                 ]),
               ),
@@ -185,7 +185,7 @@ class _WeatherScreenState extends ConsumerState<WeatherScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(tr('wc_enter_a_city_name_chinese_or_english_e_g'),
-                style: const TextStyle(fontSize: 11, color: AppColors.dim)),
+                style:  TextStyle(fontSize: 11, color: AppColors.dim)),
             const SizedBox(height: 10),
             TextField(
               controller: ctrl,
@@ -238,7 +238,7 @@ class _WeatherScreenState extends ConsumerState<WeatherScreen> {
       ),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Text(c?['city']?.toString() ?? tr('weather_location'),
-            style: const TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+            style:  TextStyle(fontSize: 13, color: AppColors.textSecondary)),
         if (_source != null || _updatedAt != null || _fromCache)
           Padding(
             padding: const EdgeInsets.only(top: 3),
@@ -247,20 +247,20 @@ class _WeatherScreenState extends ConsumerState<WeatherScreen> {
               if (_updatedAt != null) '更新 ${_updatedAt!}',
               if (_fromCache) '缓存',
             ].join(' · '),
-                style: const TextStyle(fontSize: 10, color: AppColors.dim)),
+                style:  TextStyle(fontSize: 10, color: AppColors.dim)),
           ),
         const SizedBox(height: 10),
         Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
           Icon(icon, size: 52, color: AppColors.brandGreen),
           const SizedBox(width: 18),
           Text(temp == null ? '--' : '$temp°',
-              style: const TextStyle(
+              style:  TextStyle(
                   fontFamily: fuiMono,
                   fontSize: 44,
                   fontWeight: FontWeight.w600,
                   color: AppColors.textPrimary)),
           const SizedBox(width: 12),
-          Text(label, style: const TextStyle(fontSize: 14, color: AppColors.textSecondary)),
+          Text(label, style:  TextStyle(fontSize: 14, color: AppColors.textSecondary)),
         ]),
         const SizedBox(height: 16),
         Wrap(spacing: 18, runSpacing: 8, children: [
@@ -285,9 +285,9 @@ class _WeatherScreenState extends ConsumerState<WeatherScreen> {
     return Row(mainAxisSize: MainAxisSize.min, children: [
       Icon(ic, size: 15, color: AppColors.textSecondary),
       const SizedBox(width: 5),
-      Text('$label ', style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+      Text('$label ', style:  TextStyle(fontSize: 11, color: AppColors.textSecondary)),
       Text(v == null ? '--' : '$v$unit',
-          style: const TextStyle(fontSize: 12, color: AppColors.textPrimary)),
+          style:  TextStyle(fontSize: 12, color: AppColors.textPrimary)),
     ]);
   }
 
@@ -295,7 +295,7 @@ class _WeatherScreenState extends ConsumerState<WeatherScreen> {
     return Padding(
       padding: const EdgeInsets.only(top: 14),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(tr('weather_hourly'), style: const TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+        Text(tr('weather_hourly'), style:  TextStyle(fontSize: 13, color: AppColors.textSecondary)),
         const SizedBox(height: 8),
         SizedBox(
           height: 96,
@@ -318,7 +318,7 @@ class _WeatherScreenState extends ConsumerState<WeatherScreen> {
                 ),
                 child: Column(children: [
                   Text(t.length >= 13 ? t.substring(11, 13) : t,
-                      style: const TextStyle(fontSize: 10, color: AppColors.textSecondary)),
+                      style:  TextStyle(fontSize: 10, color: AppColors.textSecondary)),
                   const SizedBox(height: 6),
                   Icon(ic, size: 18, color: AppColors.brandGreen),
                   const SizedBox(height: 6),
@@ -326,7 +326,7 @@ class _WeatherScreenState extends ConsumerState<WeatherScreen> {
                       style: const TextStyle(fontFamily: fuiMono, fontSize: 12)),
                   if (h['pop'] != null)
                     Text('${h['pop']}%',
-                        style: const TextStyle(fontSize: 9, color: AppColors.brandCyan)),
+                        style:  TextStyle(fontSize: 9, color: AppColors.brandCyan)),
                 ]),
               );
             },
@@ -340,7 +340,7 @@ class _WeatherScreenState extends ConsumerState<WeatherScreen> {
     return Padding(
       padding: const EdgeInsets.only(top: 16),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(tr('weather_daily'), style: const TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+        Text(tr('weather_daily'), style:  TextStyle(fontSize: 13, color: AppColors.textSecondary)),
         const SizedBox(height: 8),
         ..._daily.map((d) {
           final (ic, label) = _codeInfo(d['code']);
@@ -356,12 +356,12 @@ class _WeatherScreenState extends ConsumerState<WeatherScreen> {
               SizedBox(
                   width: 78,
                   child: Text(d['date']?.toString() ?? '--',
-                      style: const TextStyle(fontSize: 11, color: AppColors.textSecondary))),
+                      style:  TextStyle(fontSize: 11, color: AppColors.textSecondary))),
               Icon(ic, size: 17, color: AppColors.brandGreen),
               const SizedBox(width: 8),
               Expanded(
                   child: Text(label,
-                      style: const TextStyle(fontSize: 11, color: AppColors.textSecondary))),
+                      style:  TextStyle(fontSize: 11, color: AppColors.textSecondary))),
               // 【0.5.2】temp_min/max 与 lo/hi 双名兼容
               Text(
                   '${d['temp_min'] ?? d['lo'] ?? '--'}° / ${d['temp_max'] ?? d['hi'] ?? '--'}°',

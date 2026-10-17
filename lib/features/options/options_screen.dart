@@ -100,7 +100,7 @@ class _OptionsScreenState extends ConsumerState<OptionsScreen> {
         builder: (ctx) => AlertDialog(
           backgroundColor: AppColors.surface,
           title: Row(children: [
-            const Icon(Icons.warning_amber_rounded, color: AppColors.brandRed, size: 20),
+             Icon(Icons.warning_amber_rounded, color: AppColors.brandRed, size: 20),
             const SizedBox(width: 8),
             Text(tr('optx_dangerous_action'), style: const TextStyle(fontSize: 15)),
           ]),
@@ -110,7 +110,7 @@ class _OptionsScreenState extends ConsumerState<OptionsScreen> {
             TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr('cancel'))),
             TextButton(
               onPressed: () => Navigator.pop(ctx, true),
-              child: Text(tr('ok'), style: const TextStyle(color: AppColors.brandRed)),
+              child: Text(tr('ok'), style:  TextStyle(color: AppColors.brandRed)),
             ),
           ],
         ),
@@ -161,19 +161,19 @@ class _OptionsScreenState extends ConsumerState<OptionsScreen> {
 
   Widget _offline() => Center(
         child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-          const Icon(Icons.cloud_off_outlined, size: 40, color: AppColors.dim),
+           Icon(Icons.cloud_off_outlined, size: 40, color: AppColors.dim),
           const SizedBox(height: 10),
-          Text(tr('not_connected'), style: const TextStyle(color: AppColors.textSecondary)),
+          Text(tr('not_connected'), style:  TextStyle(color: AppColors.textSecondary)),
           const SizedBox(height: 4),
-          Text(tr('optx_options_must_be_read_from_the_host'), style: const TextStyle(fontSize: 11, color: AppColors.dim)),
+          Text(tr('optx_options_must_be_read_from_the_host'), style:  TextStyle(fontSize: 11, color: AppColors.dim)),
         ]),
       );
 
   Widget _errView() => Center(
         child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-          const Icon(Icons.error_outline, size: 40, color: AppColors.brandRed),
+           Icon(Icons.error_outline, size: 40, color: AppColors.brandRed),
           const SizedBox(height: 10),
-          Text(_error ?? tr('optx_load_failed'), style: const TextStyle(color: AppColors.textSecondary)),
+          Text(_error ?? tr('optx_load_failed'), style:  TextStyle(color: AppColors.textSecondary)),
           const SizedBox(height: 10),
           TextButton(onPressed: _refresh, child: Text(tr('retry'))),
         ]),
@@ -204,7 +204,7 @@ class _OptionsScreenState extends ConsumerState<OptionsScreen> {
         ]),
         const SizedBox(height: 6),
         Text(tr('opt_privacy_desc'),
-            style: const TextStyle(fontSize: 10, color: AppColors.dim)),
+            style:  TextStyle(fontSize: 10, color: AppColors.dim)),
         const SizedBox(height: 10),
         Row(children: [
           Expanded(
@@ -237,7 +237,7 @@ class _OptionsScreenState extends ConsumerState<OptionsScreen> {
       out.add(Padding(
         padding: const EdgeInsets.only(top: 12, bottom: 6),
         child: Text('▍${g < _groups.length ? _groups[g] : '其他'}',
-            style: const TextStyle(
+            style:  TextStyle(
                 fontSize: 11, color: AppColors.brandGreen, letterSpacing: 1)),
       ));
       for (final o in grouped[g]!) {
@@ -285,11 +285,11 @@ class _OptionsScreenState extends ConsumerState<OptionsScreen> {
               Row(children: [
                 Flexible(
                   child: Text(name,
-                      style: const TextStyle(fontSize: 12, color: AppColors.white),
+                      style:  TextStyle(fontSize: 12, color: AppColors.white),
                       overflow: TextOverflow.ellipsis),
                 ),
                 if (dangerous)
-                  const Padding(
+                   Padding(
                     padding: EdgeInsets.only(left: 5),
                     child: Icon(Icons.warning_amber_rounded,
                         size: 13, color: AppColors.brandRed),
@@ -298,12 +298,12 @@ class _OptionsScreenState extends ConsumerState<OptionsScreen> {
                   Padding(
                     padding: const EdgeInsets.only(left: 5),
                     child: Text(tr('opt_needs_condition'),
-                        style: const TextStyle(fontSize: 9, color: AppColors.brandAmber)),
+                        style:  TextStyle(fontSize: 9, color: AppColors.brandAmber)),
                   ),
               ]),
               if (desc.isNotEmpty)
                 Text(desc,
-                    style: const TextStyle(fontSize: 9.5, color: AppColors.dim),
+                    style:  TextStyle(fontSize: 9.5, color: AppColors.dim),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis),
             ]),

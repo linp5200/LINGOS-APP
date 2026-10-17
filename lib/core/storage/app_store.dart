@@ -173,6 +173,8 @@ class AppStore {
 
   // ---------- 【0.1.9】外观与偏好 ----------
   static const _kThemeMode = 'ui_theme_mode'; // system/light/dark
+  static const _kUiVariant = 'ui_theme_variant'; // A/B/C
+
   static const _kAccentDynamic = 'ui_accent_dynamic'; // bool
   static const _kLanguage = 'ui_language'; // system/zh/en
   static const _kMsgPrefs = 'ui_msg_prefs_json';
@@ -186,6 +188,16 @@ class AppStore {
   Future<String> getThemeMode() async {
     final sp = await SharedPreferences.getInstance();
     return sp.getString(_kThemeMode) ?? 'system';
+  }
+
+  Future<void> saveUiVariant(String v) async {
+    final sp = await SharedPreferences.getInstance();
+    await sp.setString(_kUiVariant, v);
+  }
+
+  Future<String> getUiVariant() async {
+    final sp = await SharedPreferences.getInstance();
+    return sp.getString(_kUiVariant) ?? 'A';
   }
 
   Future<void> saveAccentDynamic(bool v) async {

@@ -219,7 +219,7 @@ class _HaControlScreenState extends ConsumerState<HaControlScreen> {
                   if (_statusText.isNotEmpty) ...[
                     const SizedBox(height: 10),
                     Text(_statusText,
-                        style: const TextStyle(fontSize: 12, color: AppColors.brandCyan)),
+                        style:  TextStyle(fontSize: 12, color: AppColors.brandCyan)),
                   ],
                 ],
               ),
@@ -256,7 +256,7 @@ class _HaControlScreenState extends ConsumerState<HaControlScreen> {
                   title: Text(friendly ?? entityId,
                       style: const TextStyle(fontSize: 13)),
                   subtitle: Text('$entityId · $state',
-                      style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                      style:  TextStyle(fontSize: 11, color: AppColors.textSecondary)),
                   trailing: controllable
                       ? Row(
                           mainAxisSize: MainAxisSize.min,
@@ -276,7 +276,7 @@ class _HaControlScreenState extends ConsumerState<HaControlScreen> {
               padding: const EdgeInsets.symmetric(vertical: 20),
               child: Center(
                 child: Text(tr('hac_not_configured_or_no_controllable_entities'),
-                    style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                    style:  TextStyle(fontSize: 12, color: AppColors.textSecondary)),
               ),
             ),
           // 实时事件流
@@ -295,7 +295,7 @@ class _HaControlScreenState extends ConsumerState<HaControlScreen> {
                 ),
                 child: Text(
                   '$friendly: ${evt['old_state'] ?? '?'} → ${evt['state'] ?? '?'}',
-                  style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                  style:  TextStyle(fontSize: 12, color: AppColors.textSecondary),
                 ),
               );
             }),

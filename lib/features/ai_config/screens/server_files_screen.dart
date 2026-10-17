@@ -103,7 +103,7 @@ class _ServerFilesScreenState extends ConsumerState<ServerFilesScreen> {
           ? ListView(
               padding: const EdgeInsets.all(16),
               children: [
-                Text(tr('srvf_lingos_system_directories'), style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
+                Text(tr('srvf_lingos_system_directories'), style:  TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
                 const SizedBox(height: 8),
                 for (final d in kSystemDirs)
                   Card(
@@ -115,21 +115,21 @@ class _ServerFilesScreenState extends ConsumerState<ServerFilesScreen> {
                               {'p0': '${d['name']}', 'p1': '${d['path']}'}),
                           style: const TextStyle(fontSize: 14)),
                       subtitle: Text(d['desc'] as String,
-                          style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
-                      trailing: const Icon(Icons.chevron_right, size: 18, color: AppColors.textSecondary),
+                          style:  TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                      trailing:  Icon(Icons.chevron_right, size: 18, color: AppColors.textSecondary),
                       onTap: () => _list(d['path'] as String),
                     ),
                   ),
                 const SizedBox(height: 12),
                 Text(tr('srvf_view_download_only_edit_on_the_browse_files'),
-                    style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                    style:  TextStyle(fontSize: 11, color: AppColors.textSecondary)),
               ],
             )
           // 目录内文件列表
           : _loading
-              ? const Center(child: CircularProgressIndicator())
+              ?  Center(child: CircularProgressIndicator())
               : _error != null
-                  ? Center(child: Text(_error!, style: const TextStyle(color: AppColors.brandRed)))
+                  ? Center(child: Text(_error!, style:  TextStyle(color: AppColors.brandRed)))
                   : ListView(
                       padding: const EdgeInsets.all(16),
                       children: [
@@ -161,7 +161,7 @@ class _ServerFilesScreenState extends ConsumerState<ServerFilesScreen> {
                               title: Text(f['name']?.toString() ?? '',
                                   style: const TextStyle(fontSize: 13)),
                               trailing: f['is_dir'] == true || f['type'] == 'dir'
-                                  ? const Icon(Icons.chevron_right, size: 16, color: AppColors.textSecondary)
+                                  ?  Icon(Icons.chevron_right, size: 16, color: AppColors.textSecondary)
                                   : IconButton(
                                       icon: const Icon(Icons.visibility_outlined, size: 16),
                                       onPressed: () => _view('$_currentPath/${f['name']}'),

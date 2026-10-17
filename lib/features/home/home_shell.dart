@@ -127,21 +127,21 @@ class _HomeShellState extends ConsumerState<HomeShell> {
       barrierDismissible: false,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.surface,
-        title: Text(tr('shell_token_unusable'), style: const TextStyle(color: AppColors.textPrimary)),
+        title: Text(tr('shell_token_unusable'), style:  TextStyle(color: AppColors.textPrimary)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(tr('shell_the_server_rejected_the_current_token_re'),
-                style: const TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+                style:  TextStyle(color: AppColors.textSecondary, fontSize: 13)),
             const SizedBox(height: 6),
             Text(
               tr('shell_if_the_new_token_is_rejected_too_on_the'),
-              style: const TextStyle(color: AppColors.textSecondary, fontSize: 11),
+              style:  TextStyle(color: AppColors.textSecondary, fontSize: 11),
             ),
             const SizedBox(height: 8),
             TextField(
               controller: codeCtrl,
-              style: const TextStyle(color: AppColors.textPrimary),
+              style:  TextStyle(color: AppColors.textPrimary),
               decoration: InputDecoration(
                 labelText: tr('shell_host_side_code_token_login_again_code'),
                 border: const OutlineInputBorder(),
@@ -187,18 +187,18 @@ class _HomeShellState extends ConsumerState<HomeShell> {
         padding: EdgeInsets.zero,
         children: [
           DrawerHeader(
-            decoration: const BoxDecoration(color: AppColors.surface),
+            decoration:  BoxDecoration(color: AppColors.surface),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                const Text('LING OS',
+                 Text('LING OS',
                     style: TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.w700,
                         color: AppColors.textPrimary)),
                 Text(AppInfo.tag,
-                    style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                    style:  TextStyle(fontSize: 12, color: AppColors.textSecondary)),
               ],
             ),
           ),
@@ -206,10 +206,10 @@ class _HomeShellState extends ConsumerState<HomeShell> {
           _item(context, LingIcons.internalService, trCtx(context, 'settings'), const AiConfigScreen()),
           // 【0.4.3】主机连接（本地模式——需连主机时主动进入）
           ListTile(
-            leading: const LingIcon(LingIcons.connect, size: 20, color: AppColors.brandGreen),
+            leading:  LingIcon(LingIcons.connect, size: 20, color: AppColors.brandGreen),
             title: Text(trCtx(context, 'connect_host'),
-                style: const TextStyle(color: AppColors.brandGreen)),
-            subtitle: Text(tr('shell_chat_sync_remote_cameras_require_a'), style: const TextStyle(fontSize: 10, color: AppColors.dim)),
+                style:  TextStyle(color: AppColors.brandGreen)),
+            subtitle: Text(tr('shell_chat_sync_remote_cameras_require_a'), style:  TextStyle(fontSize: 10, color: AppColors.dim)),
             onTap: _goConnect,
           ),
           // 【0.2.1 B1 改名】Help AI（帮助档案——原 HA 面板）
@@ -224,18 +224,18 @@ class _HomeShellState extends ConsumerState<HomeShell> {
           // 【0.5.1】批次2~5 新功能（先生 2026-09-12）
           _item(context, TablerIcons.home_cog, trCtx(context, 'nav_home'), const HomeExtScreen()),
           _item(context, TablerIcons.timeline, trCtx(context, 'nav_timeline'), const TimelineScreen()),
-          const Divider(color: AppColors.divider),
+           Divider(color: AppColors.divider),
           _item(context, TablerIcons.bell, trCtx(context, 'nav_notify'), const NotifyCenterScreen()),
           _item(context, TablerIcons.music, trCtx(context, 'nav_media'), const MediaScreen()),
           _item(context, TablerIcons.book, trCtx(context, 'nav_kb'), const KbScreen()),
           _item(context, TablerIcons.adjustments, trCtx(context, 'nav_options'), const OptionsScreen()),
           // 【0.7.0 P3】命令面板（~130 命令无入口的总出口——先生"摸不到"治疗）
           _item(context, TablerIcons.terminal_2, tr('cmd_command_panel'), const CommandPanelScreen()),
-          const Divider(color: AppColors.divider),
+           Divider(color: AppColors.divider),
           ListTile(
-            leading: const Icon(Icons.logout, size: 20, color: AppColors.brandRed),
+            leading:  Icon(Icons.logout, size: 20, color: AppColors.brandRed),
             title: Text(trCtx(context, 'disconnect'),
-                style: const TextStyle(color: AppColors.brandRed)),
+                style:  TextStyle(color: AppColors.brandRed)),
             onTap: () {
               ref.read(connectionProvider).disconnect();
               Navigator.of(context).popUntil((r) => r.isFirst);

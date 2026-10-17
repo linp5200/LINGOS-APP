@@ -130,7 +130,7 @@ class _ServerModeScreenState extends ConsumerState<ServerModeScreen> {
         actions: [IconButton(icon: const Icon(Icons.refresh), onPressed: _loading ? null : _load)],
       ),
       body: _loading
-          ? const Center(child: CircularProgressIndicator())
+          ?  Center(child: CircularProgressIndicator())
           : ListView(
               padding: const EdgeInsets.all(16),
               children: [
@@ -161,14 +161,14 @@ class _ServerModeScreenState extends ConsumerState<ServerModeScreen> {
                         ListTile(
                           dense: true,
                           title: Text(tr('srvm_server_mode_package'), style: const TextStyle(fontSize: 12)),
-                          trailing: Text(tr('srvm_normal_stop_has_no_effect'), style: const TextStyle(fontSize: 11, color: AppColors.brandAmber)),
+                          trailing: Text(tr('srvm_normal_stop_has_no_effect'), style:  TextStyle(fontSize: 11, color: AppColors.brandAmber)),
                         ),
-                      const Divider(height: 1, color: AppColors.divider),
+                       Divider(height: 1, color: AppColors.divider),
                       ListTile(
                         dense: true,
                         title: Text(
                           tr('srvm_server_mode_logs_only_no_input_accepted'),
-                          style: const TextStyle(fontSize: 11, color: AppColors.dim),
+                          style:  TextStyle(fontSize: 11, color: AppColors.dim),
                         ),
                       ),
                     ],
@@ -186,20 +186,20 @@ class _ServerModeScreenState extends ConsumerState<ServerModeScreen> {
                       ? null
                       : () => _send('server_mode_stop',
                           confirm: true, confirmText: tr('srvm_stop_the_entire_server_n_all_server')),
-                  icon: const Icon(Icons.stop_circle_outlined, color: AppColors.brandRed),
+                  icon:  Icon(Icons.stop_circle_outlined, color: AppColors.brandRed),
                   label: Text(tr('srvm_stop_server_the_only_exit'),
-                      style: const TextStyle(color: AppColors.brandRed)),
+                      style:  TextStyle(color: AppColors.brandRed)),
                 ),
                 if (_msg.isNotEmpty) ...[
                   const SizedBox(height: 14),
                   Text(_msg,
                       textAlign: TextAlign.center,
-                      style: const TextStyle(fontSize: 12, color: AppColors.brandAmber)),
+                      style:  TextStyle(fontSize: 12, color: AppColors.brandAmber)),
                 ],
                 const SizedBox(height: 18),
                 Text(
                   tr('srvm_note_the_server_side_server_mode_on_also'),
-                  style: const TextStyle(fontSize: 11, color: AppColors.dim),
+                  style:  TextStyle(fontSize: 11, color: AppColors.dim),
                 ),
               ],
             ),

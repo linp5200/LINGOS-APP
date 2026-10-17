@@ -62,16 +62,16 @@ class _MountScreenState extends State<MountScreen> {
         ],
       ),
       body: _loading
-          ? const Center(child: CircularProgressIndicator())
+          ?  Center(child: CircularProgressIndicator())
           : _mounts.isEmpty
               ? Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.link_off, size: 48, color: AppColors.textSecondary),
+                       Icon(Icons.link_off, size: 48, color: AppColors.textSecondary),
                       const SizedBox(height: 12),
                       Text(tr('mnt_no_mounts_tap_to_add'),
-                          style: const TextStyle(color: AppColors.textSecondary)),
+                          style:  TextStyle(color: AppColors.textSecondary)),
                     ],
                   ),
                 )
@@ -90,7 +90,7 @@ class _MountScreenState extends State<MountScreen> {
                             style: const TextStyle(fontSize: 13)),
                         subtitle: Text(
                             '${ro ? '只读' : '读写'} · ${m['persist'] == true ? '持久化' : '临时'}',
-                            style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                            style:  TextStyle(fontSize: 11, color: AppColors.textSecondary)),
                         trailing: IconButton(
                           icon: const Icon(Icons.delete_outline, size: 18),
                           onPressed: () => _remove(i),
@@ -193,7 +193,7 @@ class _MountEditScreenState extends State<_MountEditScreen> {
           const SizedBox(height: 12),
           Text(
             tr('mnt_technical_proot_b_directory_binding_no_root'),
-            style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+            style:  TextStyle(fontSize: 11, color: AppColors.textSecondary),
           ),
         ],
       ),

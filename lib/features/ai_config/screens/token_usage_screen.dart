@@ -112,7 +112,7 @@ class _TokenUsageScreenState extends ConsumerState<TokenUsageScreen> {
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
             child: Row(
               children: [
-                const Icon(Icons.date_range, size: 16, color: AppColors.textSecondary),
+                 Icon(Icons.date_range, size: 16, color: AppColors.textSecondary),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Wrap(
@@ -130,18 +130,18 @@ class _TokenUsageScreenState extends ConsumerState<TokenUsageScreen> {
           ),
           Expanded(
             child: _loading
-                ? const Center(child: CircularProgressIndicator())
+                ?  Center(child: CircularProgressIndicator())
                 : _error != null
-                    ? Center(child: Text(_error!, style: const TextStyle(color: AppColors.brandRed)))
+                    ? Center(child: Text(_error!, style:  TextStyle(color: AppColors.brandRed)))
                     : _data == null
                         ? Center(
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                const Icon(Icons.data_usage, size: 48, color: AppColors.textSecondary),
+                                 Icon(Icons.data_usage, size: 48, color: AppColors.textSecondary),
                                 const SizedBox(height: 12),
                                 Text(tr('tku_no_usage_data_yet_generated_after_chatting'),
-                                    style: const TextStyle(color: AppColors.textSecondary)),
+                                    style:  TextStyle(color: AppColors.textSecondary)),
                                 const SizedBox(height: 12),
                                 TextButton(onPressed: _load, child: Text(tr('refresh'))),
                               ],
@@ -189,7 +189,7 @@ class _TokenUsageScreenState extends ConsumerState<TokenUsageScreen> {
           child: Column(
             children: [
               Text(trp('tku_total', {'p0': _fmtTokens(total)}),
-                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+                  style:  TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
               const SizedBox(height: 8),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -203,14 +203,14 @@ class _TokenUsageScreenState extends ConsumerState<TokenUsageScreen> {
           ),
         ),
         const SizedBox(height: 16),
-        Text(tr('tku_by_model'), style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
+        Text(tr('tku_by_model'), style:  TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
         const SizedBox(height: 8),
         // 按模型分组
         for (final e in byModel.entries)
           Card(
             margin: const EdgeInsets.only(bottom: 8),
             child: ListTile(
-              leading: const Icon(Icons.memory, size: 20, color: AppColors.brandCyan),
+              leading:  Icon(Icons.memory, size: 20, color: AppColors.brandCyan),
               title: Text(e.key, style: const TextStyle(fontSize: 14)),
               subtitle: Text(
                   trp('tku_model_stats', {
@@ -218,16 +218,16 @@ class _TokenUsageScreenState extends ConsumerState<TokenUsageScreen> {
                     'p1': _fmtTokens((e.value['prompt_tokens'] as num?)?.toInt() ?? 0),
                     'p2': _fmtTokens((e.value['completion_tokens'] as num?)?.toInt() ?? 0),
                   }),
-                  style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                  style:  TextStyle(fontSize: 11, color: AppColors.textSecondary)),
               trailing: e.value['model'] == 'unknown'
-                  ? Text(tr('prov_unknown'), style: const TextStyle(fontSize: 11, color: AppColors.textSecondary))
+                  ? Text(tr('prov_unknown'), style:  TextStyle(fontSize: 11, color: AppColors.textSecondary))
                   : null,
             ),
           ),
         const SizedBox(height: 12),
         // 明细（可展开）
         Text(trp('tku_details_last', {'p0': '${records.length}'}),
-            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
+            style:  TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
         const SizedBox(height: 8),
         for (final r in records)
           _recordTile(r),
@@ -253,7 +253,7 @@ class _TokenUsageScreenState extends ConsumerState<TokenUsageScreen> {
             size: 16, color: AppColors.textSecondary),
         title: Text('$time · $model', style: const TextStyle(fontSize: 12)),
         trailing: Text('${_fmtTokens(p)} / ${_fmtTokens(c)}',
-            style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+            style:  TextStyle(fontSize: 11, color: AppColors.textSecondary)),
       ),
     );
   }
@@ -261,9 +261,9 @@ class _TokenUsageScreenState extends ConsumerState<TokenUsageScreen> {
   Widget _stat(String label, String value) {
     return Column(
       children: [
-        Text(value, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
+        Text(value, style:  TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
         const SizedBox(height: 2),
-        Text(label, style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+        Text(label, style:  TextStyle(fontSize: 11, color: AppColors.textSecondary)),
       ],
     );
   }

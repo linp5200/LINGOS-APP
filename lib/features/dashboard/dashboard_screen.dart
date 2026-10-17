@@ -111,11 +111,11 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           const Positioned.fill(child: FuiTerrainBackground(opacity: 0.10)),
           Positioned.fill(
             child: _loading
-                ? const Center(child: CircularProgressIndicator())
+                ?  Center(child: CircularProgressIndicator())
                 : _error != null
-                    ? Center(child: Text(_error!, style: const TextStyle(color: AppColors.brandRed)))
+                    ? Center(child: Text(_error!, style:  TextStyle(color: AppColors.brandRed)))
                     : _info == null
-                        ? Center(child: Text(tr('dash_tap_refresh'), style: const TextStyle(color: AppColors.textSecondary)))
+                        ? Center(child: Text(tr('dash_tap_refresh'), style:  TextStyle(color: AppColors.textSecondary)))
                         : _buildGrid(),
           ),
         ],
@@ -170,8 +170,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           Icon(icon, color: color, size: 22),
           const SizedBox(height: 8),
           Text(value,
-              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.textPrimary, fontFamily: fuiMono)),
-          Text(label, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+              style:  TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.textPrimary, fontFamily: fuiMono)),
+          Text(label, style:  TextStyle(fontSize: 12, color: AppColors.textSecondary)),
         ],
       ),
     );

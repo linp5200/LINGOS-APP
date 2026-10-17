@@ -116,10 +116,10 @@ class _MemoryScreenState extends ConsumerState<MemoryScreen> {
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.surface,
         title: Text([if (type.isNotEmpty) type, if (time.isNotEmpty) time].join(' · '),
-            style: const TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+            style:  TextStyle(fontSize: 13, color: AppColors.textSecondary)),
         content: SingleChildScrollView(
           child: SelectableText(content,
-              style: const TextStyle(fontSize: 14, color: AppColors.textPrimary, height: 1.6)),
+              style:  TextStyle(fontSize: 14, color: AppColors.textPrimary, height: 1.6)),
         ),
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx), child: Text(tr('close'))),
@@ -155,9 +155,9 @@ class _MemoryScreenState extends ConsumerState<MemoryScreen> {
               await _store.saveAutoMemoryWrite(v);
             },
             title: Text(tr('mem_ai_memory_auto_write'),
-                style: const TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+                style:  TextStyle(fontSize: 13, color: AppColors.textSecondary)),
             subtitle: Text(tr('mem_allow_the_ai_to_call_memory_write_on_its'),
-                style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                style:  TextStyle(fontSize: 11, color: AppColors.textSecondary)),
           ),
           Padding(
             padding: const EdgeInsets.all(16),
@@ -180,9 +180,9 @@ class _MemoryScreenState extends ConsumerState<MemoryScreen> {
           ),
           Expanded(
             child: _loading
-                ? const Center(child: CircularProgressIndicator())
+                ?  Center(child: CircularProgressIndicator())
                 : _items.isEmpty
-                    ? Center(child: Text(tr('mem_no_memories_yet'), style: const TextStyle(color: AppColors.textSecondary)))
+                    ? Center(child: Text(tr('mem_no_memories_yet'), style:  TextStyle(color: AppColors.textSecondary)))
                     : ListView.builder(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         itemCount: _items.length,
@@ -195,13 +195,13 @@ class _MemoryScreenState extends ConsumerState<MemoryScreen> {
                           return Card(
                             margin: const EdgeInsets.only(bottom: 8),
                             child: ListTile(
-                              leading: const Icon(Icons.psychology_outlined, size: 20, color: AppColors.brandCyan),
+                              leading:  Icon(Icons.psychology_outlined, size: 20, color: AppColors.brandCyan),
                               // 【0.1.9】列表显示摘要——点击展开全文
                               title: Text(content.length > 60 ? '${content.substring(0, 60)}...' : content,
                                   style: const TextStyle(fontSize: 13), maxLines: 2, overflow: TextOverflow.ellipsis),
                               subtitle: Text(
                                   [if (type.isNotEmpty) type, if (time.isNotEmpty) _fmtMemTime(time)].join(' · '),
-                                  style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                                  style:  TextStyle(fontSize: 11, color: AppColors.textSecondary)),
                               onTap: () => _showDetail(content, type, time),
                               trailing: id.isEmpty
                                   ? null

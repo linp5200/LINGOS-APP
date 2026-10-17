@@ -183,7 +183,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   _connected
                       ? tr('home_connected_data_refreshes_every_5s_pull_down')
                       : tr('home_once_connected_this_screen_becomes_a_live'),
-                  style: const TextStyle(
+                  style:  TextStyle(
                       fontFamily: fuiMono, fontSize: 9, color: AppColors.dim, height: 1.8)),
             ),
           ],
@@ -218,7 +218,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         Container(width: 14, height: 1, color: AppColors.line),
         const SizedBox(width: 8),
         Text(title,
-            style: const TextStyle(
+            style:  TextStyle(
                 fontFamily: fuiMono,
                 fontSize: 11,
                 letterSpacing: 2,
@@ -238,13 +238,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         borderRadius: BorderRadius.circular(4),
       ),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(label, style: const TextStyle(fontSize: 10, color: AppColors.dim)),
+        Text(label, style:  TextStyle(fontSize: 10, color: AppColors.dim)),
         const SizedBox(height: 4),
         FittedBox(
           fit: BoxFit.scaleDown,
           alignment: Alignment.centerLeft,
           child: Text(value,
-              style: const TextStyle(
+              style:  TextStyle(
                   fontFamily: fuiMono,
                   fontSize: 17,
                   fontWeight: FontWeight.w700,
@@ -261,10 +261,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 8),
       leading: Icon(icon, size: 22, color: color),
-      title: Text(title, style: const TextStyle(fontSize: 14, color: AppColors.textPrimary)),
+      title: Text(title, style:  TextStyle(fontSize: 14, color: AppColors.textPrimary)),
       subtitle: Text(sub,
-          style: const TextStyle(fontFamily: fuiMono, fontSize: 9, color: AppColors.dim)),
-      trailing: const Icon(Icons.chevron_right, size: 18, color: AppColors.dim),
+          style:  TextStyle(fontFamily: fuiMono, fontSize: 9, color: AppColors.dim)),
+      trailing:  Icon(Icons.chevron_right, size: 18, color: AppColors.dim),
       onTap: onTap,
     );
   }

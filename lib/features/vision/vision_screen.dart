@@ -204,9 +204,9 @@ class _VisionScreenState extends ConsumerState<VisionScreen> {
                   const SizedBox(height: 6),
                   Row(
                     children: [
-                      Text(tr('vis_preview'), style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                      Text(tr('vis_preview'), style:  TextStyle(fontSize: 12, color: AppColors.textSecondary)),
                       Text('http://$host:$_httpPort/stream',
-                          style: const TextStyle(fontSize: 12, color: AppColors.brandCyan, fontFamily: 'monospace')),
+                          style:  TextStyle(fontSize: 12, color: AppColors.brandCyan, fontFamily: 'monospace')),
                     ],
                   ),
                   if (md != null || vd != null) ...[
@@ -221,7 +221,7 @@ class _VisionScreenState extends ConsumerState<VisionScreen> {
                             : '--',
                         'p2': vd != null && vd['visiond'] == true ? tr('vis_visiond_present') : '',
                       }),
-                      style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                      style:  TextStyle(fontSize: 11, color: AppColors.textSecondary),
                     ),
                   ],
                 ],
@@ -289,7 +289,7 @@ class _VisionScreenState extends ConsumerState<VisionScreen> {
                     // 【2026-09-18 修复】原 toStringAsFixed 误置于插值外（显示为字面文本）
                     '${d['label'] ?? '?'} (${(((d['confidence'] as num?)?.toDouble() ?? 0.0) * 100.0).toStringAsFixed(0)}%)'
                     '${d['world_x'] != null ? '  @x=${(d['world_x'] as num).toInt()}cm y=${(d['world_y'] as num?)?.toInt() ?? 0}cm' : ''}',
-                    style: const TextStyle(fontSize: 12, color: AppColors.textPrimary),
+                    style:  TextStyle(fontSize: 12, color: AppColors.textPrimary),
                   ),
                 )),
             const SizedBox(height: 8),
@@ -308,7 +308,7 @@ class _VisionScreenState extends ConsumerState<VisionScreen> {
                   child: Text(
                     // 【2026-09-18 修复】同上——toStringAsFixed 位置修正
                     '“${o['text'] ?? ''}” (${(((o['confidence'] as num?)?.toDouble() ?? 0.0) * 100.0).toStringAsFixed(0)}%)',
-                    style: const TextStyle(fontSize: 12, color: AppColors.textPrimary),
+                    style:  TextStyle(fontSize: 12, color: AppColors.textPrimary),
                   ),
                 )),
             const SizedBox(height: 8),
@@ -318,7 +318,7 @@ class _VisionScreenState extends ConsumerState<VisionScreen> {
               padding: const EdgeInsets.symmetric(vertical: 12),
               child: Center(
                 child: Text(tr('vis_no_detection_results_yet_waiting_for'),
-                    style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                    style:  TextStyle(fontSize: 12, color: AppColors.textSecondary)),
               ),
             ),
         ],

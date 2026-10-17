@@ -274,7 +274,7 @@ class _SessionsScreenState extends ConsumerState<SessionsScreen> {
         actions: [
           if (_selectMode)
             IconButton(
-              icon: const Icon(Icons.delete_sweep_outlined, size: 20, color: AppColors.brandRed),
+              icon:  Icon(Icons.delete_sweep_outlined, size: 20, color: AppColors.brandRed),
               onPressed: _batchDelete,
             )
           else ...[
@@ -293,10 +293,10 @@ class _SessionsScreenState extends ConsumerState<SessionsScreen> {
                   color: AppColors.brandCyan.withValues(alpha: 0.15),
                   child: Row(
                     children: [
-                      const Icon(Icons.cloud_off, size: 16, color: AppColors.brandCyan),
+                       Icon(Icons.cloud_off, size: 16, color: AppColors.brandCyan),
                       const SizedBox(width: 8),
                       Text(tr('sess_offline_read_only_mode_showing_cached'),
-                          style: const TextStyle(fontSize: 12, color: AppColors.brandCyan)),
+                          style:  TextStyle(fontSize: 12, color: AppColors.brandCyan)),
                     ],
                   ),
                 ),
@@ -309,9 +309,9 @@ class _SessionsScreenState extends ConsumerState<SessionsScreen> {
 
   Widget _buildList() {
     return _loading
-          ? const Center(child: CircularProgressIndicator())
+          ?  Center(child: CircularProgressIndicator())
           : _sessions.isEmpty
-              ? Center(child: Text(tr('sess_no_sessions'), style: const TextStyle(color: AppColors.textSecondary)))
+              ? Center(child: Text(tr('sess_no_sessions'), style:  TextStyle(color: AppColors.textSecondary)))
               : ListView.builder(
                   padding: const EdgeInsets.all(16),
                   itemCount: _sessions.length,
@@ -324,7 +324,7 @@ class _SessionsScreenState extends ConsumerState<SessionsScreen> {
                       color: sel ? AppColors.surface.withValues(alpha: 0.8) : null,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
-                        side: sel ? const BorderSide(color: AppColors.brandCyan) : BorderSide.none,
+                        side: sel ?  BorderSide(color: AppColors.brandCyan) : BorderSide.none,
                       ),
                       child: ListTile(
                         leading: Icon(
@@ -341,7 +341,7 @@ class _SessionsScreenState extends ConsumerState<SessionsScreen> {
                               'p1': _fmtTokens(s['token_total']),
                               'p2': s['updated'] != null ? _fmtTime(s['updated']) : '',
                             }),
-                            style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                            style:  TextStyle(fontSize: 11, color: AppColors.textSecondary)),
                         trailing: _selectMode
                             ? null
                             : Row(

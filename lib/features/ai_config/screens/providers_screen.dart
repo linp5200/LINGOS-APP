@@ -206,14 +206,14 @@ class _ProvidersScreenState extends ConsumerState<ProvidersScreen> {
           children: [
             Row(
               children: [
-                const Icon(Icons.model_training, size: 16, color: AppColors.brandCyan),
+                 Icon(Icons.model_training, size: 16, color: AppColors.brandCyan),
                 const SizedBox(width: 6),
                 Text(tr('prov_host_side_models_tap_to_switch'),
-                    style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                    style:  TextStyle(fontSize: 12, color: AppColors.textSecondary)),
                 const Spacer(),
                 if (_activeModel.isNotEmpty)
                   Text(trp('prov_current', {'p0': _activeModel}),
-                      style: const TextStyle(fontSize: 11, color: AppColors.brandCyan)),
+                      style:  TextStyle(fontSize: 11, color: AppColors.brandCyan)),
               ],
             ),
             const SizedBox(height: 8),
@@ -253,15 +253,15 @@ class _ProvidersScreenState extends ConsumerState<ProvidersScreen> {
         ],
       ),
       body: _loading
-          ? const Center(child: CircularProgressIndicator())
+          ?  Center(child: CircularProgressIndicator())
           : _providers.isEmpty
               ? Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.cloud_outlined, size: 48, color: AppColors.textSecondary),
+                       Icon(Icons.cloud_outlined, size: 48, color: AppColors.textSecondary),
                       const SizedBox(height: 12),
-                      Text(tr('prov_no_providers_configured_yet'), style: const TextStyle(color: AppColors.textSecondary)),
+                      Text(tr('prov_no_providers_configured_yet'), style:  TextStyle(color: AppColors.textSecondary)),
                       const SizedBox(height: 12),
                       TextButton(onPressed: _addFlow, child: Text(tr('prov_tap_in_the_top_right_to_add'))),
                     ],
@@ -294,16 +294,16 @@ class _ProvidersScreenState extends ConsumerState<ProvidersScreen> {
                           color: AppColors.brandCyan,
                         ),
                         title: Text(name,
-                            style: const TextStyle(fontSize: 14, color: AppColors.textPrimary)),
+                            style:  TextStyle(fontSize: 14, color: AppColors.textPrimary)),
                         subtitle: Text(
                           [if (baseUrl.isNotEmpty) baseUrl, if (model.isNotEmpty) model].join(' · ') +
                               (isVoice ? tr('prov_nvoice_service_server_integration_pending') : ''),
-                          style: const TextStyle(fontSize: 11, color: AppColors.textSecondary, height: 1.4),
+                          style:  TextStyle(fontSize: 11, color: AppColors.textSecondary, height: 1.4),
                         ),
                         // 【先生设计】点击进入子菜单（编辑）
                         onTap: () => _edit(p),
                         trailing: IconButton(
-                          icon: const Icon(Icons.delete_outline, size: 18, color: AppColors.textSecondary),
+                          icon:  Icon(Icons.delete_outline, size: 18, color: AppColors.textSecondary),
                           onPressed: () => _remove(p['id']?.toString() ?? ''),
                         ),
                       ),
@@ -326,9 +326,9 @@ class _ProviderSelectScreen extends StatelessWidget {
     Widget tile(BuildContext ctx, ProviderPreset p) {
       return ListTile(
         leading: Icon(p.icon, size: 20, color: AppColors.brandCyan),
-        title: Text(p.name, style: const TextStyle(fontSize: 14, color: AppColors.textPrimary)),
-        subtitle: Text(p.hint, style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
-        trailing: const Icon(Icons.chevron_right, size: 18, color: AppColors.textSecondary),
+        title: Text(p.name, style:  TextStyle(fontSize: 14, color: AppColors.textPrimary)),
+        subtitle: Text(p.hint, style:  TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+        trailing:  Icon(Icons.chevron_right, size: 18, color: AppColors.textSecondary),
         onTap: () => Navigator.pop(ctx, p),
       );
     }
@@ -340,7 +340,7 @@ class _ProviderSelectScreen extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 16, 20, 4),
             child: Text(title,
-                style: const TextStyle(
+                style:  TextStyle(
                     fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
           ),
           ...items.map((p) => tile(context, p)),
@@ -440,7 +440,7 @@ class _ProviderConfigScreenState extends ConsumerState<_ProviderConfigScreen> {
               Icon(p.icon, size: 18, color: AppColors.brandCyan),
               const SizedBox(width: 8),
               Text('${isVoice ? tr('grp_voice') : 'LLM'} · ${p.name}',
-                  style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                  style:  TextStyle(fontSize: 12, color: AppColors.textSecondary)),
             ],
           ),
           const SizedBox(height: 16),
@@ -504,7 +504,7 @@ class _ProviderConfigScreenState extends ConsumerState<_ProviderConfigScreen> {
               onChanged: (v) => setState(() => _thinkingEnabled = v),
               title: Text(tr('prov_thinking_mode'), style: const TextStyle(fontSize: 14)),
               subtitle: Text(tr('prov_on_the_model_outputs_a_reasoning_chain'),
-                  style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                  style:  TextStyle(fontSize: 11, color: AppColors.textSecondary)),
               contentPadding: EdgeInsets.zero,
             ),
             Row(
@@ -540,7 +540,7 @@ class _ProviderConfigScreenState extends ConsumerState<_ProviderConfigScreen> {
           ),
           const SizedBox(height: 12),
           Text(p.hint,
-              style: const TextStyle(fontSize: 11, color: AppColors.textSecondary, height: 1.5)),
+              style:  TextStyle(fontSize: 11, color: AppColors.textSecondary, height: 1.5)),
           const SizedBox(height: 20),
           FilledButton(
             onPressed: _keyCtrl.text.trim().isEmpty && p.id != 'compatible'
@@ -551,7 +551,7 @@ class _ProviderConfigScreenState extends ConsumerState<_ProviderConfigScreen> {
           if (isVoice) ...[
             const SizedBox(height: 8),
             Text(tr('prov_voice_service_config_is_saved_on_this'),
-                style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                style:  TextStyle(fontSize: 11, color: AppColors.textSecondary)),
           ],
         ],
       ),

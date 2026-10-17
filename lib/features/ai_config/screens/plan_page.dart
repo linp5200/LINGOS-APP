@@ -28,10 +28,10 @@ class PlanPage extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Icon(Icons.construction, size: 18, color: AppColors.brandCyan),
+               Icon(Icons.construction, size: 18, color: AppColors.brandCyan),
               const SizedBox(width: 8),
               Text(tr('plan_planned_feature_enabled_once_the_server'),
-                  style: const TextStyle(fontSize: 12, color: AppColors.brandCyan)),
+                  style:  TextStyle(fontSize: 12, color: AppColors.brandCyan)),
             ],
           ),
           const SizedBox(height: 16),
@@ -41,14 +41,14 @@ class PlanPage extends StatelessWidget {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Padding(
+                   Padding(
                     padding: EdgeInsets.only(top: 4),
                     child: Icon(Icons.check_circle_outline, size: 14, color: AppColors.textSecondary),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(item,
-                        style: const TextStyle(
+                        style:  TextStyle(
                             fontSize: 13, color: AppColors.textPrimary, height: 1.5)),
                   ),
                 ],
@@ -64,7 +64,7 @@ class PlanPage extends StatelessWidget {
                 border: Border.all(color: AppColors.divider),
               ),
               child: Text(note,
-                  style: const TextStyle(fontSize: 11, color: AppColors.textSecondary, height: 1.5)),
+                  style:  TextStyle(fontSize: 11, color: AppColors.textSecondary, height: 1.5)),
             ),
           ],
         ],

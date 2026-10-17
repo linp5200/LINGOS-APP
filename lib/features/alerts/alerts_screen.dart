@@ -178,7 +178,7 @@ class _AlertsScreenState extends ConsumerState<AlertsScreen> {
         IconButton(icon: const Icon(Icons.refresh, size: 20), onPressed: _loading ? null : _refresh),
       ]),
       body: _loading
-          ? const Center(child: CircularProgressIndicator())
+          ?  Center(child: CircularProgressIndicator())
           : _alerts.isEmpty
               ? Center(
                   child: Column(
@@ -259,7 +259,7 @@ class _AlertsScreenState extends ConsumerState<AlertsScreen> {
                           if (timeText.isNotEmpty) ...[
                             const SizedBox(width: 8),
                             Text(timeText,
-                                style: const TextStyle(
+                                style:  TextStyle(
                                     fontSize: 11, color: AppColors.textSecondary)),
                           ],
                         ]),

@@ -95,7 +95,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   Widget _buildModelSwitcher(ChatState chat) {
     if (_serverModels.isEmpty) {
       return Text(chat.model ?? tr('chat_not_connected'),
-          style: const TextStyle(fontSize: 11, color: AppColors.textSecondary));
+          style:  TextStyle(fontSize: 11, color: AppColors.textSecondary));
     }
     final current = _activeModel.isNotEmpty ? _activeModel : (chat.model ?? '');
     return GestureDetector(
@@ -106,9 +106,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           Flexible(
             child: Text(current,
                 maxLines: 1, overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontSize: 11, color: AppColors.brandCyan)),
+                style:  TextStyle(fontSize: 11, color: AppColors.brandCyan)),
           ),
-          const Icon(Icons.arrow_drop_down, size: 16, color: AppColors.brandCyan),
+           Icon(Icons.arrow_drop_down, size: 16, color: AppColors.brandCyan),
         ],
       ),
     );
@@ -128,7 +128,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             return ListTile(
               title: Text(name, style: const TextStyle(fontSize: 14)),
               subtitle: id.isNotEmpty && id != name ? Text(id, style: const TextStyle(fontSize: 11)) : null,
-              trailing: id == current ? const Icon(Icons.check, color: AppColors.brandCyan) : null,
+              trailing: id == current ?  Icon(Icons.check, color: AppColors.brandCyan) : null,
               onTap: () => Navigator.pop(ctx, id),
             );
           }).toList(),
@@ -316,7 +316,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       color: AppColors.surface.withValues(alpha: 0.6),
       child: Text(
         parts.join('  ·  '),
-        style: const TextStyle(fontSize: 10, color: AppColors.textSecondary, fontFamily: 'monospace'),
+        style:  TextStyle(fontSize: 10, color: AppColors.textSecondary, fontFamily: 'monospace'),
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
       ),
@@ -370,9 +370,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 Padding(
                   padding: const EdgeInsets.only(bottom: 3),
                   child: Text(_fmtTime(msg.ts!),
-                      style: const TextStyle(color: AppColors.dim, fontSize: 10, fontFamily: fuiMono)),
+                      style:  TextStyle(color: AppColors.dim, fontSize: 10, fontFamily: fuiMono)),
                 ),
-              Text(msg.content, style: const TextStyle(color: AppColors.textPrimary, fontSize: 14)),
+              Text(msg.content, style:  TextStyle(color: AppColors.textPrimary, fontSize: 14)),
             ]),
           ),
         );
@@ -394,10 +394,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                     Padding(
                       padding: const EdgeInsets.only(bottom: 4),
                       child: Text(_fmtTime(msg.ts!),
-                          style: const TextStyle(color: AppColors.dim, fontSize: 10, fontFamily: fuiMono)),
+                          style:  TextStyle(color: AppColors.dim, fontSize: 10, fontFamily: fuiMono)),
                     ),
                   Text(msg.content + (msg.streaming ? '▍' : ''),
-                      style: const TextStyle(color: AppColors.textPrimary, fontSize: 14, height: 1.5)),
+                      style:  TextStyle(color: AppColors.textPrimary, fontSize: 14, height: 1.5)),
                 ]),
               ),
             ),
@@ -417,10 +417,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.refresh, size: 14, color: AppColors.textSecondary),
+                         Icon(Icons.refresh, size: 14, color: AppColors.textSecondary),
                         const SizedBox(width: 4),
                         Text(tr('chat_stopped_continue'),
-                            style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                            style:  TextStyle(fontSize: 12, color: AppColors.textSecondary)),
                       ],
                     ),
                   ),
@@ -439,7 +439,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(color: AppColors.divider),
                     ),
-                    child: const Row(mainAxisSize: MainAxisSize.min, children: [
+                    child:  Row(mainAxisSize: MainAxisSize.min, children: [
                       Icon(Icons.copy, size: 14, color: AppColors.textSecondary),
                     ]),
                   ),
@@ -461,9 +461,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.volume_up_outlined, size: 14, color: AppColors.brandCyan),
+                         Icon(Icons.volume_up_outlined, size: 14, color: AppColors.brandCyan),
                         const SizedBox(width: 4),
-                        Text(tr('chat_read_aloud'), style: const TextStyle(fontSize: 12, color: AppColors.brandCyan)),
+                        Text(tr('chat_read_aloud'), style:  TextStyle(fontSize: 12, color: AppColors.brandCyan)),
                       ],
                     ),
                   ),
@@ -508,20 +508,20 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(children: [
-                const Icon(Icons.help_outline, size: 14, color: AppColors.brandCyan),
+                 Icon(Icons.help_outline, size: 14, color: AppColors.brandCyan),
                 const SizedBox(width: 4),
-                Text(tr('chat_ai_question'), style: const TextStyle(color: AppColors.brandCyan, fontSize: 12, fontWeight: FontWeight.bold)),
+                Text(tr('chat_ai_question'), style:  TextStyle(color: AppColors.brandCyan, fontSize: 12, fontWeight: FontWeight.bold)),
               ]),
               const SizedBox(height: 7),
-              Text(msg.content, style: const TextStyle(color: AppColors.textPrimary, fontSize: 13, height: 1.45)),
+              Text(msg.content, style:  TextStyle(color: AppColors.textPrimary, fontSize: 13, height: 1.45)),
               const SizedBox(height: 9),
               if (answered != null && answered.isNotEmpty)
                 Row(children: [
-                  const Icon(Icons.check_circle, size: 14, color: AppColors.brandGreen),
+                   Icon(Icons.check_circle, size: 14, color: AppColors.brandGreen),
                   const SizedBox(width: 5),
                   Expanded(
                     child: Text(tr('chat_answered_answered'),
-                        style: const TextStyle(color: AppColors.textSecondary, fontSize: 12)),
+                        style:  TextStyle(color: AppColors.textSecondary, fontSize: 12)),
                   ),
                 ])
               else ...[
@@ -568,21 +568,21 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             children: [
               Row(
                 children: [
-                  const Icon(Icons.error_outline, size: 14, color: AppColors.brandRed),
+                   Icon(Icons.error_outline, size: 14, color: AppColors.brandRed),
                   const SizedBox(width: 4),
                   Expanded(
                     child: Text('${msg.toolName ?? '工具'} [${msg.errorType ?? 'Error'}]',
-                        style: const TextStyle(color: AppColors.brandRed, fontSize: 12, fontWeight: FontWeight.bold)),
+                        style:  TextStyle(color: AppColors.brandRed, fontSize: 12, fontWeight: FontWeight.bold)),
                   ),
                 ],
               ),
               const SizedBox(height: 4),
               Text(msg.content,
-                  style: const TextStyle(color: AppColors.textSecondary, fontSize: 12, height: 1.4)),
+                  style:  TextStyle(color: AppColors.textSecondary, fontSize: 12, height: 1.4)),
               if (msg.errorAction != null && msg.errorAction!.isNotEmpty) ...[
                 const SizedBox(height: 4),
                 Text('💡 ${msg.errorAction}',
-                    style: const TextStyle(color: AppColors.brandCyan, fontSize: 11)),
+                    style:  TextStyle(color: AppColors.brandCyan, fontSize: 11)),
               ],
             ],
           ),
@@ -597,7 +597,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               borderRadius: BorderRadius.circular(8),
             ),
             child: Text(msg.content,
-                style: const TextStyle(color: AppColors.textSecondary, fontSize: 11)),
+                style:  TextStyle(color: AppColors.textSecondary, fontSize: 11)),
           ),
         );
     }
@@ -606,7 +606,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   Widget _buildInput(bool busy) {
     return Container(
       padding: const EdgeInsets.all(12),
-      decoration: const BoxDecoration(
+      decoration:  BoxDecoration(
         color: AppColors.surface,
         border: Border(top: BorderSide(color: AppColors.divider)),
       ),
@@ -890,7 +890,7 @@ class _CollapsibleBlockState extends State<_CollapsibleBlock> {
                     padding: const EdgeInsets.only(left: 10),
                     child: Text(
                       _open ? 'v' : '>',
-                      style: const TextStyle(
+                      style:  TextStyle(
                           fontFamily: fuiMono,
                           fontSize: 10,
                           color: AppColors.dim,
@@ -911,7 +911,7 @@ class _CollapsibleBlockState extends State<_CollapsibleBlock> {
               padding: const EdgeInsets.fromLTRB(10, 0, 10, 8),
               child: SingleChildScrollView(
                 child: SelectableText(widget.content,
-                    style: const TextStyle(color: AppColors.textSecondary, fontSize: 11, height: 1.4, fontFamily: fuiMono)),
+                    style:  TextStyle(color: AppColors.textSecondary, fontSize: 11, height: 1.4, fontFamily: fuiMono)),
               ),
             ),
         ],

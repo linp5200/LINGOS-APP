@@ -7,21 +7,23 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/i18n/app_i18n.dart';
+import '../../../core/theme/theme_controller.dart';
 
 import '../../../core/storage/app_store.dart';
 import '../../../core/theme/app_theme.dart';
 
-class AppearanceScreen extends StatefulWidget {
+class AppearanceScreen extends ConsumerStatefulWidget {
   const AppearanceScreen({super.key});
 
   @override
-  State<AppearanceScreen> createState() => _AppearanceScreenState();
+  ConsumerState<AppearanceScreen> createState() => _AppearanceScreenState();
 }
 
-class _AppearanceScreenState extends State<AppearanceScreen> {
+class _AppearanceScreenState extends ConsumerState<AppearanceScreen> {
   final _store = AppStore();
-  String _themeMode = 'system';
+  String _variant = 'A';
   bool _accentDynamic = true;
   String _language = 'system';
   Map<String, bool> _msgPrefs = const {};
@@ -36,7 +38,7 @@ class _AppearanceScreenState extends State<AppearanceScreen> {
   }
 
   Future<void> _load() async {
-    final theme = await _store.getThemeMode();
+    final variant = await _store.getUiVariant();
     final accent = await _store.getAccentDynamic();
     final lang = await _store.getLanguage();
     final prefs = await _store.getMsgPrefs();
@@ -44,7 +46,7 @@ class _AppearanceScreenState extends State<AppearanceScreen> {
     final start = await _store.getStartScreen();
     if (!mounted) return;
     setState(() {
-      _themeMode = theme;
+      _variant = variant;
       _accentDynamic = accent;
       _language = lang;
       _msgPrefs = prefs;
@@ -59,7 +61,7 @@ class _AppearanceScreenState extends State<AppearanceScreen> {
     return Scaffold(
       appBar: AppBar(title: Text(tr('cfg_appearance_preferences'))),
       body: _loading
-          ? const Center(child: CircularProgressIndicator())
+          ?  Center(child: CircularProgressIndicator())
           : ListView(
               padding: const EdgeInsets.all(16),
               children: [
@@ -69,17 +71,18 @@ class _AppearanceScreenState extends State<AppearanceScreen> {
                   leading: const Icon(Icons.brightness_6_outlined, size: 20),
                   title: Text(tr('look_theme')),
                   trailing: DropdownButton<String>(
-                    value: _themeMode,
+                    value: _variant,
                     underline: const SizedBox.shrink(),
-                    items: [
-                      DropdownMenuItem(value: 'system', child: Text(tr('look_follow_system'))),
-                      DropdownMenuItem(value: 'light', child: Text(tr('look_light'))),
-                      DropdownMenuItem(value: 'dark', child: Text(tr('look_dark'))),
+                    items: const [
+                      DropdownMenuItem(value: 'A', child: Text('A 静默深色')),
+                      DropdownMenuItem(value: 'B', child: Text('B 暖白家居')),
+                      DropdownMenuItem(value: 'C', child: Text('C 诺玛 HUD')),
                     ],
                     onChanged: (v) async {
                       if (v == null) return;
-                      setState(() => _themeMode = v);
-                      await _store.saveThemeMode(v);
+                      setState(() => _variant = v);
+                      await _store.saveUiVariant(v);
+                      ref.read(themeVariantProvider.notifier).applyTheme(variantFromCode(v));
                     },
                   ),
                 ),
@@ -92,7 +95,7 @@ class _AppearanceScreenState extends State<AppearanceScreen> {
                   },
                   title: Text(tr('look_dynamic_accent_color')),
                   subtitle: Text(tr('look_follow_system_dynamic_color_material_you'),
-                      style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                      style:  TextStyle(fontSize: 12, color: AppColors.textSecondary)),
                 ),
                 const Divider(),
                 _section(tr('look_message_preferences_all_on_by_default')),
@@ -108,7 +111,7 @@ class _AppearanceScreenState extends State<AppearanceScreen> {
                 // 【0.2.1 #7】开局显示设置——三选项平铺
                 _section(tr('look_startup_screen')),
                 Text(tr('look_show_first_when_the_app_starts'),
-                    style: const TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+                    style:  TextStyle(fontSize: 13, color: AppColors.textSecondary)),
                 const SizedBox(height: 8),
                 Wrap(
                   spacing: 8,
@@ -148,12 +151,12 @@ class _AppearanceScreenState extends State<AppearanceScreen> {
                   },
                   title: Text(tr('look_anonymous_analytics')),
                   subtitle: Text(tr('look_off_by_default_privacy_first_data_stays_on'),
-                      style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                      style:  TextStyle(fontSize: 12, color: AppColors.textSecondary)),
                 ),
                 const SizedBox(height: 24),
                 Text(
                   tr('look_language_sync_the_server_lang_list_will'),
-                  style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                  style:  TextStyle(fontSize: 11, color: AppColors.textSecondary),
                 ),
               ],
             ),
@@ -168,7 +171,7 @@ class _AppearanceScreenState extends State<AppearanceScreen> {
         await _store.saveMsgPrefs(_msgPrefs);
       },
       title: Text(title, style: const TextStyle(fontSize: 14)),
-      subtitle: Text(subtitle, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+      subtitle: Text(subtitle, style:  TextStyle(fontSize: 12, color: AppColors.textSecondary)),
     );
   }
 
@@ -207,7 +210,7 @@ class _AppearanceScreenState extends State<AppearanceScreen> {
   Widget _section(String title) => Padding(
         padding: const EdgeInsets.only(top: 8, bottom: 4),
         child: Text(title,
-            style: const TextStyle(
+            style:  TextStyle(
                 fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
       );
 }

@@ -123,7 +123,7 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen> {
         ],
       ),
       body: _loading
-          ? const Center(child: CircularProgressIndicator())
+          ?  Center(child: CircularProgressIndicator())
           : ListView(
               padding: const EdgeInsets.all(16),
               children: [
@@ -156,7 +156,7 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen> {
                       ),
                     ),
                     subtitle: Text(_message ?? tr('upg_never_checked'),
-                        style: const TextStyle(fontSize: 11, color: AppColors.dim)),
+                        style:  TextStyle(fontSize: 11, color: AppColors.dim)),
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -165,11 +165,11 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen> {
                   child: Column(
                     children: [
                       _kv(tr('upg_current_version'), _current ?? '--'),
-                      const Divider(height: 1, color: AppColors.divider),
+                       Divider(height: 1, color: AppColors.divider),
                       _kv(tr('upg_latest_version'), _latest ?? '--'),
-                      const Divider(height: 1, color: AppColors.divider),
+                       Divider(height: 1, color: AppColors.divider),
                       _kv(tr('upg_source'), _source ?? tr('upg_source_unset')),
-                      const Divider(height: 1, color: AppColors.divider),
+                       Divider(height: 1, color: AppColors.divider),
                       _kv(tr('upg_checked_at'), _checkedText),
                     ],
                   ),
@@ -182,7 +182,7 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen> {
                 ),
                 const SizedBox(height: 16),
                 Text(tr('upg_note'),
-                    style: const TextStyle(fontSize: 11, color: AppColors.dim)),
+                    style:  TextStyle(fontSize: 11, color: AppColors.dim)),
               ],
             ),
     );
@@ -190,9 +190,9 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen> {
 
   Widget _kv(String k, String v) => ListTile(
         dense: true,
-        title: Text(k, style: const TextStyle(fontSize: 12, color: AppColors.gray)),
+        title: Text(k, style:  TextStyle(fontSize: 12, color: AppColors.gray)),
         trailing: Text(v,
-            style: const TextStyle(
+            style:  TextStyle(
                 fontFamily: fuiMono, fontSize: 12, color: AppColors.white)),
       );
 }

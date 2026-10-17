@@ -206,9 +206,9 @@ class _PermissionScreenState extends ConsumerState<PermissionScreen> {
         IconButton(icon: const Icon(Icons.refresh, size: 20), onPressed: _loading ? null : _load),
       ]),
       body: _loading
-          ? const Center(child: CircularProgressIndicator())
+          ?  Center(child: CircularProgressIndicator())
           : _error != null
-              ? Center(child: Text(_error!, style: const TextStyle(color: AppColors.brandRed)))
+              ? Center(child: Text(_error!, style:  TextStyle(color: AppColors.brandRed)))
               : ListView(
                   padding: const EdgeInsets.all(16),
                   children: [
@@ -222,7 +222,7 @@ class _PermissionScreenState extends ConsumerState<PermissionScreen> {
                       ),
                       child: Text(
                         tr('perm_shadow_mode_shadowed_permissions_return'),
-                        style: const TextStyle(fontSize: 11, color: AppColors.textSecondary, height: 1.5),
+                        style:  TextStyle(fontSize: 11, color: AppColors.textSecondary, height: 1.5),
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -233,7 +233,7 @@ class _PermissionScreenState extends ConsumerState<PermissionScreen> {
                     const SizedBox(height: 16),
                     Text(
                       tr('perm_token_permission_management_issue_revoke'),
-                      style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                      style:  TextStyle(fontSize: 11, color: AppColors.textSecondary),
                     ),
                   ],
                 ),
@@ -248,13 +248,13 @@ class _PermissionScreenState extends ConsumerState<PermissionScreen> {
         leading: Icon(icon, size: 20, color: AppColors.brandCyan),
         title: Text(groupName, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
         subtitle: Text(trp('perm_permissions', {'p0': '${perms.length}'}),
-            style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+            style:  TextStyle(fontSize: 11, color: AppColors.textSecondary)),
         childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
         children: [
           // 类级统一授权
           Row(
             children: [
-              Text(tr('perm_grant_all'), style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+              Text(tr('perm_grant_all'), style:  TextStyle(fontSize: 12, color: AppColors.textSecondary)),
               const SizedBox(width: 4),
             ],
           ),
@@ -278,7 +278,7 @@ class _PermissionScreenState extends ConsumerState<PermissionScreen> {
               ),
               title: Text(kPermLabels[perm] ?? perm, style: const TextStyle(fontSize: 13)),
               subtitle: Text(_modeDesc(_current[perm]?.toString() ?? 'deny'),
-                  style: const TextStyle(fontSize: 10, color: AppColors.textSecondary)),
+                  style:  TextStyle(fontSize: 10, color: AppColors.textSecondary)),
               trailing: DropdownButton<String>(
                 value: _current[perm]?.toString() ?? 'deny',
                 underline: const SizedBox.shrink(),

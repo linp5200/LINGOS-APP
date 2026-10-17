@@ -109,15 +109,15 @@ class AiConfigScreen extends StatelessWidget {
           return ListTile(
             leading: Icon(c.icon, size: 22, color: AppColors.green),
             title: Text(c.title,
-                style: const TextStyle(
+                style:  TextStyle(
                     fontFamily: fuiMono,
                     fontSize: 13,
                     color: AppColors.white,
                     letterSpacing: 1,
                     fontWeight: FontWeight.w700)),
             subtitle: Text(trp('cfg_items', {'p0': '${c.items.length}'}),
-                style: const TextStyle(fontSize: 9, color: AppColors.dim)),
-            trailing: const Icon(Icons.chevron_right, size: 18, color: AppColors.dim),
+                style:  TextStyle(fontSize: 9, color: AppColors.dim)),
+            trailing:  Icon(Icons.chevron_right, size: 18, color: AppColors.dim),
             onTap: () => Navigator.push(context,
                 MaterialPageRoute(builder: (_) => _SubMenuScreen(category: c))),
           );
@@ -149,8 +149,8 @@ class _SubMenuScreen extends StatelessWidget {
           return ListTile(
             leading: Icon(it.icon, size: 21, color: AppColors.gray),
             title: Text(it.label,
-                style: const TextStyle(fontSize: 14, color: AppColors.textPrimary)),
-            trailing: const Icon(Icons.chevron_right, size: 18, color: AppColors.dim),
+                style:  TextStyle(fontSize: 14, color: AppColors.textPrimary)),
+            trailing:  Icon(Icons.chevron_right, size: 18, color: AppColors.dim),
             onTap: () => Navigator.push(context,
                 MaterialPageRoute(builder: (_) => it.page)),
           );

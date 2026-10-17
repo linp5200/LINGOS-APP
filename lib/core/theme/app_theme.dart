@@ -1,105 +1,212 @@
-/// 全局主题（FUI v2 / Tactical HUD——先生 2026-09-04 定稿）
-/// 灰白地形图语言：中深灰渐变底（少纯黑）/ 白线框架 / 色彩功能化
-/// 绿=在线/数据 · 琥珀=未连/警告 · 红=录影/警报（唯一警报色）
+/// LING OS App 主题（三方向运行时主题：A 静默深色 / B 暖白家居 / C 诺玛 HUD）
+/// 设计依据：docs/LINGOS-UI方向与设计系统-20261017.md
+/// 说明：AppColors 变为"运行时调色板 getter"——切换主题后所有引用自动生效。
+/// 注意：因此 AppColors 不再可用于 const 表达式（相关 const 已移除）。
 library;
 
 import 'package:flutter/material.dart';
 
-class AppColors {
-  // FUI v2 色板：中深灰（非纯黑）为底，白线低透明做框架
-  static const bg = Color(0xFF1E2126);          // 中深灰底（替代纯黑）
-  static const bgAlt = Color(0xFF16191D);        // 更深一档（局部）
-  static const surface = Color(0xFF2B3038);      // 面板（半透明灰感）
-  static const surfaceHigh = Color(0xFF333942);  // 高亮面板
-  static const line = Color(0x47FFFFFF);         // 白线框 rgba(255,.28)
-  static const lineDim = Color(0x24FFFFFF);      // 白线框 rgba(255,.14)
-  static const white = Color(0xFFF4F6F8);        // 主文字
-  static const gray = Color(0xFFA9B1BC);         // 次级文字
-  static const dim = Color(0xFF6B7480);          // 弱化
-  static const dd = Color(0xFF3E454F);           // 更弱（标签）
-  // 功能色（先生定：色彩功能化，不作装饰）
-  static const green = Color(0xFF6CF59A);        // 在线/检测/数据
-  static const amber = Color(0xFFFFBE4D);        // 未连/警告
-  static const yellow = amber;                    // 兼容旧引用（日志 WARN）
-  static const red = Color(0xFFFF4D4D);          // 录影/警报（仅警报）
-  static const blue = Color(0xFF5AB0FF);         // 信息（可选）
-  // 兼容旧引用（brand 前缀 + text 前缀——全局不破坏）
-  static const brandRed = red;
-  static const brandCyan = gray;                 // 原青→灰
-  static const brandGreen = green;
-  static const brandAmber = amber;
-  static const textPrimary = white;
-  static const textSecondary = gray;
-  static const divider = line;
+enum AppThemeVariant { silent, home, norma }
+
+class LingPalette {
+  final String name;
+  final bool dark;
+  final Color bg;
+  final Color bgAlt;
+  final Color surface;
+  final Color surfaceHigh;
+  final Color line;
+  final Color lineDim;
+  final Color white;
+  final Color gray;
+  final Color dim;
+  final Color dd;
+  final Color green;
+  final Color amber;
+  final Color red;
+  final Color blue;
+
+  const LingPalette({
+    required this.name,
+    required this.dark,
+    required this.bg,
+    required this.bgAlt,
+    required this.surface,
+    required this.surfaceHigh,
+    required this.line,
+    required this.lineDim,
+    required this.white,
+    required this.gray,
+    required this.dim,
+    required this.dd,
+    required this.green,
+    required this.amber,
+    required this.red,
+    required this.blue,
+  });
 }
 
-/// FUI 等宽字体（数据/参数/日志用——monospace）
+const LingPalette kPaletteSilent = LingPalette(
+  name: 'A 静默深色', dark: true,
+  bg: Color(0xFF0B0D10), bgAlt: Color(0xFF07090C),
+  surface: Color(0xFF12151A), surfaceHigh: Color(0xFF191D24),
+  line: Color(0x14FFFFFF), lineDim: Color(0x0AFFFFFF),
+  white: Color(0xFFE8EAED), gray: Color(0xFF9AA3AF),
+  dim: Color(0xFF5C6470), dd: Color(0xFF3A424C),
+  green: Color(0xFF3DDC97), amber: Color(0xFFE8A33D),
+  red: Color(0xFFE5484D), blue: Color(0xFF5AC8FA),
+);
+
+const LingPalette kPaletteHome = LingPalette(
+  name: 'B 暖白家居', dark: false,
+  bg: Color(0xFFF7F5F0), bgAlt: Color(0xFFF0EDE6),
+  surface: Color(0xFFFFFFFF), surfaceHigh: Color(0xFFF0EDE6),
+  line: Color(0x1A000000), lineDim: Color(0x0F000000),
+  white: Color(0xFF1C1F24), gray: Color(0xFF5B616B),
+  dim: Color(0xFF8A9099), dd: Color(0xFFB9BEC6),
+  green: Color(0xFF0F9D6E), amber: Color(0xFFC77B1E),
+  red: Color(0xFFC43D3D), blue: Color(0xFF2F7CD6),
+);
+
+const LingPalette kPaletteNorma = LingPalette(
+  name: 'C 诺玛 HUD', dark: true,
+  bg: Color(0xFF070A0F), bgAlt: Color(0xFF05070B),
+  surface: Color(0xFF0E141D), surfaceHigh: Color(0xFF131B26),
+  line: Color(0x2978C8FF), lineDim: Color(0x1478C8FF),
+  white: Color(0xFFE6F1FF), gray: Color(0xFF9DB4CC),
+  dim: Color(0xFF5A7186), dd: Color(0xFF35485C),
+  green: Color(0xFF4FD1FF), amber: Color(0xFFFFB454),
+  red: Color(0xFFFF5C5C), blue: Color(0xFF7AA2FF),
+);
+
+LingPalette paletteOf(AppThemeVariant v) {
+  switch (v) {
+    case AppThemeVariant.home:
+      return kPaletteHome;
+    case AppThemeVariant.norma:
+      return kPaletteNorma;
+    case AppThemeVariant.silent:
+      return kPaletteSilent;
+  }
+}
+
+/// 全局主题状态（运行时调色板）
+class AppThemeState {
+  AppThemeState._();
+
+  static AppThemeVariant variant = AppThemeVariant.silent;
+  static LingPalette palette = kPaletteSilent;
+
+  static void apply(AppThemeVariant v) {
+    variant = v;
+    palette = paletteOf(v);
+  }
+}
+
+/// App 颜色（运行时 getter——主题切换自动生效）
+class AppColors {
+  AppColors._();
+
+  static LingPalette get _p => AppThemeState.palette;
+
+  static Color get bg => _p.bg;
+  static Color get bgAlt => _p.bgAlt;
+  static Color get surface => _p.surface;
+  static Color get surfaceHigh => _p.surfaceHigh;
+  static Color get line => _p.line;
+  static Color get lineDim => _p.lineDim;
+  static Color get white => _p.white;
+  static Color get gray => _p.gray;
+  static Color get dim => _p.dim;
+  static Color get dd => _p.dd;
+  static Color get green => _p.green;
+  static Color get amber => _p.amber;
+  static Color get yellow => _p.amber;
+  static Color get red => _p.red;
+  static Color get blue => _p.blue;
+  // 兼容旧引用
+  static Color get brandRed => _p.red;
+  static Color get brandCyan => _p.gray;
+  static Color get brandGreen => _p.green;
+  static Color get brandAmber => _p.amber;
+  static Color get textPrimary => _p.white;
+  static Color get textSecondary => _p.gray;
+  static Color get divider => _p.line;
+}
+
+/// FUI 等宽字体（数据/参数/日志用）
 const String fuiMono = 'monospace';
 
-ThemeData buildAppTheme() {
-  const scheme = ColorScheme.dark(
-    primary: AppColors.green,          // FUI v2：主强调=绿（在线/数据）
-    secondary: AppColors.gray,
-    surface: AppColors.surface,
-    onSurface: AppColors.white,
-    onPrimary: Colors.black,
-    onSecondary: Colors.black,
-    error: AppColors.red,
+ThemeData buildAppTheme([AppThemeVariant? variant]) {
+  final v = variant ?? AppThemeState.variant;
+  AppThemeState.apply(v);
+  final p = AppThemeState.palette;
+  final scheme = ColorScheme(
+    brightness: p.dark ? Brightness.dark : Brightness.light,
+    primary: p.green,
+    onPrimary: p.dark ? Colors.black : Colors.white,
+    secondary: p.gray,
+    onSecondary: p.dark ? Colors.black : Colors.white,
+    surface: p.surface,
+    onSurface: p.white,
+    error: p.red,
+    onError: Colors.white,
   );
   final base = ThemeData(
     useMaterial3: true,
     colorScheme: scheme,
-    scaffoldBackgroundColor: AppColors.bg,
+    brightness: p.dark ? Brightness.dark : Brightness.light,
+    scaffoldBackgroundColor: p.bg,
   );
   return base.copyWith(
-    appBarTheme: const AppBarTheme(
-      backgroundColor: AppColors.bg,
+    appBarTheme: AppBarTheme(
+      backgroundColor: p.bg,
       elevation: 0,
       centerTitle: false,
       titleTextStyle: TextStyle(
-        color: AppColors.white,
+        color: p.white,
         fontSize: 16,
         fontWeight: FontWeight.w700,
-        letterSpacing: 2,
+        letterSpacing: 1,
       ),
     ),
     navigationBarTheme: NavigationBarThemeData(
-      backgroundColor: AppColors.surface,
-      indicatorColor: AppColors.green.withValues(alpha: 0.15),
-      labelTextStyle: const WidgetStatePropertyAll(
-        TextStyle(fontSize: 10, color: AppColors.gray, letterSpacing: 1),
+      backgroundColor: p.surface,
+      indicatorColor: p.green.withValues(alpha: 0.15),
+      labelTextStyle: WidgetStatePropertyAll(
+        TextStyle(fontSize: 10, color: p.gray, letterSpacing: 0.5),
       ),
     ),
-    drawerTheme: const DrawerThemeData(backgroundColor: AppColors.bg),
+    drawerTheme: DrawerThemeData(backgroundColor: p.bg),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
-      fillColor: AppColors.surface,
+      fillColor: p.surface,
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(2),  // FUI 锐角
-        borderSide: const BorderSide(color: AppColors.line),
+        borderRadius: BorderRadius.circular(8),
+        borderSide: BorderSide(color: p.line),
       ),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(2),
-        borderSide: const BorderSide(color: AppColors.line),
+        borderRadius: BorderRadius.circular(8),
+        borderSide: BorderSide(color: p.line),
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(2),
-        borderSide: const BorderSide(color: AppColors.green),
+        borderRadius: BorderRadius.circular(8),
+        borderSide: BorderSide(color: p.green),
       ),
-      hintStyle: const TextStyle(color: AppColors.dim, fontSize: 12),
+      hintStyle: TextStyle(color: p.dim, fontSize: 12),
     ),
     cardTheme: CardThemeData(
-      color: AppColors.surface,
+      color: p.surface,
       elevation: 0,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(2),  // 锐角
-        side: const BorderSide(color: AppColors.line),
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: p.line),
       ),
     ),
-    dividerTheme: const DividerThemeData(color: AppColors.line, thickness: 1),
+    dividerTheme: DividerThemeData(color: p.line, thickness: 1),
     textTheme: base.textTheme.apply(
-      bodyColor: AppColors.white,
-      displayColor: AppColors.white,
+      bodyColor: p.white,
+      displayColor: p.white,
     ),
   );
 }

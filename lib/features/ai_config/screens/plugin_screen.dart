@@ -145,7 +145,7 @@ class _PluginScreenState extends ConsumerState<PluginScreen> {
         ],
       ),
       body: _loading
-          ? const Center(child: CircularProgressIndicator())
+          ?  Center(child: CircularProgressIndicator())
           : ListView(
               padding: const EdgeInsets.all(16),
               children: [
@@ -169,7 +169,7 @@ class _PluginScreenState extends ConsumerState<PluginScreen> {
                     ),
                     subtitle: Text(
                       '$dirLabel: $dirTxt',
-                      style: const TextStyle(
+                      style:  TextStyle(
                           fontFamily: fuiMono, fontSize: 11, color: AppColors.dim),
                     ),
                   ),
@@ -190,11 +190,11 @@ class _PluginScreenState extends ConsumerState<PluginScreen> {
                   const SizedBox(height: 12),
                   Text(_msg,
                       textAlign: TextAlign.center,
-                      style: const TextStyle(fontSize: 12, color: AppColors.amber)),
+                      style:  TextStyle(fontSize: 12, color: AppColors.amber)),
                 ],
                 const SizedBox(height: 16),
                 Text(tr('plg_note'),
-                    style: const TextStyle(fontSize: 11, color: AppColors.dim)),
+                    style:  TextStyle(fontSize: 11, color: AppColors.dim)),
               ],
             ),
     );
@@ -211,16 +211,16 @@ class _PluginScreenState extends ConsumerState<PluginScreen> {
             dense: true,
             leading: Icon(icon, size: 18, color: AppColors.gray),
             title: Text(title,
-                style: const TextStyle(fontSize: 12, color: AppColors.gray)),
+                style:  TextStyle(fontSize: 12, color: AppColors.gray)),
             trailing: Text(cnt,
-                style: const TextStyle(
+                style:  TextStyle(
                     fontFamily: fuiMono, fontSize: 12, color: AppColors.white)),
           ),
           if (_reachable && items.isEmpty)
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
               child: Text(tr('plg_empty'),
-                  style: const TextStyle(fontSize: 11, color: AppColors.dim)),
+                  style:  TextStyle(fontSize: 11, color: AppColors.dim)),
             ),
           if (items.isNotEmpty)
             Padding(
@@ -237,7 +237,7 @@ class _PluginScreenState extends ConsumerState<PluginScreen> {
                         borderRadius: BorderRadius.circular(2),
                       ),
                       child: Text(n,
-                          style: const TextStyle(
+                          style:  TextStyle(
                               fontFamily: fuiMono,
                               fontSize: 11,
                               color: AppColors.gray)),

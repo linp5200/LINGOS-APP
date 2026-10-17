@@ -136,7 +136,7 @@ class _NotifScreenState extends ConsumerState<NotifScreen> {
         ],
       ),
       body: _loading
-          ? const Center(child: CircularProgressIndicator())
+          ?  Center(child: CircularProgressIndicator())
           : ListView(
               padding: const EdgeInsets.all(16),
               children: [
@@ -145,24 +145,24 @@ class _NotifScreenState extends ConsumerState<NotifScreen> {
                   value: _alertNotif,
                   onChanged: (v) => _setBool('notif_alert', v, () => _alertNotif = v),
                   title: Text(tr('notif_alert_notifications'), style: const TextStyle(fontSize: 14)),
-                  subtitle: Text(tr('notif_server_alerts_app_push'), style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                  subtitle: Text(tr('notif_server_alerts_app_push'), style:  TextStyle(fontSize: 12, color: AppColors.textSecondary)),
                 ),
                 SwitchListTile(
                   value: _capsule,
                   onChanged: (v) => _setBool('notif_capsule', v, () => _capsule = v),
                   title: Text(tr('notif_dynamic_capsule_focus_notification'), style: const TextStyle(fontSize: 14)),
-                  subtitle: Text(tr('notif_android_16_persistent_notification_redmi'), style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                  subtitle: Text(tr('notif_android_16_persistent_notification_redmi'), style:  TextStyle(fontSize: 12, color: AppColors.textSecondary)),
                 ),
                 SwitchListTile(
                   value: _taskNotif,
                   onChanged: (v) => _setBool('notif_task', v, () => _taskNotif = v),
                   title: Text(tr('notif_task_notifications'), style: const TextStyle(fontSize: 14)),
-                  subtitle: Text(tr('notif_let_ai_agents_notify_you_proactively_alert'), style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                  subtitle: Text(tr('notif_let_ai_agents_notify_you_proactively_alert'), style:  TextStyle(fontSize: 12, color: AppColors.textSecondary)),
                 ),
                 Padding(
                   padding: const EdgeInsets.only(top: 2, bottom: 2),
                   child: Text(tr('notif_local_note'),
-                      style: const TextStyle(fontSize: 11, color: AppColors.dim)),
+                      style:  TextStyle(fontSize: 11, color: AppColors.dim)),
                 ),
                 const Divider(),
                 // 【第6期】服务端通知渠道（真实 notify_list / notify_dnd）
@@ -172,29 +172,29 @@ class _NotifScreenState extends ConsumerState<NotifScreen> {
                   onChanged: (!_srvReachable || _srvBusy) ? null : _toggleServerDnd,
                   title: Text(tr('notif_server_dnd'), style: const TextStyle(fontSize: 14)),
                   subtitle: Text(tr('notif_server_dnd_sub'),
-                      style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                      style:  TextStyle(fontSize: 12, color: AppColors.textSecondary)),
                 ),
                 ListTile(
                   dense: true,
                   title: Text(tr('notif_server_unread'),
-                      style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                      style:  TextStyle(fontSize: 12, color: AppColors.textSecondary)),
                   trailing: Text(_srvReachable ? (_srvUnread?.toString() ?? '--') : '--',
-                      style: const TextStyle(
+                      style:  TextStyle(
                           fontFamily: fuiMono, fontSize: 13, color: AppColors.textPrimary)),
                 ),
                 ListTile(
                   dense: true,
                   title: Text(tr('notif_server_total'),
-                      style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                      style:  TextStyle(fontSize: 12, color: AppColors.textSecondary)),
                   trailing: Text(_srvReachable ? (_srvTotal?.toString() ?? '--') : '--',
-                      style: const TextStyle(
+                      style:  TextStyle(
                           fontFamily: fuiMono, fontSize: 13, color: AppColors.textPrimary)),
                 ),
                 if (!_srvReachable)
                   Padding(
                     padding: const EdgeInsets.only(top: 4),
                     child: Text(tr('notif_server_unreachable'),
-                        style: const TextStyle(fontSize: 11, color: AppColors.brandAmber)),
+                        style:  TextStyle(fontSize: 11, color: AppColors.brandAmber)),
                   ),
                 const Divider(),
                 _section(tr('notif_background')),
@@ -202,10 +202,10 @@ class _NotifScreenState extends ConsumerState<NotifScreen> {
                   value: _keepAlive,
                   onChanged: (v) => _setBool('keep_alive', v, () => _keepAlive = v),
                   title: Text(tr('notif_keep_alive_in_background'), style: const TextStyle(fontSize: 14)),
-                  subtitle: Text(tr('notif_foreground_service_persistent_notification'), style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                  subtitle: Text(tr('notif_foreground_service_persistent_notification'), style:  TextStyle(fontSize: 12, color: AppColors.textSecondary)),
                 ),
                 ListTile(
-                  leading: const Icon(Icons.hourglass_bottom, size: 20, color: AppColors.textSecondary),
+                  leading:  Icon(Icons.hourglass_bottom, size: 20, color: AppColors.textSecondary),
                   title: Text(tr('notif_background_mode'), style: const TextStyle(fontSize: 14)),
                   trailing: DropdownButton<String>(
                     value: _bgMode,
@@ -225,23 +225,23 @@ class _NotifScreenState extends ConsumerState<NotifScreen> {
                 const Divider(),
                 _section(tr('notif_background_permissions_system_settings')),
                 ListTile(
-                  leading: const Icon(Icons.battery_charging_full, size: 20, color: AppColors.brandCyan),
+                  leading:  Icon(Icons.battery_charging_full, size: 20, color: AppColors.brandCyan),
                   title: Text(tr('notif_battery_optimization'), style: const TextStyle(fontSize: 14)),
-                  subtitle: Text(tr('notif_request_ignoring_battery_optimization_key'), style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
-                  trailing: const Icon(Icons.chevron_right, size: 18, color: AppColors.textSecondary),
+                  subtitle: Text(tr('notif_request_ignoring_battery_optimization_key'), style:  TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                  trailing:  Icon(Icons.chevron_right, size: 18, color: AppColors.textSecondary),
                   onTap: () => _openBatterySettings(),
                 ),
                 ListTile(
-                  leading: const Icon(Icons.power_settings_new, size: 20, color: AppColors.brandCyan),
+                  leading:  Icon(Icons.power_settings_new, size: 20, color: AppColors.brandCyan),
                   title: Text(tr('notif_auto_start'), style: const TextStyle(fontSize: 14)),
-                  subtitle: Text(tr('notif_vendor_auto_start_permission_miui_needs'), style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
-                  trailing: const Icon(Icons.chevron_right, size: 18, color: AppColors.textSecondary),
+                  subtitle: Text(tr('notif_vendor_auto_start_permission_miui_needs'), style:  TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                  trailing:  Icon(Icons.chevron_right, size: 18, color: AppColors.textSecondary),
                   onTap: () => _openAutoStartSettings(),
                 ),
                 const SizedBox(height: 16),
                 Text(
                   tr('notif_reconnect_exponential_backoff_1s_2s_4s_max'),
-                  style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                  style:  TextStyle(fontSize: 11, color: AppColors.textSecondary),
                 ),
               ],
             ),
@@ -263,7 +263,7 @@ class _NotifScreenState extends ConsumerState<NotifScreen> {
   Widget _section(String title) => Padding(
         padding: const EdgeInsets.only(top: 8, bottom: 4),
         child: Text(title,
-            style: const TextStyle(
+            style:  TextStyle(
                 fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
       );
 }

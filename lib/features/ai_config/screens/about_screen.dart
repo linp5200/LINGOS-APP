@@ -41,11 +41,11 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
                 border: Border.all(color: AppColors.line, width: 2),
                 borderRadius: BorderRadius.circular(18),
               ),
-              child: const Icon(Icons.terminal, size: 44, color: AppColors.green),
+              child:  Icon(Icons.terminal, size: 44, color: AppColors.green),
             ),
           ),
           const SizedBox(height: 16),
-          const Center(
+           Center(
             child: Text('LING OS',
                 style: TextStyle(
                     fontFamily: fuiMono,
@@ -63,7 +63,7 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(AppInfo.tag,
-                  style: const TextStyle(
+                  style:  TextStyle(
                       fontFamily: fuiMono, fontSize: 13, color: AppColors.green, letterSpacing: 1)),
             ),
           ),
@@ -83,7 +83,7 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
           const SizedBox(height: 20),
           Center(
             child: Text(tr('about_2026_ling_os_local_first_privacy_first'),
-                style: const TextStyle(fontSize: 10, color: AppColors.dim)),
+                style:  TextStyle(fontSize: 10, color: AppColors.dim)),
           ),
         ],
       ),
@@ -98,7 +98,7 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
           Icon(icon, size: 18, color: dim ? AppColors.dim : AppColors.gray),
           const SizedBox(width: 14),
           Text('$label  ',
-              style: const TextStyle(fontSize: 12, color: AppColors.dim)),
+              style:  TextStyle(fontSize: 12, color: AppColors.dim)),
           Expanded(
             child: Text(value,
                 style: TextStyle(fontSize: 12, color: dim ? AppColors.dim : AppColors.white)),

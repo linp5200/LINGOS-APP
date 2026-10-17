@@ -127,7 +127,7 @@ class _HomeExtScreenState extends ConsumerState<HomeExtScreen>
         IconButton(icon: const Icon(Icons.refresh, size: 20), onPressed: _refresh),
       ]),
       body: !connected
-          ? Center(child: Text(tr('not_connected'), style: const TextStyle(color: AppColors.textSecondary)))
+          ? Center(child: Text(tr('not_connected'), style:  TextStyle(color: AppColors.textSecondary)))
           : ListView(padding: const EdgeInsets.all(14), children: [
               _statRow(),
               const SizedBox(height: 12),
@@ -164,11 +164,11 @@ class _HomeExtScreenState extends ConsumerState<HomeExtScreen>
             ),
             child: Column(children: [
               Text(it[1] == null ? '--' : '${it[1]}',
-                  style: const TextStyle(
+                  style:  TextStyle(
                       fontFamily: fuiMono, fontSize: 16, color: AppColors.brandGreen)),
               const SizedBox(height: 3),
               Text(it[0] as String,
-                  style: const TextStyle(fontSize: 10, color: AppColors.dim)),
+                  style:  TextStyle(fontSize: 10, color: AppColors.dim)),
             ]),
           ),
         );
@@ -195,19 +195,19 @@ class _HomeExtScreenState extends ConsumerState<HomeExtScreen>
             const Spacer(),
             if (onAdd != null)
               InkWell(onTap: onAdd, child: Text(tr('ext_new'),
-                  style: const TextStyle(fontSize: 10, color: AppColors.brandGreen))),
+                  style:  TextStyle(fontSize: 10, color: AppColors.brandGreen))),
           ]),
           const SizedBox(height: 6),
           if (items.isEmpty)
             Text(tr('ext_none_showing_not_simulated'),
-                style: const TextStyle(fontSize: 10, color: AppColors.dim))
+                style:  TextStyle(fontSize: 10, color: AppColors.dim))
           else
             ...items.take(8).map<Widget>((e) {
               final m = (e is Map) ? e : const {};
               return Padding(
                 padding: const EdgeInsets.only(top: 4),
                 child: Row(children: [
-                  Container(width: 4, height: 4, decoration: const BoxDecoration(
+                  Container(width: 4, height: 4, decoration:  BoxDecoration(
                       color: AppColors.brandGreen, shape: BoxShape.circle)),
                   const SizedBox(width: 7),
                   Expanded(
@@ -219,7 +219,7 @@ class _HomeExtScreenState extends ConsumerState<HomeExtScreen>
                   ),
                   if (m['trigger'] != null)
                     Text('${m['trigger']}',
-                        style: const TextStyle(fontSize: 9, color: AppColors.dim)),
+                        style:  TextStyle(fontSize: 9, color: AppColors.dim)),
                 ]),
               );
             }),
@@ -241,7 +241,7 @@ class _HomeExtScreenState extends ConsumerState<HomeExtScreen>
       ),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(children: [
-          const Icon(Icons.bolt_outlined, size: 15, color: AppColors.brandAmber),
+           Icon(Icons.bolt_outlined, size: 15, color: AppColors.brandAmber),
           const SizedBox(width: 6),
           Text(tr('home_energy'), style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
         ]),
@@ -259,9 +259,9 @@ class _HomeExtScreenState extends ConsumerState<HomeExtScreen>
     return Expanded(
       child: Column(children: [
         Text(v == null ? '--' : '$v$unit',
-            style: const TextStyle(fontFamily: fuiMono, fontSize: 13, color: AppColors.white)),
+            style:  TextStyle(fontFamily: fuiMono, fontSize: 13, color: AppColors.white)),
         const SizedBox(height: 2),
-        Text(label, style: const TextStyle(fontSize: 9, color: AppColors.dim)),
+        Text(label, style:  TextStyle(fontSize: 9, color: AppColors.dim)),
       ]),
     );
   }
@@ -309,7 +309,7 @@ class _TimelineScreenState extends ConsumerState<TimelineScreen>
         IconButton(icon: const Icon(Icons.refresh, size: 20), onPressed: _refresh),
       ]),
       body: !connected
-          ? Center(child: Text(tr('not_connected'), style: const TextStyle(color: AppColors.textSecondary)))
+          ? Center(child: Text(tr('not_connected'), style:  TextStyle(color: AppColors.textSecondary)))
           : ListView(padding: const EdgeInsets.all(14), children: [
               Container(
                 padding: const EdgeInsets.all(12),
@@ -320,14 +320,14 @@ class _TimelineScreenState extends ConsumerState<TimelineScreen>
                 ),
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   Text(trp('ext_tl_events_24h', {'p0': ovm['timeline_events'] ?? '--'}),
-                      style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                      style:  TextStyle(fontSize: 11, color: AppColors.textSecondary)),
                   const SizedBox(height: 8),
                   SizedBox(
                     height: 62,
                     child: segs.isEmpty
                         ? Center(
                             child: Text(tr('ext_no_events_showing_not_simulated'),
-                                style: const TextStyle(fontSize: 10, color: AppColors.dim)))
+                                style:  TextStyle(fontSize: 10, color: AppColors.dim)))
                         : Row(
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: segs.map<Widget>((s) {
@@ -356,7 +356,7 @@ class _TimelineScreenState extends ConsumerState<TimelineScreen>
                   ),
                   const SizedBox(height: 4),
                   Text(tr('ext_each_bar_1h_green_motion_blue_object'),
-                      style: const TextStyle(fontSize: 8, color: AppColors.dim)),
+                      style:  TextStyle(fontSize: 8, color: AppColors.dim)),
                 ]),
               ),
               const SizedBox(height: 12),
@@ -372,16 +372,16 @@ class _TimelineScreenState extends ConsumerState<TimelineScreen>
                       style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
                   const SizedBox(height: 6),
                   Text(trp('ext_tl_storage_used', {'p0': stm['used_gb'] ?? '--', 'p1': stm['limit_gb'] ?? '--'}),
-                      style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                      style:  TextStyle(fontSize: 11, color: AppColors.textSecondary)),
                   Text(trp('ext_tl_recordings', {'p0': stm['recordings'] ?? '--', 'p1': stm['object_recordings'] ?? '--'}),
-                      style: const TextStyle(fontSize: 10, color: AppColors.dim)),
+                      style:  TextStyle(fontSize: 10, color: AppColors.dim)),
                 ]),
               ),
               const SizedBox(height: 12),
-              Text(tr('tl_event_list'), style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+              Text(tr('tl_event_list'), style:  TextStyle(fontSize: 12, color: AppColors.textSecondary)),
               const SizedBox(height: 6),
               if (items.isEmpty)
-                Text(tr('tl_no_events'), style: const TextStyle(fontSize: 10, color: AppColors.dim))
+                Text(tr('tl_no_events'), style:  TextStyle(fontSize: 10, color: AppColors.dim))
               else
                 ...items.reversed.take(30).map<Widget>((e) {
                   final m = (e is Map) ? e : const {};
@@ -401,7 +401,7 @@ class _TimelineScreenState extends ConsumerState<TimelineScreen>
                         ts == null
                             ? ''
                             : '${ts.hour.toString().padLeft(2, '0')}:${ts.minute.toString().padLeft(2, '0')}',
-                        style: const TextStyle(fontSize: 10, color: AppColors.dim)),
+                        style:  TextStyle(fontSize: 10, color: AppColors.dim)),
                   );
                 }),
             ]),
@@ -459,23 +459,23 @@ class _NotifyCenterScreenState extends ConsumerState<NotifyCenterScreen>
         ],
       ),
       body: !connected
-          ? Center(child: Text(tr('not_connected'), style: const TextStyle(color: AppColors.textSecondary)))
+          ? Center(child: Text(tr('not_connected'), style:  TextStyle(color: AppColors.textSecondary)))
           : Column(children: [
               Padding(
                 padding: const EdgeInsets.fromLTRB(14, 10, 14, 6),
                 child: Row(children: [
                   Text(trp('ext_nt_total_unread', {'p0': m['total'] ?? '--', 'p1': m['unread'] ?? '--'}),
-                      style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                      style:  TextStyle(fontSize: 11, color: AppColors.textSecondary)),
                   const Spacer(),
                   if (m['dnd'] == true)
                     Text(tr('nt_dnd_hint'),
-                        style: const TextStyle(fontSize: 10, color: AppColors.brandAmber)),
+                        style:  TextStyle(fontSize: 10, color: AppColors.brandAmber)),
                 ]),
               ),
               Expanded(
                 child: items.isEmpty
                     ? Center(
-                        child: Text(tr('nt_empty'), style: const TextStyle(color: AppColors.dim)))
+                        child: Text(tr('nt_empty'), style:  TextStyle(color: AppColors.dim)))
                     : ListView.builder(
                         padding: const EdgeInsets.symmetric(horizontal: 14),
                         itemCount: items.length,
@@ -517,13 +517,13 @@ class _NotifyCenterScreenState extends ConsumerState<NotifyCenterScreen>
                                   ),
                                   if (mm['silenced'] == true)
                                     Text(tr('nt_silenced'),
-                                        style: const TextStyle(fontSize: 9, color: AppColors.dim)),
+                                        style:  TextStyle(fontSize: 9, color: AppColors.dim)),
                                 ]),
                                 if ((mm['body'] ?? '').toString().isNotEmpty)
                                   Padding(
                                     padding: const EdgeInsets.only(top: 4),
                                     child: Text('${mm['body']}',
-                                        style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                                        style:  TextStyle(fontSize: 11, color: AppColors.textSecondary)),
                                   ),
                               ]),
                             ),
@@ -572,13 +572,13 @@ class _MediaScreenState extends ConsumerState<MediaScreen>
         IconButton(icon: const Icon(Icons.refresh, size: 20), onPressed: _refresh),
       ]),
       body: !connected
-          ? Center(child: Text(tr('not_connected'), style: const TextStyle(color: AppColors.textSecondary)))
+          ? Center(child: Text(tr('not_connected'), style:  TextStyle(color: AppColors.textSecondary)))
           : list.isEmpty
               ? Center(
                   child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-                  const Icon(Icons.music_off_outlined, size: 40, color: AppColors.dim),
+                   Icon(Icons.music_off_outlined, size: 40, color: AppColors.dim),
                   const SizedBox(height: 10),
-                  Text(tr('md_no_player'), style: const TextStyle(color: AppColors.textSecondary)),
+                  Text(tr('md_no_player'), style:  TextStyle(color: AppColors.textSecondary)),
                 ]))
               : ListView(
                   padding: const EdgeInsets.all(14),
@@ -596,7 +596,7 @@ class _MediaScreenState extends ConsumerState<MediaScreen>
                       ),
                       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                         Row(children: [
-                          const Icon(Icons.speaker_outlined, size: 15, color: AppColors.brandGreen),
+                           Icon(Icons.speaker_outlined, size: 15, color: AppColors.brandGreen),
                           const SizedBox(width: 7),
                           Expanded(
                             child: Text(eid,
@@ -604,13 +604,13 @@ class _MediaScreenState extends ConsumerState<MediaScreen>
                                 overflow: TextOverflow.ellipsis),
                           ),
                           Text('${m['state'] ?? 'idle'}',
-                              style: const TextStyle(fontSize: 10, color: AppColors.textSecondary)),
+                              style:  TextStyle(fontSize: 10, color: AppColors.textSecondary)),
                         ]),
                         if ((m['media_title'] ?? '').toString().isNotEmpty)
                           Padding(
                             padding: const EdgeInsets.only(top: 5),
                             child: Text('♪ ${m['media_title']}${(m['media_artist'] ?? '').toString().isNotEmpty ? ' · ${m['media_artist']}' : ''}',
-                                style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                                style:  TextStyle(fontSize: 11, color: AppColors.textSecondary)),
                           ),
                         const SizedBox(height: 8),
                         Row(children: [
@@ -631,7 +631,7 @@ class _MediaScreenState extends ConsumerState<MediaScreen>
                               onPressed: () => _cmd(eid, 'volume_up')),
                           const Spacer(),
                           Text('${(vol * 100).round()}%',
-                              style: const TextStyle(
+                              style:  TextStyle(
                                   fontFamily: fuiMono, fontSize: 11, color: AppColors.brandGreen)),
                         ]),
                       ]),
@@ -684,7 +684,7 @@ class _KbScreenState extends ConsumerState<KbScreen> with _ExtMixin<KbScreen> {
         IconButton(icon: const Icon(Icons.refresh, size: 20), onPressed: _refresh),
       ]),
       body: !connected
-          ? Center(child: Text(tr('not_connected'), style: const TextStyle(color: AppColors.textSecondary)))
+          ? Center(child: Text(tr('not_connected'), style:  TextStyle(color: AppColors.textSecondary)))
           : ListView(padding: const EdgeInsets.all(14), children: [
               Container(
                 padding: const EdgeInsets.all(12),
@@ -695,7 +695,7 @@ class _KbScreenState extends ConsumerState<KbScreen> with _ExtMixin<KbScreen> {
                 ),
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   Text(trp('ext_kb_docs_chunks', {'p0': '${docs.length}', 'p1': m['total_chunks'] ?? '--'}),
-                      style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                      style:  TextStyle(fontSize: 11, color: AppColors.textSecondary)),
                   const SizedBox(height: 8),
                   Row(children: [
                     Expanded(
@@ -760,7 +760,7 @@ class _KbScreenState extends ConsumerState<KbScreen> with _ExtMixin<KbScreen> {
               ]),
               if (_hits.isNotEmpty) ...[
                 const SizedBox(height: 14),
-                Text(tr('kb_results'), style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                Text(tr('kb_results'), style:  TextStyle(fontSize: 12, color: AppColors.textSecondary)),
                 const SizedBox(height: 6),
                 ..._hits.map<Widget>((h) => Container(
                       margin: const EdgeInsets.only(bottom: 6),
@@ -776,22 +776,22 @@ class _KbScreenState extends ConsumerState<KbScreen> with _ExtMixin<KbScreen> {
                               style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600)),
                           const Spacer(),
                           Text('${h['score'] ?? ''} · ${h['method'] ?? ''}',
-                              style: const TextStyle(fontSize: 9, color: AppColors.dim)),
+                              style:  TextStyle(fontSize: 9, color: AppColors.dim)),
                         ]),
                         const SizedBox(height: 4),
                         Text('${h['text'] ?? ''}',
-                            style: const TextStyle(fontSize: 10, color: AppColors.textSecondary),
+                            style:  TextStyle(fontSize: 10, color: AppColors.textSecondary),
                             maxLines: 4,
                             overflow: TextOverflow.ellipsis),
                       ]),
                     )),
               ],
               const SizedBox(height: 14),
-              Text(tr('kb_doc_list'), style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+              Text(tr('kb_doc_list'), style:  TextStyle(fontSize: 12, color: AppColors.textSecondary)),
               const SizedBox(height: 6),
               if (docs.isEmpty)
                 Text(tr('ext_knowledge_base_is_empty_showing_not'),
-                    style: const TextStyle(fontSize: 10, color: AppColors.dim))
+                    style:  TextStyle(fontSize: 10, color: AppColors.dim))
               else
                 ...docs.map<Widget>((doc) {
                   final dm = (doc is Map) ? doc : const {};

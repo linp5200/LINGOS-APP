@@ -106,9 +106,9 @@ class _PersonalityScreenState extends ConsumerState<PersonalityScreen> {
         IconButton(icon: const Icon(Icons.refresh, size: 20), onPressed: _loading ? null : _load),
       ]),
       body: _loading
-          ? const Center(child: CircularProgressIndicator())
+          ?  Center(child: CircularProgressIndicator())
           : _error != null
-              ? Center(child: Text(_error!, style: const TextStyle(color: AppColors.brandRed)))
+              ? Center(child: Text(_error!, style:  TextStyle(color: AppColors.brandRed)))
               : ListView(
                   padding: const EdgeInsets.all(16),
                   children: [
@@ -116,7 +116,7 @@ class _PersonalityScreenState extends ConsumerState<PersonalityScreen> {
                     for (final p in _kPersonalities) _personalityCard(p),
                     const SizedBox(height: 16),
                     Text(tr('pers_voice_field_links_to_speech_tts_channel'),
-                        style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                        style:  TextStyle(fontSize: 11, color: AppColors.textSecondary)),
                   ],
                 ),
     );
@@ -128,7 +128,7 @@ class _PersonalityScreenState extends ConsumerState<PersonalityScreen> {
       margin: const EdgeInsets.only(bottom: 10),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(14),
-        side: sel ? const BorderSide(color: AppColors.brandCyan, width: 2) : BorderSide.none,
+        side: sel ?  BorderSide(color: AppColors.brandCyan, width: 2) : BorderSide.none,
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(14),
@@ -144,13 +144,13 @@ class _PersonalityScreenState extends ConsumerState<PersonalityScreen> {
                       size: 20, color: sel ? AppColors.brandCyan : AppColors.textSecondary),
                   const SizedBox(width: 8),
                   Text(p.name,
-                      style: const TextStyle(
+                      style:  TextStyle(
                           fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
                 ],
               ),
               const SizedBox(height: 6),
               Text(p.desc,
-                  style: const TextStyle(fontSize: 12, color: AppColors.textSecondary, height: 1.5)),
+                  style:  TextStyle(fontSize: 12, color: AppColors.textSecondary, height: 1.5)),
               const SizedBox(height: 12),
               Row(
                 children: [
@@ -174,8 +174,8 @@ class _PersonalityScreenState extends ConsumerState<PersonalityScreen> {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text('$label: ', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
-        Text(value, style: const TextStyle(fontSize: 12, color: AppColors.textPrimary)),
+        Text('$label: ', style:  TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+        Text(value, style:  TextStyle(fontSize: 12, color: AppColors.textPrimary)),
       ],
     );
   }
@@ -186,7 +186,7 @@ class _PersonalityScreenState extends ConsumerState<PersonalityScreen> {
         SizedBox(
           width: 56,
           child: Text(label,
-              style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+              style:  TextStyle(fontSize: 12, color: AppColors.textSecondary)),
         ),
         Expanded(
           child: Slider(
@@ -199,7 +199,7 @@ class _PersonalityScreenState extends ConsumerState<PersonalityScreen> {
         SizedBox(
           width: 24,
           child: Text('$value',
-              style: const TextStyle(fontSize: 12, color: AppColors.textPrimary)),
+              style:  TextStyle(fontSize: 12, color: AppColors.textPrimary)),
         ),
       ],
     );

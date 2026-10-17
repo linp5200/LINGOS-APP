@@ -92,7 +92,7 @@ class _ConnSettingsScreenState extends ConsumerState<ConnSettingsScreen> {
     return Scaffold(
       appBar: AppBar(title: Text(tr('cset_connection_settings'))),
       body: _loading
-          ? const Center(child: CircularProgressIndicator())
+          ?  Center(child: CircularProgressIndicator())
           : ListView(
               padding: const EdgeInsets.all(16),
               children: [
@@ -102,7 +102,7 @@ class _ConnSettingsScreenState extends ConsumerState<ConnSettingsScreen> {
                   leading: const Icon(Icons.dns_outlined, size: 20),
                   title: Text(tr('cset_host_ip')),
                   subtitle: Text('$_host${_port != null ? ':$_port' : ''}',
-                      style: const TextStyle(color: AppColors.textSecondary)),
+                      style:  TextStyle(color: AppColors.textSecondary)),
                   enabled: false,
                 ),
                 ListTile(
@@ -112,14 +112,14 @@ class _ConnSettingsScreenState extends ConsumerState<ConnSettingsScreen> {
                       _token != null && _token!.isNotEmpty
                           ? '${_token!.substring(0, _token!.length > 8 ? 8 : _token!.length)}...'
                           : tr('cset_not_authenticated'),
-                      style: const TextStyle(color: AppColors.textSecondary)),
+                      style:  TextStyle(color: AppColors.textSecondary)),
                 ),
                 ListTile(
                   leading: Icon(Icons.circle,
                       size: 14, color: connected ? Colors.green : AppColors.brandRed),
                   title: Text(tr('cset_connection_status')),
                   subtitle: Text(mgr.state.name,
-                      style: const TextStyle(color: AppColors.textSecondary)),
+                      style:  TextStyle(color: AppColors.textSecondary)),
                 ),
                 // 【定案】连接方式（原 APP 设定）
                 Padding(
@@ -144,7 +144,7 @@ class _ConnSettingsScreenState extends ConsumerState<ConnSettingsScreen> {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
                   child: Text(ConnectionMode.fromId(_connectionModeId).description,
-                      style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                      style:  TextStyle(fontSize: 11, color: AppColors.textSecondary)),
                 ),
                 // 【定案】加密（原 APP 设定——默认 wss）
                 SwitchListTile(
@@ -156,7 +156,7 @@ class _ConnSettingsScreenState extends ConsumerState<ConnSettingsScreen> {
                   title: Text(tr('conn_encrypted')),
                   subtitle: Text(
                     tr('cset_encrypted_by_default_wss_enable_plaintext'),
-                    style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                    style:  TextStyle(fontSize: 12, color: AppColors.textSecondary),
                   ),
                 ),
                 // 【0.2.0】音频提供商使用服务端代理（先生决策：本地直连/代理可选）
@@ -169,7 +169,7 @@ class _ConnSettingsScreenState extends ConsumerState<ConnSettingsScreen> {
                   title: Text(tr('cset_audio_providers_via_server_proxy')),
                   subtitle: Text(
                     tr('cset_on_speech_synthesized_recognized_on_the'),
-                    style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                    style:  TextStyle(fontSize: 12, color: AppColors.textSecondary),
                   ),
                 ),
                 // 【0.2.0】自动朗读（默认关——先生决策）
@@ -182,7 +182,7 @@ class _ConnSettingsScreenState extends ConsumerState<ConnSettingsScreen> {
                   title: Text(tr('cset_auto_read_aloud')),
                   subtitle: Text(
                     tr('cset_read_ai_replies_aloud_automatically_off_by'),
-                    style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                    style:  TextStyle(fontSize: 12, color: AppColors.textSecondary),
                   ),
                 ),
                 // 【0.2.0】连续对话（家居等情景默认开——先生决策）
@@ -195,17 +195,17 @@ class _ConnSettingsScreenState extends ConsumerState<ConnSettingsScreen> {
                   title: Text(tr('cset_continuous_chat')),
                   subtitle: Text(
                     tr('cset_continuous_chat_by_default_in_home_voice'),
-                    style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                    style:  TextStyle(fontSize: 12, color: AppColors.textSecondary),
                   ),
                 ),
                 const Divider(),
                 const SizedBox(height: 8),
                 // 【定案】退出登录——本页底部（红色）
                 ListTile(
-                  leading: const Icon(Icons.logout, size: 20, color: AppColors.brandRed),
-                  title: Text(tr('cset_log_out'), style: const TextStyle(color: AppColors.brandRed)),
+                  leading:  Icon(Icons.logout, size: 20, color: AppColors.brandRed),
+                  title: Text(tr('cset_log_out'), style:  TextStyle(color: AppColors.brandRed)),
                   subtitle: Text(tr('cset_clear_token_encrypted_revoke_unbind_device'),
-                      style: const TextStyle(color: AppColors.textSecondary)),
+                      style:  TextStyle(color: AppColors.textSecondary)),
                   onTap: _logout,
                 ),
               ],
@@ -216,7 +216,7 @@ class _ConnSettingsScreenState extends ConsumerState<ConnSettingsScreen> {
   Widget _section(String title) => Padding(
         padding: const EdgeInsets.only(top: 8, bottom: 4),
         child: Text(title,
-            style: const TextStyle(
+            style:  TextStyle(
                 fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
       );
 }

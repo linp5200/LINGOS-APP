@@ -118,13 +118,13 @@ class _McpScreenState extends ConsumerState<McpScreen> {
         ],
       ),
       body: _loading
-          ? const Center(child: CircularProgressIndicator())
+          ?  Center(child: CircularProgressIndicator())
           : _error != null
               ? Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(_error!, style: const TextStyle(color: AppColors.brandRed)),
+                      Text(_error!, style:  TextStyle(color: AppColors.brandRed)),
                       const SizedBox(height: 12),
                       TextButton(onPressed: _load, child: Text(tr('retry'))),
                     ],
@@ -135,10 +135,10 @@ class _McpScreenState extends ConsumerState<McpScreen> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(Icons.dns_outlined, size: 48, color: AppColors.textSecondary),
+                           Icon(Icons.dns_outlined, size: 48, color: AppColors.textSecondary),
                           const SizedBox(height: 12),
                           Text(tr('mcp_no_mcp_servers_configured_tap_to_add'),
-                              style: const TextStyle(color: AppColors.textSecondary)),
+                              style:  TextStyle(color: AppColors.textSecondary)),
                           const SizedBox(height: 12),
                           TextButton(onPressed: _add, child: Text(tr('mcp_add_mcp'))),
                         ],
@@ -156,7 +156,7 @@ class _McpScreenState extends ConsumerState<McpScreen> {
                           ),
                           child: Text(
                             tr('mcp_mcp_model_context_protocol_connect_external'),
-                            style: const TextStyle(fontSize: 11, color: AppColors.textSecondary, height: 1.5),
+                            style:  TextStyle(fontSize: 11, color: AppColors.textSecondary, height: 1.5),
                           ),
                         ),
                         const SizedBox(height: 12),
@@ -196,9 +196,9 @@ class _McpScreenState extends ConsumerState<McpScreen> {
               ],
             ),
             const SizedBox(height: 4),
-            Text(url, style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+            Text(url, style:  TextStyle(fontSize: 11, color: AppColors.textSecondary)),
             Text(trp('mcp_auth', {'p0': auth == 'none' ? tr('mcp_no_auth') : auth}),
-                style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                style:  TextStyle(fontSize: 11, color: AppColors.textSecondary)),
             if (tools.isNotEmpty) ...[
               const SizedBox(height: 6),
               Wrap(
@@ -213,7 +213,7 @@ class _McpScreenState extends ConsumerState<McpScreen> {
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Text(tname,
-                        style: const TextStyle(fontSize: 10, color: AppColors.brandCyan)),
+                        style:  TextStyle(fontSize: 10, color: AppColors.brandCyan)),
                   );
                 }).toList(),
               ),
@@ -228,7 +228,7 @@ class _McpScreenState extends ConsumerState<McpScreen> {
                 ),
                 const Spacer(),
                 IconButton(
-                  icon: const Icon(Icons.delete_outline, size: 18, color: AppColors.textSecondary),
+                  icon:  Icon(Icons.delete_outline, size: 18, color: AppColors.textSecondary),
                   onPressed: () => _remove(name),
                 ),
               ],
@@ -330,7 +330,7 @@ class _McpAddScreenState extends State<_McpAddScreen> {
           ),
           const SizedBox(height: 12),
           Text(tr('mcp_mcp_tools_register_as_a_separate_mcp_skill'),
-              style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+              style:  TextStyle(fontSize: 11, color: AppColors.textSecondary)),
         ],
       ),
     );

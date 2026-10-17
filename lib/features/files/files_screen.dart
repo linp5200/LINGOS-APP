@@ -81,13 +81,13 @@ class _FilesScreenState extends ConsumerState<FilesScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.surface,
-        title: Text(path, style: const TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+        title: Text(path, style:  TextStyle(fontSize: 13, color: AppColors.textSecondary)),
         content: ConstrainedBox(
           constraints: BoxConstraints(
               maxHeight: MediaQuery.of(ctx).size.height * 0.6),
           child: SingleChildScrollView(
             child: SelectableText(content,
-                style: const TextStyle(
+                style:  TextStyle(
                     fontSize: 12, color: AppColors.textPrimary, height: 1.5, fontFamily: 'monospace')),
           ),
         ),
@@ -204,7 +204,7 @@ class _FilesScreenState extends ConsumerState<FilesScreen> {
         ],
       ),
       body: _loading
-          ? const Center(child: CircularProgressIndicator())
+          ?  Center(child: CircularProgressIndicator())
           : ListView.builder(
               itemCount: _entries.length,
               itemBuilder: (ctx, i) {
@@ -216,7 +216,7 @@ class _FilesScreenState extends ConsumerState<FilesScreen> {
                       size: 20, color: isDir ? AppColors.brandCyan : AppColors.textSecondary),
                   title: Text(name, style: const TextStyle(fontSize: 14)),
                   subtitle: isDir ? null : Text(_fmtSize(e['size']?.toString() ?? '0'),
-                      style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                      style:  TextStyle(fontSize: 11, color: AppColors.textSecondary)),
                   trailing: isDir
                       ? null
                       : Row(

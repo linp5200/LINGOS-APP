@@ -12,7 +12,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/providers.dart';
 import '../../../core/theme/app_theme.dart';
 
-const kRiskColors = {
+ kRiskColors = {
   'low': Color(0xFF4CAF50),
   'medium': Color(0xFFFFB300),
   'high': Color(0xFFFF7043),
@@ -128,9 +128,9 @@ class _SkillsScreenState extends ConsumerState<SkillsScreen> {
         IconButton(icon: const Icon(Icons.refresh, size: 20), onPressed: _loading ? null : _load),
       ]),
       body: _loading
-          ? const Center(child: CircularProgressIndicator())
+          ?  Center(child: CircularProgressIndicator())
           : _error != null
-              ? Center(child: Text(_error!, style: const TextStyle(color: AppColors.brandRed)))
+              ? Center(child: Text(_error!, style:  TextStyle(color: AppColors.brandRed)))
               : Column(
                   children: [
                     // 分组过滤
@@ -162,7 +162,7 @@ class _SkillsScreenState extends ConsumerState<SkillsScreen> {
                       ),
                       child: Text(
                         tr('skill_enabled_permitted_inside_a_proot_rootfs'),
-                        style: const TextStyle(fontSize: 11, color: AppColors.textSecondary, height: 1.5),
+                        style:  TextStyle(fontSize: 11, color: AppColors.textSecondary, height: 1.5),
                       ),
                     ),
                     Expanded(
@@ -186,7 +186,7 @@ class _SkillsScreenState extends ConsumerState<SkillsScreen> {
         Padding(
           padding: const EdgeInsets.only(top: 10, bottom: 4),
           child: Text(trp('skill_text', {'p0': group, 'p1': '${items.length}'}),
-              style: const TextStyle(
+              style:  TextStyle(
                   fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
         ),
         for (final s in items) _skillTile(s),
@@ -218,7 +218,7 @@ class _SkillsScreenState extends ConsumerState<SkillsScreen> {
         title: Text(name, style: const TextStyle(fontSize: 13)),
         subtitle: Text(
             [s['description']?.toString() ?? '', if (needConfirm) tr('skill_needs_confirmation')].join(' · '),
-            style: const TextStyle(fontSize: 10, color: AppColors.textSecondary),
+            style:  TextStyle(fontSize: 10, color: AppColors.textSecondary),
             maxLines: 1,
             overflow: TextOverflow.ellipsis),
         trailing: Switch(

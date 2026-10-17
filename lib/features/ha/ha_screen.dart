@@ -87,9 +87,9 @@ class _HaScreenState extends ConsumerState<HaScreen> {
           ),
           Expanded(
             child: _loading
-                ? const Center(child: CircularProgressIndicator())
+                ?  Center(child: CircularProgressIndicator())
                 : _events.isEmpty
-                    ? Center(child: Text(tr('ha_no_events_enter_a_keyword_to_search'), style: const TextStyle(color: AppColors.textSecondary)))
+                    ? Center(child: Text(tr('ha_no_events_enter_a_keyword_to_search'), style:  TextStyle(color: AppColors.textSecondary)))
                     : ListView.builder(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         itemCount: _events.length,
@@ -98,11 +98,11 @@ class _HaScreenState extends ConsumerState<HaScreen> {
                           return Card(
                             margin: const EdgeInsets.only(bottom: 8),
                             child: ListTile(
-                              leading: const Icon(Icons.home_work_outlined, size: 20, color: AppColors.brandCyan),
+                              leading:  Icon(Icons.home_work_outlined, size: 20, color: AppColors.brandCyan),
                               title: Text(e['title']?.toString() ?? e['type']?.toString() ?? tr('ha_events')),
                               subtitle: Text(e['content']?.toString() ?? e['summary']?.toString() ?? ''),
                               trailing: Text(e['time']?.toString() ?? e['ts']?.toString() ?? '',
-                                  style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                                  style:  TextStyle(fontSize: 11, color: AppColors.textSecondary)),
                             ),
                           );
                         },

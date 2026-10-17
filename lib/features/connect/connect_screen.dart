@@ -178,9 +178,9 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const Icon(Icons.language_rounded, size: 56, color: AppColors.brandRed),
+                   Icon(Icons.language_rounded, size: 56, color: AppColors.brandRed),
                   const SizedBox(height: 12),
-                  const Text('LING OS',
+                   Text('LING OS',
                       textAlign: TextAlign.center,
                       style: TextStyle(fontSize: 26, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
                   const SizedBox(height: 4),
@@ -302,7 +302,7 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
                   const SizedBox(height: 20),
                   TextButton(
                     onPressed: () => _mgr.disconnect(),
-                    child: Text(tr('disconnect'), style: const TextStyle(color: AppColors.textSecondary)),
+                    child: Text(tr('disconnect'), style:  TextStyle(color: AppColors.textSecondary)),
                   ),
                 ],
               ),

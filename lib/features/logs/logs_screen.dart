@@ -153,17 +153,17 @@ class _LogsScreenState extends ConsumerState<LogsScreen> {
           dense: true,
           value: _enabled,
           onChanged: _toggle,
-          title: Text(tr('log_logging'), style: const TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+          title: Text(tr('log_logging'), style:  TextStyle(fontSize: 13, color: AppColors.textSecondary)),
           subtitle: Text(tr('log_when_off_no_new_logs_are_recorded_connect'),
-              style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+              style:  TextStyle(fontSize: 11, color: AppColors.textSecondary)),
         ),
         SwitchListTile(
           dense: true,
           value: _saveToFile,
           onChanged: _toggleSave,
-          title: Text(tr('log_save_to_file'), style: const TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+          title: Text(tr('log_save_to_file'), style:  TextStyle(fontSize: 13, color: AppColors.textSecondary)),
           subtitle: Text(tr('log_off_by_default_only_exports_are_written_on'),
-              style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+              style:  TextStyle(fontSize: 11, color: AppColors.textSecondary)),
         ),
         Container(
           width: double.infinity,
@@ -171,13 +171,13 @@ class _LogsScreenState extends ConsumerState<LogsScreen> {
           color: AppColors.surface,
           child: Text(
             tr('log_shows_the_last_100_lines_written_to_disk_on'),
-            style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+            style:  TextStyle(fontSize: 11, color: AppColors.textSecondary),
           ),
         ),
         Expanded(
           child: _logger.recentLogs.isEmpty
               ? Center(
-                  child: Text(tr('log_no_logs_yet_recording_starts_after'), style: const TextStyle(color: AppColors.textSecondary)),
+                  child: Text(tr('log_no_logs_yet_recording_starts_after'), style:  TextStyle(color: AppColors.textSecondary)),
                 )
               : ListView.builder(
                   padding: const EdgeInsets.all(12),
@@ -219,7 +219,7 @@ class _LogsScreenState extends ConsumerState<LogsScreen> {
               Expanded(
                 child: Text(
                   connected ? tr('log_host_logs_lingos_log_lingos_log_last_120') : tr('log_host_not_connected_server_logs_are_fetched'),
-                  style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                  style:  TextStyle(fontSize: 11, color: AppColors.textSecondary),
                 ),
               ),
               IconButton(
@@ -240,7 +240,7 @@ class _LogsScreenState extends ConsumerState<LogsScreen> {
                     padding: const EdgeInsets.all(24),
                     child: Text(_serverErr,
                         textAlign: TextAlign.center,
-                        style: const TextStyle(color: AppColors.textSecondary, fontSize: 12, height: 1.6)),
+                        style:  TextStyle(color: AppColors.textSecondary, fontSize: 12, height: 1.6)),
                   ),
                 )
               : _serverLog.isEmpty
@@ -249,7 +249,7 @@ class _LogsScreenState extends ConsumerState<LogsScreen> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(tr('log_not_fetched_yet_tap_refresh_to_read_server'),
-                              style: const TextStyle(color: AppColors.textSecondary, fontSize: 12)),
+                              style:  TextStyle(color: AppColors.textSecondary, fontSize: 12)),
                           const SizedBox(height: 12),
                           FilledButton.icon(
                             onPressed: _loadServerLog,

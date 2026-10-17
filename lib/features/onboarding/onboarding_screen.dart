@@ -87,7 +87,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 children: [
                   TextButton(
                     onPressed: () => _finish(),
-                    child: Text(tr('onb_skip'), style: const TextStyle(color: AppColors.dim)),
+                    child: Text(tr('onb_skip'), style:  TextStyle(color: AppColors.dim)),
                   ),
                   const Spacer(),
                   if (_page < 2)
@@ -124,14 +124,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.wb_twilight, size: 64, color: AppColors.brandGreen),
+           Icon(Icons.wb_twilight, size: 64, color: AppColors.brandGreen),
           const SizedBox(height: 18),
           Text(tr('onb_welcome_to_ling_os'),
-              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+              style:  TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
           const SizedBox(height: 14),
           Text(
             tr('onb_a_personal_home_security_ai_system_n_n'),
-            style: const TextStyle(fontSize: 13, height: 1.7, color: AppColors.textSecondary),
+            style:  TextStyle(fontSize: 13, height: 1.7, color: AppColors.textSecondary),
           ),
         ],
       ),
@@ -145,18 +145,18 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.lan_outlined, size: 56, color: AppColors.brandGreen),
+           Icon(Icons.lan_outlined, size: 56, color: AppColors.brandGreen),
           const SizedBox(height: 18),
           Text(tr('onb_connect_your_host'),
-              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+              style:  TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
           const SizedBox(height: 12),
           Text(
             tr('onb_the_ling_os_server_runs_on_your_host_a'),
-            style: const TextStyle(fontSize: 13, height: 1.7, color: AppColors.textSecondary),
+            style:  TextStyle(fontSize: 13, height: 1.7, color: AppColors.textSecondary),
           ),
           const SizedBox(height: 18),
           Text(tr('onb_tip_the_terminal_shows_the_verification'),
-              style: const TextStyle(fontSize: 11, color: AppColors.dim)),
+              style:  TextStyle(fontSize: 11, color: AppColors.dim)),
         ],
       ),
     );
@@ -169,17 +169,17 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.checklist_rtl, size: 56, color: AppColors.brandGreen),
+           Icon(Icons.checklist_rtl, size: 56, color: AppColors.brandGreen),
           const SizedBox(height: 18),
           Text(tr('onb_readiness_check'),
-              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+              style:  TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
           const SizedBox(height: 14),
           _checkLine(tr('onb_notification_permission'), tr('onb_allow_notifications_so_crises_alerts_can')),
           _checkLine(tr('notif_keep_alive_in_background'), tr('onb_recommended_settings_notifications')),
           _checkLine(tr('notif_battery_optimization'), tr('onb_disable_battery_restrictions_for_this_app')),
           const SizedBox(height: 16),
           Text(tr('onb_you_can_start_once_done_everything_can_be'),
-              style: const TextStyle(fontSize: 11, color: AppColors.dim)),
+              style:  TextStyle(fontSize: 11, color: AppColors.dim)),
         ],
       ),
     );
@@ -191,15 +191,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.check_circle_outline, size: 18, color: AppColors.brandGreen),
+           Icon(Icons.check_circle_outline, size: 18, color: AppColors.brandGreen),
           const SizedBox(width: 10),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(title,
-                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
-                Text(desc, style: const TextStyle(fontSize: 11, color: AppColors.dim)),
+                    style:  TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
+                Text(desc, style:  TextStyle(fontSize: 11, color: AppColors.dim)),
               ],
             ),
           ),

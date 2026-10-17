@@ -120,7 +120,7 @@ class _BootScreenState extends ConsumerState<BootScreen>
                 children: [
                   const Spacer(flex: 2),
                   // LOGO
-                  const Text('LING OS',
+                   Text('LING OS',
                       style: TextStyle(
                           fontFamily: fuiMono,
                           fontSize: 44,
@@ -130,7 +130,7 @@ class _BootScreenState extends ConsumerState<BootScreen>
                   const SizedBox(height: 10),
                   // 【0.5.2 修复】版本动态化（原硬编码 LN-0.4.3——先生报告版本不更新）
                   Text('SYSTEM INITIALIZE · ${AppInfo.tag}',
-                      style: const TextStyle(
+                      style:  TextStyle(
                           fontFamily: fuiMono,
                           fontSize: 9,
                           letterSpacing: 2,
@@ -151,7 +151,7 @@ class _BootScreenState extends ConsumerState<BootScreen>
                       ),
                       child: Row(
                         children: [
-                          const SizedBox(
+                           SizedBox(
                               width: 7,
                               height: 7,
                               child: DecoratedBox(
@@ -163,7 +163,7 @@ class _BootScreenState extends ConsumerState<BootScreen>
                               _restoring
                                   ? _restoreStatus
                                   : tr('boot_local_mode'),
-                              style: const TextStyle(
+                              style:  TextStyle(
                                   fontFamily: fuiMono,
                                   fontSize: 10,
                                   color: AppColors.amber)),
@@ -179,7 +179,7 @@ class _BootScreenState extends ConsumerState<BootScreen>
                             onPressed: _enterHome,
                             style: OutlinedButton.styleFrom(
                               foregroundColor: AppColors.white,
-                              side: const BorderSide(color: AppColors.line),
+                              side:  BorderSide(color: AppColors.line),
                               padding: const EdgeInsets.symmetric(vertical: 12),
                               shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(4)),
@@ -247,7 +247,7 @@ class _BootScreenState extends ConsumerState<BootScreen>
                 padding: const EdgeInsets.symmetric(vertical: 2),
                 child: Text(
                   '▸ ${lines[i]}',
-                  style: const TextStyle(
+                  style:  TextStyle(
                       fontFamily: fuiMono,
                       fontSize: 10,
                       color: AppColors.gray),

@@ -87,10 +87,10 @@ class _CommandPanelScreenState extends ConsumerState<CommandPanelScreen> {
             children: [
               if ((c['desc']?.toString() ?? '').isNotEmpty)
                 Text(c['desc'].toString(),
-                    style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                    style:  TextStyle(fontSize: 12, color: AppColors.textSecondary)),
               const SizedBox(height: 4),
               Text(trp('cmd_source_risk', {'p0': c['source'] ?? '-', 'p1': c['risk'] ?? '-'}),
-                  style: const TextStyle(fontSize: 11, color: AppColors.dim)),
+                  style:  TextStyle(fontSize: 11, color: AppColors.dim)),
               const SizedBox(height: 12),
               TextField(
                 controller: paramsCtrl,
@@ -151,7 +151,7 @@ class _CommandPanelScreenState extends ConsumerState<CommandPanelScreen> {
                   onPressed: () => Navigator.pop(ctx),
                 ),
               ]),
-              const Divider(color: AppColors.divider),
+               Divider(color: AppColors.divider),
               SelectableText(pretty,
                   style: const TextStyle(fontFamily: 'monospace', fontSize: 11)),
             ],
@@ -222,16 +222,16 @@ class _CommandPanelScreenState extends ConsumerState<CommandPanelScreen> {
             child: Align(
               alignment: Alignment.centerLeft,
               child: Text(trp('cmd_commands', {'p0': '${shown.length}'}),
-                  style: const TextStyle(fontSize: 11, color: AppColors.dim)),
+                  style:  TextStyle(fontSize: 11, color: AppColors.dim)),
             ),
           ),
           Expanded(
             child: _loading
-                ? const Center(child: CircularProgressIndicator())
+                ?  Center(child: CircularProgressIndicator())
                 : shown.isEmpty
                     ? Center(
                         child: Text(tr('cmd_no_matching_commands_or_host_not_connected'),
-                            style: const TextStyle(color: AppColors.dim, fontSize: 12)))
+                            style:  TextStyle(color: AppColors.dim, fontSize: 12)))
                     : ListView.builder(
                         itemCount: shown.length,
                         itemBuilder: (ctx, i) {
@@ -253,7 +253,7 @@ class _CommandPanelScreenState extends ConsumerState<CommandPanelScreen> {
                               ].join(' · '),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(fontSize: 10, color: AppColors.dim),
+                              style:  TextStyle(fontSize: 10, color: AppColors.dim),
                             ),
                             trailing: const Icon(Icons.play_arrow, size: 18),
                             onTap: () => _run(c),

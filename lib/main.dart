@@ -10,24 +10,30 @@ import 'core/logging/app_logger.dart';
 import 'core/services/notification_service.dart';
 import 'core/notification_bridge.dart';   // 【0.7.0 P3】后台推送（危机/预警本地通知）
 import 'core/theme/app_theme.dart';
+import 'core/theme/theme_controller.dart';
+import 'core/storage/app_store.dart';
 import 'features/home/boot_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await AppLogger.instance.init();          // 日志（版本+环境）
   await NotificationService.instance.init(); // 通知服务
+  // 【三主题】启动时读取上次选择并应用（A 静默深色 / B 暖白家居 / C 诺玛 HUD）
+  final vCode = await AppStore().getUiVariant();
+  AppThemeState.apply(variantFromCode(vCode));
   runApp(const ProviderScope(child: LingOsApp()));
 }
 
-class LingOsApp extends StatelessWidget {
+class LingOsApp extends ConsumerWidget {
   const LingOsApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final variant = ref.watch(themeVariantProvider);
     return MaterialApp(
       title: 'LING OS',
       debugShowCheckedModeBanner: false,
-      theme: buildAppTheme(),
+      theme: buildAppTheme(variant),
       // 【0.5.1 先生裁决】中英双语：Material 组件本地化 + 支持语言声明
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,

@@ -103,7 +103,7 @@ class _PrivilegeScreenState extends State<PrivilegeScreen> {
     return Scaffold(
       appBar: AppBar(title: Text(tr('priv_privileges'))),
       body: _checking
-          ? const Center(child: CircularProgressIndicator())
+          ?  Center(child: CircularProgressIndicator())
           : ListView(
               padding: const EdgeInsets.all(16),
               children: [
@@ -128,11 +128,11 @@ class _PrivilegeScreenState extends State<PrivilegeScreen> {
                       ),
                       const SizedBox(height: 8),
                       Text(trp('priv_status', {'p0': granted ? tr('priv_granted') : tr('priv_not_granted')}),
-                          style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                          style:  TextStyle(fontSize: 12, color: AppColors.textSecondary)),
                       const SizedBox(height: 12),
                       if (!granted) ...[
                         Text(tr('priv_the_shizuku_app_com_moe_shizuku_xyz_must_be'),
-                            style: const TextStyle(fontSize: 11, color: AppColors.textSecondary, height: 1.5)),
+                            style:  TextStyle(fontSize: 11, color: AppColors.textSecondary, height: 1.5)),
                         const SizedBox(height: 8),
                         FilledButton.icon(
                           onPressed: _requestShizuku,
@@ -174,12 +174,12 @@ class _PrivilegeScreenState extends State<PrivilegeScreen> {
                   onChanged: _toggleAdb,
                   title: Text(tr('priv_ai_can_run_commands_via_shizuku'), style: const TextStyle(fontSize: 14)),
                   subtitle: Text(tr('priv_once_authorized_the_ai_nook_can_run_adb'),
-                      style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                      style:  TextStyle(fontSize: 12, color: AppColors.textSecondary)),
                 ),
                 const Divider(),
                 Text(
                   tr('priv_note_n_after_shizuku_authorization_the_app'),
-                  style: const TextStyle(fontSize: 11, color: AppColors.textSecondary, height: 1.6),
+                  style:  TextStyle(fontSize: 11, color: AppColors.textSecondary, height: 1.6),
                 ),
               ],
             ),
