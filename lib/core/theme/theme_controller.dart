@@ -29,7 +29,7 @@ String variantToCode(AppThemeVariant v) {
 }
 
 class ThemeVariantController extends StateNotifier<AppThemeVariant> {
-  ThemeVariantController(super.initial) {
+  ThemeVariantController(AppThemeVariant initial) : super(initial) {
     AppThemeState.apply(initial);
   }
 

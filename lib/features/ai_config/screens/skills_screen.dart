@@ -12,7 +12,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/providers.dart';
 import '../../../core/theme/app_theme.dart';
 
- kRiskColors = {
+ final Map<String, Color> kRiskColors = {
   'low': Color(0xFF4CAF50),
   'medium': Color(0xFFFFB300),
   'high': Color(0xFFFF7043),
