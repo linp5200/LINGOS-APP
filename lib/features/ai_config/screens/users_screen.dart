@@ -51,18 +51,19 @@ class _UsersScreenState extends ConsumerState<UsersScreen> {
           resp = Map<String, dynamic>.from(data);
         }
         if (resp == null) return;
-        if (resp['status'] != 'ok') {
+        final rp = resp;
+        if (rp['status'] != 'ok') {
           setState(() {
             _loading = false;
-            _error = (resp['msg'] ?? resp['message'] ?? '操作失败').toString();
+            _error = (rp['msg'] ?? rp['message'] ?? '操作失败').toString();
           });
           return;
         }
-        final d = resp['data'];
+        final d = rp['data'];
         if (d is List) {
           setState(() {
             _users = d.map((e) => Map<String, dynamic>.from(e as Map)).toList();
-            final rs = resp['roles'];
+            final rs = rp['roles'];
             if (rs is List && rs.isNotEmpty) {
               _roles = rs.map((e) => e.toString()).toList();
             }
