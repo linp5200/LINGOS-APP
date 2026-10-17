@@ -61,6 +61,9 @@ class AlertsScreen extends ConsumerStatefulWidget {
 class _AlertsScreenState extends ConsumerState<AlertsScreen> {
   List<Map<String, dynamic>> _alerts = [];
   bool _loading = false;
+  // 【P0-4】三态：可用/数据不可达/真空；首屏自动查询
+  bool _available = true;
+  bool _failed = false;
   StreamSubscription? _sub;
 
   @override
@@ -94,24 +97,36 @@ class _AlertsScreenState extends ConsumerState<AlertsScreen> {
             resp = Map<String, dynamic>.from(data);
           }
           if (resp == null || resp['status'] != 'ok') {
-            setState(() => _loading = false);
+            setState(() {
+              _loading = false;
+              _failed = true;
+              _available = false;
+            });
             return;
           }
+          final avail = resp['available'];
+          _available = avail != false;
           // 【0.1.9】alert_query 返回 {status,count,events:[...]}——从 events 取
           final events = resp['events'] ?? resp['data'];
           if (events is List) {
             setState(() {
               _alerts = events.map((e) => Map<String, dynamic>.from(e is Map ? e : {})).toList();
               _loading = false;
+              _failed = false;
             });
           } else {
             setState(() {
               _alerts = [];
               _loading = false;
+              _failed = !_available;
             });
           }
         }
       } catch (_) {}
+    });
+    // 【P0-4】首屏自动查询（此前必须手动刷新，首屏永远"暂无预警"——生命线页面暗示安全）
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _refresh();
     });
   }
 
@@ -169,9 +184,13 @@ class _AlertsScreenState extends ConsumerState<AlertsScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.notifications_none, size: 48, color: AppColors.textSecondary),
+                      Icon(_failed ? Icons.cloud_off_outlined : Icons.notifications_none,
+                          size: 48,
+                          color: _failed ? AppColors.brandRed : AppColors.textSecondary),
                       const SizedBox(height: 12),
-                      Text(tr('alert_none'), style: const TextStyle(color: AppColors.textSecondary)),
+                      Text(_failed ? '预警数据不可达（不代表安全）' : tr('alert_none'),
+                          style: TextStyle(
+                              color: _failed ? AppColors.brandRed : AppColors.textSecondary)),
                       const SizedBox(height: 12),
                       TextButton(onPressed: _refresh, child: Text(tr('refresh'))),
                     ],

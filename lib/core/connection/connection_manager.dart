@@ -196,7 +196,8 @@ class ConnectionManager implements ChannelListener {
             final data = m['data'];
             // 服务端已注入 cmd 标识：优先按 data.cmd 匹配
             if (data is Map && data['cmd'] == cmdName) {
-              comp.complete(m.cast<String, dynamic>());
+              // 【P0-1 契约修复】返回命令回包本身（此前返回 WS 信封，导致 25 处调用点读错层级）
+              comp.complete(Map<String, dynamic>.from(data));
             }
           }
         }

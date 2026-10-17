@@ -168,7 +168,8 @@ class _SessionsScreenState extends ConsumerState<SessionsScreen> {
 
   /// 【0.1.9】点击会话 → 进入对话页（载入该会话继续对话）
   void _openChat(String id) {
-    ref.read(chatControllerProvider.notifier).setSession(id);
+    // 【P0-5】切会话并载入历史消息（此前只切 sessionId → 空白页）
+    ref.read(chatControllerProvider.notifier).loadHistory(id);
     Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ChatScreen()));
   }
 

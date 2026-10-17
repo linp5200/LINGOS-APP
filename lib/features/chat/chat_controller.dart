@@ -29,11 +29,13 @@ class ChatMsg {
   // 【2026-10-02 · B2】内联提问卡片（gui_ask——替代弹窗）
   final List<String>? options;
   final String? answered;    // 已回答内容（null=未答）
+  final int? ts;             // 消息时间（毫秒——P0-2 时间归属）
+  final int round;           // 轮次（工具循环同一轮——P0-2 过程分组）
 
   const ChatMsg(this.type, this.content,
       {this.toolName, this.streaming = false, this.interrupted = false,
       this.errorType, this.errorAction, this.toolResult, this.toolSuccess,
-      this.options, this.answered});
+      this.options, this.answered, this.ts, this.round = 0});
 
   ChatMsg copyWith({String? content, bool? streaming, bool? interrupted, String? toolResult, bool? toolSuccess, String? answered}) =>
       ChatMsg(type, content ?? this.content,
@@ -44,7 +46,7 @@ class ChatMsg {
           toolResult: toolResult ?? this.toolResult,
           toolSuccess: toolSuccess ?? this.toolSuccess,
           options: options,
-          answered: answered ?? this.answered);
+          answered: answered ?? this.answered, ts: ts, round: round);
 }
 
 class ChatState {
@@ -117,6 +119,7 @@ class ChatController extends StateNotifier<ChatState> {
   StreamSubscription? _sub;
   int _aiMsgIdx = -1;
   int _thinkMsgIdx = -1;
+  int _round = 0;
 
   ChatController(this.ref) : super(const ChatState()) {
     _sub = ref.read(connectionProvider).events.listen(_onEvent);
@@ -134,7 +137,18 @@ class ChatController extends StateNotifier<ChatState> {
         _appendSystem(evt.data['content']?.toString() ?? evt.data['step']?.toString() ?? '');
       case EvtType.thinkingHide:
         _endThinking();
+      // 【P0-2】轮次边界：工具轮结束时关闭当前回答/思考段，下一段 content 另起气泡
+      case EvtType.roundStart:
+        _round = (evt.data['round'] as num?)?.toInt() ?? (_round + 1);
+        _closeAiSegment();
+        _endThinking();
+      case EvtType.roundEnd:
+        _closeAiSegment();
+        _endThinking();
       case EvtType.toolCall:
+        // 【P0-2】工具调用 = 当前回答段结束（否则最终回答会拼回第一条气泡——跑到工具上方）
+        _closeAiSegment();
+        _endThinking();
         _appendTool(evt.data['name']?.toString() ?? tr('chatc_tool'), evt.data['args']?.toString() ?? '');
       case EvtType.toolResult:
         _appendToolResult(
@@ -251,18 +265,30 @@ class ChatController extends StateNotifier<ChatState> {
   void _appendAsk(String question, List<String> options) {
     state = state.copyWith(messages: [
       ...state.messages,
-      ChatMsg(ChatMsgType.ask, question, options: options),
+      ChatMsg(ChatMsgType.ask, question, options: options, ts: _nowMs(), round: _round),
     ]);
     _askMsgIdx = state.messages.length - 1;
   }
 
   void _appendSystem(String text) {
-    state = state.copyWith(messages: [...state.messages, ChatMsg(ChatMsgType.system, text)]);
+    state = state.copyWith(messages: [...state.messages, ChatMsg(ChatMsgType.system, text, ts: _nowMs(), round: _round)]);
+  }
+
+  int _nowMs() => DateTime.now().millisecondsSinceEpoch;
+
+  /// 关闭当前 AI 回答段（保留 aiBusy——后续轮次可能继续）
+  void _closeAiSegment() {
+    if (_aiMsgIdx >= 0 && _aiMsgIdx < state.messages.length) {
+      final msgs = [...state.messages];
+      msgs[_aiMsgIdx] = msgs[_aiMsgIdx].copyWith(streaming: false);
+      state = state.copyWith(messages: msgs);
+    }
+    _aiMsgIdx = -1;
   }
 
   void _appendThinking(String delta) {
     if (_thinkMsgIdx < 0) {
-      state = state.copyWith(messages: [...state.messages, ChatMsg(ChatMsgType.thinking, delta, streaming: true)]);
+      state = state.copyWith(messages: [...state.messages, ChatMsg(ChatMsgType.thinking, delta, streaming: true, ts: _nowMs(), round: _round)]);
       _thinkMsgIdx = state.messages.length - 1;
     } else {
       final msgs = [...state.messages];
@@ -283,7 +309,7 @@ class ChatController extends StateNotifier<ChatState> {
   void _appendAi(String delta) {
     if (_aiMsgIdx < 0) {
       state = state.copyWith(
-        messages: [...state.messages, ChatMsg(ChatMsgType.ai, delta, streaming: true)],
+        messages: [...state.messages, ChatMsg(ChatMsgType.ai, delta, streaming: true, ts: _nowMs(), round: _round)],
         aiBusy: true,
       );
       _aiMsgIdx = state.messages.length - 1;
@@ -330,7 +356,7 @@ class ChatController extends StateNotifier<ChatState> {
     // 【0.2.1 #4】保留完整 args（渲染层负责截断/折叠——点击展开看全文）
     state = state.copyWith(messages: [
       ...state.messages,
-      ChatMsg(ChatMsgType.tool, args, toolName: name)
+      ChatMsg(ChatMsgType.tool, args, toolName: name, ts: _nowMs(), round: _round)
     ]);
   }
 
@@ -352,7 +378,7 @@ class ChatController extends StateNotifier<ChatState> {
       // 无对应 tool 消息——独立展示
       state = state.copyWith(messages: [
         ...msgs,
-        ChatMsg(ChatMsgType.tool, '', toolName: name, toolResult: content, toolSuccess: success),
+        ChatMsg(ChatMsgType.tool, '', toolName: name, toolResult: content, toolSuccess: success, ts: _nowMs(), round: _round),
       ]);
     }
   }
@@ -362,7 +388,7 @@ class ChatController extends StateNotifier<ChatState> {
     state = state.copyWith(messages: [
       ...state.messages,
       ChatMsg(ChatMsgType.toolError, error,
-          toolName: name, errorType: type, errorAction: action)
+          toolName: name, errorType: type, errorAction: action, ts: _nowMs(), round: _round)
     ]);
   }
 
@@ -440,9 +466,38 @@ class ChatController extends StateNotifier<ChatState> {
     state = state.copyWith(sessionId: sessionId);
   }
 
+  /// 【P0-5】载入历史会话消息（此前只是切 sessionId → 空白页）
+  Future<void> loadHistory(String sessionId) async {
+    state = state.copyWith(sessionId: sessionId, messages: const []);
+    try {
+      final resp = await ref.read(connectionProvider).requestJson(
+          {'cmd': 'session_history', 'session_id': sessionId, 'limit': 200},
+          timeout: const Duration(seconds: 10));
+      if (resp == null || resp['status'] != 'ok') return;
+      final d = resp['data'];
+      final raw = d is Map ? (d['messages'] ?? d['data']) : d;
+      if (raw is! List) return;
+      final msgs = <ChatMsg>[];
+      for (final m in raw) {
+        if (m is! Map) continue;
+        final role = m['role']?.toString() ?? '';
+        final content = m['content']?.toString() ?? '';
+        if (content.isEmpty) continue;
+        final ts = (m['ts'] as num?)?.toInt();
+        if (role == 'user') {
+          msgs.add(ChatMsg(ChatMsgType.user, content, ts: ts));
+        } else if (role == 'assistant') {
+          msgs.add(ChatMsg(ChatMsgType.ai, content, ts: ts));
+        }
+      }
+      if (msgs.isNotEmpty) state = state.copyWith(messages: msgs);
+    } catch (_) {}
+  }
+
   void clear() {
     _aiMsgIdx = -1;
     _thinkMsgIdx = -1;
+    _round = 0;
     state = const ChatState();
   }
 

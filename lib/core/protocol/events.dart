@@ -28,6 +28,8 @@ class EvtType {
   static const String thinking = 'thinking'; // 步骤标题
   static const String thinkingDelta = 'thinking_delta'; // 思考逐字
   static const String thinkingHide = 'thinking_hide'; // 思考结束
+  static const String roundStart = 'round_start'; // 轮次开始（工具循环同一轮）
+  static const String roundEnd = 'round_end'; // 本轮过程结束（工具调用前——客户端分段边界）
   static const String toolCall = 'tool_call'; // 工具调用
   static const String toolResult = 'tool_result'; // 工具结果
   static const String subAgent = 'sub_agent'; // 子 AI

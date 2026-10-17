@@ -26,6 +26,10 @@ class _WeatherScreenState extends ConsumerState<WeatherScreen> {
   List<Map<String, dynamic>> _daily = [];
   bool _loading = false;
   String? _error;
+  // 【P0-3】数据新鲜度/来源（服务端返回 cache/source/time，此前完全忽略）
+  bool _fromCache = false;
+  String? _source;
+  String? _updatedAt;
   StreamSubscription? _sub;
 
   @override
@@ -61,32 +65,36 @@ class _WeatherScreenState extends ConsumerState<WeatherScreen> {
         });
         return;
       }
-      // weather_current → {status,data:{...}} ；weather_forecast → {status,hourly,daily}
+      // 服务端回包：weather_current → data{...}；weather_forecast → data{hourly,daily}（P0-3 修复嵌套读取）
       final inner = resp['data'];
       if (inner is Map) {
         final m = Map<String, dynamic>.from(inner);
+        final hourly = m['hourly'];
+        final daily = m['daily'];
         if (m.containsKey('temp') || m.containsKey('temperature')) {
           setState(() {
             _current = m;
             _loading = false;
             _error = null;
+            _fromCache = resp['cache'] == true;
+            _source = resp['source']?.toString();
+            _updatedAt = m['time']?.toString();
           });
           return;
         }
-      }
-      // 闭包内类型提升失效 → 提取非空局部变量（CI: unchecked_use_of_nullable_value）
-      final r = resp;
-      if (r['hourly'] is List || r['daily'] is List) {
-        setState(() {
-          _hourly = ((r['hourly'] as List?) ?? [])
-              .map((e) => Map<String, dynamic>.from(e is Map ? e : {}))
-              .toList();
-          _daily = ((r['daily'] as List?) ?? [])
-              .map((e) => Map<String, dynamic>.from(e is Map ? e : {}))
-              .toList();
-          _loading = false;
-          _error = null;
-        });
+        if (hourly is List || daily is List) {
+          setState(() {
+            _hourly = ((hourly as List?) ?? [])
+                .map((e) => Map<String, dynamic>.from(e is Map ? e : {}))
+                .toList();
+            _daily = ((daily as List?) ?? [])
+                .map((e) => Map<String, dynamic>.from(e is Map ? e : {}))
+                .toList();
+            _loading = false;
+            _error = null;
+            _fromCache = resp['cache'] == true;
+          });
+        }
       }
     } catch (_) {}
   }
@@ -150,7 +158,7 @@ class _WeatherScreenState extends ConsumerState<WeatherScreen> {
                   const Icon(Icons.cloud_off_outlined, size: 18, color: AppColors.brandRed),
                   const SizedBox(width: 10),
                   Expanded(
-                    child: Text('$_error${tr('common_not_simulated')}',
+                    child: Text(_error ?? tr('weather_unreachable'),
                         style: const TextStyle(fontSize: 12, color: AppColors.brandRed)),
                   ),
                 ]),
@@ -203,8 +211,15 @@ class _WeatherScreenState extends ConsumerState<WeatherScreen> {
         {'cmd': 'weather_set_city', 'city': city},
         timeout: const Duration(seconds: 10));
     if (!mounted) return;
-    final st = resp?['data'];
-    final err = (st is Map && st['status'] == 'error') ? (st['msg']?.toString() ?? tr('wc_failed_to_set')) : null;
+    // 【P0-3】契约修复后 resp 即命令回包；geocoding 失败如实报错（不拿旧坐标冒充新城市）
+    String? err;
+    if (resp == null) {
+      err = tr('wc_failed_to_set');
+    } else if (resp['status'] == 'error') {
+      err = resp['msg']?.toString() ?? tr('wc_failed_to_set');
+    } else if (resp['geo_ok'] == false) {
+      err = '城市未识别，未修改坐标（仍为 ' + (_current?['city']?.toString() ?? '--') + '）';
+    }
     ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(err ?? trp('wc_city_set_refreshing', {'p0': city}))));
     if (err == null) _refresh();
@@ -224,6 +239,16 @@ class _WeatherScreenState extends ConsumerState<WeatherScreen> {
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Text(c?['city']?.toString() ?? tr('weather_location'),
             style: const TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+        if (_source != null || _updatedAt != null || _fromCache)
+          Padding(
+            padding: const EdgeInsets.only(top: 3),
+            child: Text([
+              if (_source != null) '来源 ' + _source!,
+              if (_updatedAt != null) '更新 ' + _updatedAt!,
+              if (_fromCache) '缓存',
+            ].join(' · '),
+                style: const TextStyle(fontSize: 10, color: AppColors.dim)),
+          ),
         const SizedBox(height: 10),
         Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
           Icon(icon, size: 52, color: AppColors.brandGreen),

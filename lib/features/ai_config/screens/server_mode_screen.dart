@@ -58,6 +58,11 @@ class _ServerModeScreenState extends ConsumerState<ServerModeScreen> {
 
   Map<String, dynamic>? _extract(Map<String, dynamic>? resp) {
     try {
+      // 【P0-1 契约修复】requestJson 返回命令回包本身；兼容旧的嵌套形态
+      if (resp != null &&
+          (resp.containsKey('enabled') || resp.containsKey('package_mode'))) {
+        return resp;
+      }
       final d = resp?['data'];
       if (d is Map && d['data'] is Map) {
         return Map<String, dynamic>.from(d['data'] as Map);

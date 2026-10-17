@@ -41,6 +41,11 @@ class _PluginScreenState extends ConsumerState<PluginScreen> {
 
   Map<String, dynamic>? _extract(Map<String, dynamic>? resp) {
     try {
+      // 【P0-1 契约修复】requestJson 现在返回"命令回包"本身
+      if (resp != null &&
+          (resp.containsKey('plugins') || resp.containsKey('loaded') || resp.containsKey('dir'))) {
+        return resp;
+      }
       final d = resp?['data'];
       if (d is Map) {
         final m = Map<String, dynamic>.from(d);

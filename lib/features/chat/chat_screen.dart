@@ -3,6 +3,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../core/i18n/app_i18n.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -167,11 +168,23 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
   void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_scrollCtrl.hasClients) {
-        _scrollCtrl.animateTo(_scrollCtrl.position.maxScrollExtent,
-            duration: const Duration(milliseconds: 200), curve: Curves.easeOut);
-      }
+      if (!_scrollCtrl.hasClients) return;
+      final pos = _scrollCtrl.position;
+      // 【P0-2】只在"跟随底部"时自动滚动（用户上翻看历史时不打扰）
+      if (pos.maxScrollExtent - pos.pixels > 160) return;
+      _scrollCtrl.animateTo(pos.maxScrollExtent,
+          duration: const Duration(milliseconds: 200), curve: Curves.easeOut);
     });
+  }
+
+  String _fmtTime(int ms) {
+    final d = DateTime.fromMillisecondsSinceEpoch(ms);
+    String two(int v) => v.toString().padLeft(2, '0');
+    return '${two(d.hour)}:${two(d.minute)}:${two(d.second)}';
+  }
+
+  Future<void> _copyText(String text) async {
+    await Clipboard.setData(ClipboardData(text: text));
   }
 
   // ============================================================
@@ -348,10 +361,19 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             margin: const EdgeInsets.only(bottom: 10),
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             decoration: BoxDecoration(
-              color: AppColors.brandRed,
-              borderRadius: BorderRadius.circular(14),
+              color: AppColors.surfaceHigh,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: AppColors.divider),
             ),
-            child: Text(msg.content, style: const TextStyle(color: Colors.white, fontSize: 14)),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
+              if (msg.ts != null)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 3),
+                  child: Text(_fmtTime(msg.ts!),
+                      style: const TextStyle(color: AppColors.dim, fontSize: 10, fontFamily: fuiMono)),
+                ),
+              Text(msg.content, style: const TextStyle(color: AppColors.textPrimary, fontSize: 14)),
+            ]),
           ),
         );
       case ChatMsgType.ai:
@@ -367,8 +389,16 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   color: AppColors.surface,
                   borderRadius: BorderRadius.circular(14),
                 ),
-                child: Text(msg.content + (msg.streaming ? '▍' : ''),
-                    style: const TextStyle(color: AppColors.textPrimary, fontSize: 14, height: 1.5)),
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  if (msg.ts != null)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 4),
+                      child: Text(_fmtTime(msg.ts!),
+                          style: const TextStyle(color: AppColors.dim, fontSize: 10, fontFamily: fuiMono)),
+                    ),
+                  Text(msg.content + (msg.streaming ? '▍' : ''),
+                      style: const TextStyle(color: AppColors.textPrimary, fontSize: 14, height: 1.5)),
+                ]),
               ),
             ),
             // 【0.1.9】已终止（继续）——点击重发原文续接
@@ -393,6 +423,25 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                             style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
                       ],
                     ),
+                  ),
+                ),
+              ),
+            // 【P0-2】复制按钮
+            if (!msg.streaming && msg.content.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(left: 6, bottom: 10),
+                child: GestureDetector(
+                  onTap: () => _copyText(msg.content),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: AppColors.surface.withValues(alpha: 0.5),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: AppColors.divider),
+                    ),
+                    child: const Row(mainAxisSize: MainAxisSize.min, children: [
+                      Icon(Icons.copy, size: 14, color: AppColors.textSecondary),
+                    ]),
                   ),
                 ),
               ),
@@ -801,6 +850,14 @@ class _CollapsibleBlockState extends State<_CollapsibleBlock> {
   void initState() {
     super.initState();
     _open = !widget.collapsed;
+  }
+
+  @override
+  void didUpdateWidget(covariant _CollapsibleBlock oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.collapsed != widget.collapsed) {
+      _open = !widget.collapsed;
+    }
   }
 
   @override

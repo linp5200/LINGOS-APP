@@ -46,6 +46,11 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen> {
   /// 解析服务端响应（WS command_response.data → update_check 平铺字典）
   Map<String, dynamic>? _extract(Map<String, dynamic>? resp) {
     try {
+      // 【P0-1 契约修复】requestJson 现在返回"命令回包"本身
+      if (resp != null &&
+          (resp.containsKey('current') || resp.containsKey('update_available'))) {
+        return resp;
+      }
       final d = resp?['data'];
       if (d is Map) {
         final m = Map<String, dynamic>.from(d);
