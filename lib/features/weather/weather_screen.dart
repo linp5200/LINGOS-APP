@@ -76,8 +76,8 @@ class _WeatherScreenState extends ConsumerState<WeatherScreen> {
             _current = m;
             _loading = false;
             _error = null;
-            _fromCache = resp['cache'] == true;
-            _source = resp['source']?.toString();
+            _fromCache = resp?['cache'] == true;
+            _source = resp?['source']?.toString();
             _updatedAt = m['time']?.toString();
           });
           return;
@@ -92,7 +92,7 @@ class _WeatherScreenState extends ConsumerState<WeatherScreen> {
                 .toList();
             _loading = false;
             _error = null;
-            _fromCache = resp['cache'] == true;
+            _fromCache = resp?['cache'] == true;
           });
         }
       }
@@ -218,7 +218,7 @@ class _WeatherScreenState extends ConsumerState<WeatherScreen> {
     } else if (resp['status'] == 'error') {
       err = resp['msg']?.toString() ?? tr('wc_failed_to_set');
     } else if (resp['geo_ok'] == false) {
-      err = '城市未识别，未修改坐标（仍为 ' + (_current?['city']?.toString() ?? '--') + '）';
+      err = '城市未识别，未修改坐标（仍为 ${_current?['city']?.toString() ?? '--'}）';
     }
     ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(err ?? trp('wc_city_set_refreshing', {'p0': city}))));
@@ -243,8 +243,8 @@ class _WeatherScreenState extends ConsumerState<WeatherScreen> {
           Padding(
             padding: const EdgeInsets.only(top: 3),
             child: Text([
-              if (_source != null) '来源 ' + _source!,
-              if (_updatedAt != null) '更新 ' + _updatedAt!,
+              if (_source != null) '来源 ${_source!}',
+              if (_updatedAt != null) '更新 ${_updatedAt!}',
               if (_fromCache) '缓存',
             ].join(' · '),
                 style: const TextStyle(fontSize: 10, color: AppColors.dim)),
